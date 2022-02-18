@@ -171,7 +171,7 @@
 import Vue from 'vue'
 
 export default Vue.extend({
-  name: 'SelectProgram',
+  name: 'SelectProgra-old',
   methods: {
     selectGroup: function () {
       this.visible = !this.visible;

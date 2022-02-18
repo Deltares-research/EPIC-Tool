@@ -3,8 +3,10 @@
     <p>Progress 45% 2 minutes left</p>
     <v-progress-linear value="45"></v-progress-linear>
     <br>
-    <v-tabs color="darkred" left>
-      <v-tab>Integrated River Basin Planning</v-tab>
+    <v-tabs color="darkred" left :value="selectedTab">
+      <v-tab >
+        <v-icon dark right v-if="showCheck">mdi-checkbox-marked-circle</v-icon>Integrated River Basin Planning
+      </v-tab>
       <v-tab>Coastal Zone Management Planning</v-tab>
       <v-tab>Irrigation Water Supply Planning</v-tab>
     </v-tabs>
@@ -25,7 +27,7 @@
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
-          <program-description></program-description>
+          <program-description :tabs="selectedTab"></program-description>
           <v-card-actions>
             <v-row>
               <v-col md="10">
@@ -116,6 +118,11 @@
             <v-col md="10">
               <v-btn text color="primary" @click="e1 = 5"><v-icon>mdi-step-backward</v-icon>Linkages</v-btn>
             </v-col>
+            <v-col md="1">
+              <v-btn text color="primary" @click="selectProgram">Coastal management planning
+                <v-icon>mdi-step-forward</v-icon>
+              </v-btn>
+            </v-col>
           </v-row>
         </v-stepper-content>
       </v-stepper-items>
@@ -134,8 +141,17 @@ import Linkages from "@/components/Linkages.vue";
 export default Vue.extend({
   name: 'HelloWorld',
   components: {Linkages, Evolution, NationalFrameworks, ProgramDescription},
+  methods: {
+    selectProgram: function () {
+      this.showCheck = true;
+      this.e1=1;
+      this.selectedTab=1;
+    }
+  },
   data: () => ({
     e1: 1,
+    showCheck: false,
+    selectedTab: 0,
     ecosystem: [
       {
         text: 'vuetify-loader',

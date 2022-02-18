@@ -29,20 +29,19 @@
           <li>-	Level 3 Country Level Agencies: users will use ERAM as an assessment tool, whereby Government and Sector Level Agencies go over all the programs of the EPIC Response as a team, to understand, assess and improve their overall national flood and drought risk management systems.</li>
         </ul>
         <v-row style="margin: 1px">
-          <v-col md="5"></v-col>
-          <v-col md="2">
-            <v-btn to="SelectProgram" color="primary" style="align-content: center">Start questionnaire</v-btn>
+          <v-col md="3">
           </v-col>
-          <v-col md="5"></v-col>
-        </v-row>
-        <v-row style="margin: 1px">
-          <v-col md="3"></v-col>
           <v-col md="5">
             <v-img
                 src="../../public/arrow.png"
             ></v-img>
           </v-col>
-          <v-col md="3"></v-col>
+          <v-col md="2"></v-col>
+          <v-col md="1">
+            <v-btn to="SelectProgram" text color="primary" @click="e1 = 2">Select program(s)
+              <v-icon>mdi-step-forward</v-icon>
+            </v-btn>
+          </v-col>
         </v-row>
         <v-row no-gutters>
           <v-col md="5"></v-col>
