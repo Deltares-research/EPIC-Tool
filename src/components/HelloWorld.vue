@@ -3,6 +3,13 @@
     <p>Progress 45% 2 minutes left</p>
     <v-progress-linear value="45"></v-progress-linear>
     <br>
+    <v-tabs >
+      <v-tab disabled><span style="color: darkred">E</span>nable</v-tab>
+      <v-tab><span style="color: darkred">P</span>lan</v-tab>
+      <v-tab disabled><span style="color: darkred">I</span>nvest</v-tab>
+      <v-tab disabled><span style="color: darkred">C</span>ontrol</v-tab>
+      <v-tab disabled>RESPOND</v-tab>
+    </v-tabs>
     <v-tabs color="darkred" left :value="selectedTab">
       <v-tab >
         <v-icon dark right v-if="showCheck">mdi-checkbox-marked-circle</v-icon>Integrated River Basin Planning
