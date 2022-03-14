@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 /dist
+.django_secrets
 
 # python cache files
 **/__pycache__/**
