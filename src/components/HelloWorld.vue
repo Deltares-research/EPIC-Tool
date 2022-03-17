@@ -3,7 +3,7 @@
     <p>Progress 45% 2 minutes left</p>
     <v-progress-linear value="45"></v-progress-linear>
     <br>
-    <v-tabs >
+    <v-tabs>
       <v-tab disabled><span style="color: darkred">E</span>nable</v-tab>
       <v-tab><span style="color: darkred">P</span>lan</v-tab>
       <v-tab disabled><span style="color: darkred">I</span>nvest</v-tab>
@@ -11,8 +11,9 @@
       <v-tab disabled>RESPOND</v-tab>
     </v-tabs>
     <v-tabs color="darkred" left :value="selectedTab">
-      <v-tab >
-        <v-icon dark right v-if="showCheck">mdi-checkbox-marked-circle</v-icon>Integrated River Basin Planning
+      <v-tab>
+        <v-icon dark right v-if="showCheck">mdi-checkbox-marked-circle</v-icon>
+        Integrated River Basin Planning
       </v-tab>
       <v-tab>Coastal Zone Management Planning</v-tab>
       <v-tab>Irrigation Water Supply Planning</v-tab>
@@ -30,7 +31,7 @@
         <v-divider></v-divider>
         <v-stepper-step :complete="e1 > 5" step="5">Linkages</v-stepper-step>
         <v-divider></v-divider>
-        <v-stepper-step :complete="e1 > 6" step="6">References</v-stepper-step>
+        <v-stepper-step :complete="e1 > 7" step="6">References</v-stepper-step>
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
@@ -151,8 +152,8 @@ export default Vue.extend({
   methods: {
     selectProgram: function () {
       this.showCheck = true;
-      this.e1=1;
-      this.selectedTab=1;
+      this.e1 = 1;
+      this.selectedTab = 1;
     }
   },
   data: () => ({

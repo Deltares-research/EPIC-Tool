@@ -2,6 +2,30 @@
   <div>
     <h2 style="color:darkred">Program selection</h2>
     <br>
+    <v-row>
+      <v-col md="1">
+        <v-btn block color="blue-grey lighten-4" small >WRM Agency</v-btn>
+      </v-col>
+      <v-col md="1">
+        <v-btn block color="blue-grey lighten-4" small>DRM Agency</v-btn>
+      </v-col>
+      <v-col md="2">
+        <v-btn block color="blue-grey lighten-4" small>Hydro-Met</v-btn>
+      </v-col>
+      <v-col md="2">
+        <v-btn block color="blue-grey lighten-4" small>Agriculture</v-btn>
+      </v-col>
+      <v-col md="2">
+        <v-btn block color="blue-grey lighten-4" small>Natural Resources Management</v-btn>
+      </v-col>
+      <v-col md="2">
+        <v-btn block color="blue-grey lighten-4" small>Social Protection</v-btn>
+      </v-col>
+      <v-col md="2">
+        <v-btn block color="blue-grey lighten-4" small>Finance Agency</v-btn>
+      </v-col>
+    </v-row>
+    <br>
     <h3>Please select 1 or more programs</h3>
     <br>
     <v-card :elevation="2" color="blue-grey lighten-4">
