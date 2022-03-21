@@ -4,8 +4,9 @@ For the current approach (Django + Vue) we will follow an approach similar to th
 
 ## Collaborating
 If you wish to collaborate on this project you may want to get familiar with our tooling. In this project the following packages are used:
-* [poetry] for package handler.
-* [black] for code styling.
+* [poetry](https://python-poetry.org/) for package handler.
+* [black](https://black.readthedocs.io/en/stable/) for code styling.
+* [commitizen](http://commitizen.github.io/cz-cli/) for version control.
 * [pytest] for internal testing of the tool.
 ### Getting your development environment ready.
 * Using pip:

@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.8"
 Django = "^4.0.3"
 djangorestframework = "^3.13.1"
+commitizen = "^2.21.2"
 
 [tool.poetry.dev-dependencies]
 black = { version = "*", allow-prereleases = true }
