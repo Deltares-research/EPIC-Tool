@@ -43,6 +43,16 @@ profile = "black"
 multi_line_output = 3
 line_length = 88
 
+[tool.commitizen]
+name = "cz_conventional_commits"
+changelog_file = "changelog.md"
+update_changelog_on_bump = true
+version = "0.0.1"
+tag_format = "v$major.$minor.$patch"
+version_files= [
+    "epic_core/__init__.py",
+    "pyproject.toml:version"]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
