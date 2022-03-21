@@ -8,28 +8,28 @@ If you wish to collaborate on this project you may want to get familiar with our
 * [black](https://black.readthedocs.io/en/stable/) for code styling.
 * [commitizen](https://commitizen-tools.github.io/commitizen/) for version control.
 * [pytest] for internal testing of the tool.
+
 ### Getting your development environment ready.
 * Using pip:
     ```
     pip install poetry
+    poetry install
     poetry run
     ```
 * Using conda:
+    > Note: it turns out if you work with conda as a python environment you may come against a compatibility problem with virtualenv, we therefore recommend downgrading the pre-installed package of virtualenv of poetry to 20.0.3.
     ```
     conda install poetry
     conda install virtualenv==20.0.33
+    poetry install
     poetry run
     ```
-    > Note: it turns out if you work with conda as a python environment you may come against a compatibility problem with virtualenv, we therefore recommend downgrading the pre-installed package of virtualenv of poetry to 20.0.3.
 
+You should have now all the dependencies, including django and djangorestframework, installed in our environment.
 
-## Django installation and deployment.
-Installing django is pretty simple. For the steps that follow we assume the user has their own python environment already running up.
+## Django deployment.
+Installing django is pretty simple. For the next steps we assume poetry has been installed as described in the previous steps.
 * Navigate with the commandline to the \backend directory.
-* Install django in your machine (check latest stable django version on their official website.)
-    ```
-    pip install django
-    ```
 * Create a secret key through Python CLI
     ```cli
     python
@@ -37,8 +37,7 @@ Installing django is pretty simple. For the steps that follow we assume the user
     >> from pathlib import Path
     >> Path('.django_secrets').write_text(secrets.token_hex(16))
     ```
-    * A new file is now generated containing your unique token key expected by /epic_core/settings.py
-    * In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
+    > A new file is now generated containing your unique token key expected by /epic_core/settings.py. In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
 * Migrate the database to ensure you have the correct scheme
     ```
     python manage.py migrate
@@ -47,5 +46,16 @@ Installing django is pretty simple. For the steps that follow we assume the user
     ```
     python manage.py runserver
     ```
-    * An output in the command line will show you where the server is deployed.
-    * By default you should be able to check its functioning here: http://127.0.0.1:8000/ 
+    > An output in the command line will show you where the server is deployed. By default you should be able to check its functioning here: http://127.0.0.1:8000/ 
+* During this process, you might need to create your own admin account, simply run the following command:
+    ```
+    python manage.py createsuperuser
+    ```
+
+## Creating new models.
+During development it is naturall to create new tables or define new columns on a database entry. The most important is to manage the Django migrations with the following steps:
+```cli
+python manage.py makemigrations
+python manage.py migrate
+```
+Also, keep in mind that if a new entity needs to be modified through the Django Admin page it will also have to be added into the admin.py page.
