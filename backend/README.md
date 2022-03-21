@@ -17,8 +17,8 @@ python
 >> from pathlib import Path
 >> Path('.django_secrets').write_text(secrets.token_hex(16))
 ```
-* * A new file is now generated containing your unique token key expected by /epic_core/settings.py
-* * In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
+    * A new file is now generated containing your unique token key expected by /epic_core/settings.py
+    * In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
 
 * Migrate the database to ensure you have the correct scheme
 ```
@@ -29,7 +29,7 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
-* * An output in the command line will show you where the server is deployed.
-* * By default you should be able to check its functioning here: http://127.0.0.1:8000/ 
+    * An output in the command line will show you where the server is deployed.
+    * By default you should be able to check its functioning here: http://127.0.0.1:8000/ 
 
 
