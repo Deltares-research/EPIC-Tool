@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from epic_app.models import EpicUser, UserQuestionAnswers, QuestionAnswerForm, Question, Answer
 
-class EpicUserSerializer(serializers.HyperlinkedModelSerializer):'
+class EpicUserSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializer for 'EpicUser'
     """
