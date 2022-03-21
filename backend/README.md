@@ -20,6 +20,11 @@ python
 * * A new file is now generated containing your unique token key expected by /epic_core/settings.py
 * * In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
 
+* Migrate the database to ensure you have the correct scheme
+```
+python manage.py migrate
+```
+
 * Run the Django server with the defined settings
 ```
 python manage.py runserver
