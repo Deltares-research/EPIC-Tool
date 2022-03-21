@@ -6,30 +6,25 @@ For the current approach (Django + Vue) we will follow an approach similar to th
 Installing django is pretty simple. For the steps that follow we assume the user has their own python environment already running up.
 * Navigate with the commandline to the \backend directory.
 * Install django in your machine (check latest stable django version on their official website.)
-```
-pip install django
-```
-
+    ```
+    pip install django
+    ```
 * Create a secret key through Python CLI
-```cli
-python
->> import secrets
->> from pathlib import Path
->> Path('.django_secrets').write_text(secrets.token_hex(16))
-```
+    ```cli
+    python
+    >> import secrets
+    >> from pathlib import Path
+    >> Path('.django_secrets').write_text(secrets.token_hex(16))
+    ```
     * A new file is now generated containing your unique token key expected by /epic_core/settings.py
     * In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
-
 * Migrate the database to ensure you have the correct scheme
-```
-python manage.py migrate
-```
-
+    ```
+    python manage.py migrate
+    ```
 * Run the Django server with the defined settings
-```
-python manage.py runserver
-```
+    ```
+    python manage.py runserver
+    ```
     * An output in the command line will show you where the server is deployed.
     * By default you should be able to check its functioning here: http://127.0.0.1:8000/ 
-
-
