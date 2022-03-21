@@ -11,7 +11,7 @@ pip install django
 ```
 
 * Create a secret key through Python CLI
-```
+```cli
 python
 >> import secrets
 >> from pathlib import Path
