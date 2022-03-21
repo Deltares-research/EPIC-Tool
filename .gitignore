@@ -2,6 +2,11 @@
 node_modules
 /dist
 
+# secrets
+.*_secrets
+
+# cached files
+__pycache__
 
 # local env files
 .env.local
