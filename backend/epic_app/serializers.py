@@ -11,7 +11,7 @@ class EpicUserSerializer(serializers.HyperlinkedModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model=EpicUser
-        fields = ('username', 'organization')
+        fields = ('url', 'id', 'username', 'organization')
 
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -22,7 +22,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model=Question
-        fields = ('description')
+        fields=('url', 'id', 'description', )
     
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -33,7 +33,7 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model=Answer
-        fields = ('short_answer', 'long_answer')
+        fields=('url', 'id', 'short_answer', 'long_answer')
 
 class QuestionAnswerFormSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -44,7 +44,7 @@ class QuestionAnswerFormSerializer(serializers.HyperlinkedModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model=QuestionAnswerForm
-        fields = ('user', 'qa_form')
+        fields=('url', 'id', 'question', 'answer')
 
 class UserQuestionAnswersSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -55,4 +55,4 @@ class UserQuestionAnswersSerializer(serializers.HyperlinkedModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model=UserQuestionAnswers
-        fields = ('user', 'qa_form')
+        fields=('url', 'id', 'user', 'qa_form')
