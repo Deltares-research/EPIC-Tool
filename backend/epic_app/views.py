@@ -15,42 +15,42 @@ class EpicUserViewSet(viewsets.ModelViewSet):
     queryset = EpicUser.objects.all().order_by('username')
     serializer_class = EpicUserSerializer
 
-class QuestionViewSet(viewsets.ModelViewSet):
-    """
-    Default view set for 'Question'
+# class QuestionViewSet(viewsets.ModelViewSet):
+#     """
+#     Default view set for 'Question'
 
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
-    """
-    queryset = Question.objects.all().order_by('description')
-    serializer_class = QuestionSerializer
+#     Args:
+#         viewsets (ModelViewSet): Derives directly from ModelViewSet
+#     """
+#     queryset = Question.objects.all().order_by('description')
+#     serializer_class = QuestionSerializer
 
-class AnswerViewSet(viewsets.ModelViewSet):
-    """
-    Default view set for 'Answer'
+# class AnswerViewSet(viewsets.ModelViewSet):
+#     """
+#     Default view set for 'Answer'
 
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
-    """
-    queryset = Answer.objects.all().order_by('short_answer')
-    serializer_class = AnswerSerializer
+#     Args:
+#         viewsets (ModelViewSet): Derives directly from ModelViewSet
+#     """
+#     queryset = Answer.objects.all().order_by('short_answer')
+#     serializer_class = AnswerSerializer
 
-class QuestionAnswerFormViewSet(viewsets.ModelViewSet):
-    """
-    Default view set for 'QuestionAnswerForm'
+# class QuestionAnswerFormViewSet(viewsets.ModelViewSet):
+#     """
+#     Default view set for 'QuestionAnswerForm'
 
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
-    """
-    queryset = QuestionAnswerForm.objects.all().order_by('question')
-    serializer_class = QuestionAnswerFormSerializer
+#     Args:
+#         viewsets (ModelViewSet): Derives directly from ModelViewSet
+#     """
+#     queryset = QuestionAnswerForm.objects.all().order_by('question')
+#     serializer_class = QuestionAnswerFormSerializer
 
-class UserQuestionAnswersViewSet(viewsets.ModelViewSet):
-    """
-    Default view set for 'UserQuestionAnswers'
+# class UserQuestionAnswersViewSet(viewsets.ModelViewSet):
+#     """
+#     Default view set for 'UserQuestionAnswers'
 
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
-    """
-    queryset = UserQuestionAnswers.objects.all().order_by('user')
-    serializer_class = UserQuestionAnswersSerializer
+#     Args:
+#         viewsets (ModelViewSet): Derives directly from ModelViewSet
+#     """
+#     queryset = UserQuestionAnswers.objects.all().order_by('user')
+#     serializer_class = UserQuestionAnswersSerializer
