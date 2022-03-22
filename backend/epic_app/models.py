@@ -23,33 +23,9 @@ class Question(models.Model):
         # Show the first 15 chars as a description.
         return self.description[0:15]
 
-
-class YesNoAnswerType(models.TextChoices):
+class Program(models.Model):
     """
-    Defines the Yes / No answer types.
-
-    Args:
-        models (models.TextChocies): Derives directly from the base class TextChoices.
-    """
-    YES = 'Y'
-    NO = 'N'
-
-
-class Answer(models.Model):
-    """
-    Entity to cointain the selected short (Yes / No) and long answer (Why) for a given question.
-
-    Args:
-        models (models.Model): Derives directly from the base class Model.
-    """
-    short_answer: str = models.CharField(YesNoAnswerType.choices, max_length=50, blank=True)
-    long_answer: str = models.TextField(blank=True)
-    def __str__(self) -> str:
-        return f"({self.short_answer}) - {self.long_answer[0:12]}"
-
-class Area(models.Model):
-    """
-    Higher up entity containing a set of Groups.
+    Higher up entity containing one or many questions and answers.
 
     Args:
         models (models.Model): Derives directly from the base class Model.
@@ -65,9 +41,9 @@ class Group(models.Model):
     """
     name: str = models.CharField(max_length=50)
 
-class SubProgram(models.Model):
+class Area(models.Model):
     """
-    Higher up entity containing one or many questions and answers.
+    Higher up entity containing a set of Groups.
 
     Args:
         models (models.Model): Derives directly from the base class Model.
@@ -76,28 +52,7 @@ class SubProgram(models.Model):
 #endregion
 
 #region Cross-Reference Tables
-class QuestionAnswerForm(models.Model):
-    """
-    Cross reference table to define the bounding relationship
-    between a question and its answer.
-
-    Args:
-        models (models.Model): Derives directly from base class Model.
-    """
-    question = models.ForeignKey(
-        to=Question,
-        on_delete=models.CASCADE,
-        related_name='form_question'
-    )
-    answer = models.ForeignKey(
-        to=Answer,
-        on_delete=models.CASCADE,
-        related_name='form_answer'
-    )
-    def __str__(self) -> str:
-        return f"{self.question}: {self.answer}"
-
-class UserQuestionAnswers(models.Model):
+class Answer(models.Model):
     """
     Cross reference table to define the bounding relationship between a User and the answers they give to each question.
 
@@ -107,14 +62,28 @@ class UserQuestionAnswers(models.Model):
     user = models.ForeignKey(
         to=EpicUser,
         on_delete=models.CASCADE,
-        related_name='user_qa'
+        related_name='user_answers'
     )
-    qa_form = models.ForeignKey(
-        to=QuestionAnswerForm,
+    question = models.ForeignKey(
+        to=Question,
         on_delete=models.CASCADE,
-        related_name='question_and_answer'
+        related_name='question_answers'
     )
+    
+    class YesNoAnswerType(models.TextChoices):
+        """
+        Defines the Yes / No answer types.
+
+        Args:
+            models (models.TextChocies): Derives directly from the base class TextChoices.
+        """
+        YES = 'Y'
+        NO = 'N'
+
+    short_answer: str = models.CharField(YesNoAnswerType.choices, max_length=50, blank=True)
+    long_answer: str = models.TextField(blank=True)
+
     def __str__(self) -> str:
-        return f"[{self.user}] {self.qa_form}"
+        return f"[{self.user}] {self.question}: {self.short_answer}"
 
 #endregion

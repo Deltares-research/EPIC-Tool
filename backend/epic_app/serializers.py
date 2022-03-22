@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from epic_app.models import EpicUser, UserQuestionAnswers, QuestionAnswerForm, Question, Answer
+from epic_app.models import EpicUser, Question, Answer
 
 class EpicUserSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -26,33 +26,11 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serializer for 'Answer'
-    """
-    class Meta:
-        """
-        Overriden meta class for serializing purposes.
-        """
-        model=Answer
-        fields=('url', 'id', 'short_answer', 'long_answer')
-
-class QuestionAnswerFormSerializer(serializers.HyperlinkedModelSerializer):
-    """
     Serializer for 'QuestionAnswerForm'
     """
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
-        model=QuestionAnswerForm
-        fields=('url', 'id', 'question', 'answer')
-
-class UserQuestionAnswersSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serializer for 'UserQuestionAnswers'
-    """
-    class Meta:
-        """
-        Overriden meta class for serializing purposes.
-        """
-        model=UserQuestionAnswers
-        fields=('url', 'id', 'user', 'qa_form')
+        model=Answer
+        fields=('url', 'id', 'user', 'question', 'short_answer', 'long_answer')
