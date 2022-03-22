@@ -12,8 +12,9 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
     queryset = EpicUser.objects.all().order_by('username')
+    model=EpicUser
     serializer_class = EpicUserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]
 
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -24,7 +25,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Question.objects.all().order_by('description')
     serializer_class = QuestionSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]
 
 class AnswerViewSet(viewsets.ModelViewSet):
     """
@@ -35,4 +36,4 @@ class AnswerViewSet(viewsets.ModelViewSet):
     """
     queryset = Answer.objects.all().order_by('user')
     serializer_class = AnswerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.DjangoModelPermissions]
