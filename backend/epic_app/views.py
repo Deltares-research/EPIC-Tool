@@ -1,21 +1,8 @@
 # Create your views here.
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 
 from epic_app.serializers import EpicUserSerializer, QuestionSerializer, AnswerSerializer
 from epic_app.models import EpicUser, Question, Answer
-from rest_framework.views import APIView
-from rest_framework.response import Response
-
-# class EpicUserViewSet(APIView):
-#     """
-#     Default view set for 'EpicUser'
-
-#     Args:
-#         viewsets (ModelViewSet): Derives directly from ModelViewSet
-#     """
-#     # auth_classes = [SessionAuthent]
-#     queryset = EpicUser.objects.all().order_by('username')
-#     serializer_class = EpicUserSerializer
 
 class EpicUserViewSet(viewsets.ModelViewSet):
     """
@@ -26,8 +13,9 @@ class EpicUserViewSet(viewsets.ModelViewSet):
     """
     queryset = EpicUser.objects.all().order_by('username')
     serializer_class = EpicUserSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-class QuestionViewSet(viewsets.ModelViewSet):
+class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Default view set for 'Question'
 
@@ -36,6 +24,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     """
     queryset = Question.objects.all().order_by('description')
     serializer_class = QuestionSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 class AnswerViewSet(viewsets.ModelViewSet):
     """
@@ -46,3 +35,4 @@ class AnswerViewSet(viewsets.ModelViewSet):
     """
     queryset = Answer.objects.all().order_by('user')
     serializer_class = AnswerSerializer
+    permission_classes = [permissions.IsAuthenticated]
