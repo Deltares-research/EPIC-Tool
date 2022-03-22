@@ -1,0 +1,18 @@
+## v0.1.0 (2022-03-21)
+
+### Fix
+
+- **epic_app/serializers.py**: Fixed usage of wrong fields in the serializers
+- **epic_app/serializers.py**: corrected typo
+
+### Feat
+
+- **epic_core/urls.py**: Stable urls just for epicuser table
+- **epic_app/urls.py**: Added routing for the epic_app rest calls
+- **epic_app/views.py**: Added ViewSet for all the existing serialized models
+- **serializers.py**: Added JSON serializers
+- **migrations/models.py**: Created basic models and cross-reference tables to be modified in the admin page
+- **poetry**: Added poetry as package handler
+- Small markdown fix
+- Small markdown fix
+- Small markdown fix
