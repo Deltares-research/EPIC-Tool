@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from epic_app.models import Answer, EpicUser, Question, QuestionAnswerForm, UserQuestionAnswers
+from epic_app.models import Answer, EpicUser, Question
 
 # Register your models here.
 admin.site.register(EpicUser)
@@ -10,5 +10,3 @@ admin.site.register(Question)
 
 # These are only added until we have a more streamlined way of working.
 admin.site.register(Answer)
-admin.site.register(QuestionAnswerForm)
-admin.site.register(UserQuestionAnswers)
