@@ -1,4 +1,5 @@
-from pyexpat import model
+from multiprocessing import context
+from typing import Optional
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
@@ -59,14 +60,25 @@ class QuestionSerializer(serializers.ModelSerializer):
         """
         model=Question
         fields=('url', 'id', 'description', )
-    
+
 class AnswerSerializer(serializers.ModelSerializer):
     """
     Serializer for 'QuestionAnswerForm'
     """
+    
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
         model=Answer
         fields=('url', 'id', 'user', 'question', 'short_answer', 'long_answer')
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        def get_user_query_set():
+            current_user = self.context['request'].user
+            if current_user.is_staff or current_user.is_superuser:
+                return EpicUser.objects.all()
+            else:
+                return EpicUser.objects.all().filter(id=current_user.id)
+        self.fields['user'] = serializers.PrimaryKeyRelatedField(queryset=get_user_query_set())
