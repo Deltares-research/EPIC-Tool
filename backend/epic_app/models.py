@@ -100,6 +100,7 @@ class Question(models.Model):
     def __str__(self) -> str:
         # Show the first 15 chars as a description.
         return self.description[0:15]
+
 # endregion
 
 # region Cross-Reference Tables
