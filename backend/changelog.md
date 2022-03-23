@@ -1,3 +1,9 @@
+## v0.3.0 (2022-03-23)
+
+### Feat
+
+- **settings.py**: Added middleware CORS to allow ui / backend communication with the /api/ url
+
 ## v0.2.0 (2022-03-22)
 
 ### Feat
