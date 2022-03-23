@@ -1,3 +1,9 @@
+## v0.5.0 (2022-03-23)
+
+### Feat
+
+- **epic_app/admin.py;epic_app/models.py;epic_app/templates/**: Added simple logic to enable future CSV importing of Areas, added templates
+
 ## v0.4.0 (2022-03-23)
 
 ### Feat
