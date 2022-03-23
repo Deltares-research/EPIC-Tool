@@ -1,3 +1,17 @@
+## v0.4.0 (2022-03-23)
+
+### Feat
+
+- **epic_app/models.py;epic_app/serializers.py;epic_app/views.py**: Added logic to serialize all data with their nested relationships
+- **epic_app/models.py**: Extended logic so that clusters can be made
+- **epic_app/admin.py**: Added relationships between area-group-program-question
+
+## v0.3.0 (2022-03-23)
+
+### Feat
+
+- **settings.py**: Added middleware CORS to allow ui / backend communication with the /api/ url
+
 ## v0.2.0 (2022-03-22)
 
 ### Feat
