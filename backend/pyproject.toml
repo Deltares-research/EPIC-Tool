@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "epic_backend"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Django REST Api backend for the Deltares EPIC Tool project"
 authors = ["Carles S. Soriano Pérez <carles.sorianoperez@deltares.nl>"]
 license = "MIT"
@@ -47,7 +47,7 @@ line_length = 88
 name = "cz_conventional_commits"
 changelog_file = "changelog.md"
 update_changelog_on_bump = true
-version = "0.1.0"
+version = "0.2.0"
 tag_format = "v$major.$minor.$patch"
 version_files= [
     "epic_core/__init__.py",
