@@ -13,7 +13,6 @@ If you wish to collaborate on this project you may want to get familiar with our
 * [poetry](https://python-poetry.org/) for package handler.
 * [black](https://black.readthedocs.io/en/stable/) for code styling.
 * [commitizen](https://commitizen-tools.github.io/commitizen/) for version control.
-* [pytest] for internal testing of the tool.
 
 ### Getting your development environment ready.
 * Using pip:
