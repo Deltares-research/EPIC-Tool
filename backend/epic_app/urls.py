@@ -5,6 +5,9 @@ from epic_app import views
 
 router = routers.DefaultRouter()
 router.register(r'epicuser', views.EpicUserViewSet)
+router.register(r'area', views.AreaViewSet)
+router.register(r'group', views.GroupViewSet)
+router.register(r'program', views.ProgramViewSet)
 router.register(r'question', views.QuestionViewSet)
 router.register(r'answer', views.AnswerViewSet)
 

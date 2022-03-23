@@ -45,7 +45,7 @@ class Group(models.Model):
     area: Area = models.ForeignKey(
         to=Area,
         on_delete=models.CASCADE,
-        related_name='group_area')
+        related_name='groups')
     
     def get_programs(self) -> List[Program]:
         """
@@ -70,7 +70,7 @@ class Program(models.Model):
     group: Group = models.ForeignKey(
         to=Group,
         on_delete=models.CASCADE,
-        related_name='program_group')
+        related_name='programs')
 
     def get_questions(self) -> List[Question]:
         """
@@ -95,7 +95,7 @@ class Question(models.Model):
     program: Program = models.ForeignKey(
         to=Program,
         on_delete=models.CASCADE,
-        related_name='question_program')
+        related_name='questions')
 
     def __str__(self) -> str:
         # Show the first 15 chars as a description.

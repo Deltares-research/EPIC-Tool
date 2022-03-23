@@ -1,10 +1,8 @@
-from multiprocessing import context
-from typing import Optional
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from epic_app.models import EpicUser, Question, Answer
+from epic_app.models import EpicUser, Question, Answer, Area, Group, Program
 
 class EpicUserSerializer(serializers.ModelSerializer):
     """
@@ -59,7 +57,52 @@ class QuestionSerializer(serializers.ModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model=Question
-        fields=('url', 'id', 'description', )
+        fields=('url', 'id', 'description', 'program')
+
+class ProgramSerializer(serializers.ModelSerializer):
+    """
+    Serializer for 'Program'
+    """
+    questions = QuestionSerializer(
+        many=True,
+        read_only=True
+    )
+    class Meta:
+        """
+        Overriden meta class for serializing purposes.
+        """
+        model=Program
+        fields=('url', 'id', 'name', 'group', 'questions')
+
+class GroupSerializer(serializers.ModelSerializer):
+    """
+    Serializer for 'Group'
+    """
+    programs = ProgramSerializer(
+        many=True,
+        read_only=True
+    )
+    class Meta:
+        """
+        Overriden meta class for serializing purposes.
+        """
+        model=Group
+        fields=('url', 'id', 'name', 'area', 'programs')
+
+class AreaSerializer(serializers.ModelSerializer):
+    """
+    Serializer for 'Area'
+    """
+    groups = GroupSerializer(
+        many=True,
+        read_only=True,
+    )
+    class Meta:
+        """
+        Overriden meta class for serializing purposes.
+        """
+        model=Area
+        fields=('url', 'id', 'name', 'groups')
 
 class AnswerSerializer(serializers.ModelSerializer):
     """
