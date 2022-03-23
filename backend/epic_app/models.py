@@ -30,6 +30,9 @@ class Area(models.Model):
             List[Group]: List of groups frot this area.
         """
         return Group.objects.filter(area=self).all()
+    
+    def __str__(self) -> str:
+        return self.name
 
 class Group(models.Model):
     """
@@ -42,8 +45,7 @@ class Group(models.Model):
     area: Area = models.ForeignKey(
         to=Area,
         on_delete=models.CASCADE,
-        related_name='group_area',
-        unique=True)
+        related_name='group_area')
     
     def get_programs(self) -> List[Program]:
         """
@@ -53,6 +55,9 @@ class Group(models.Model):
             List[Program]: List of programs for this group.
         """
         return Program.objects.filter(group=self).all()
+    
+    def __str__(self) -> str:
+        return self.name
 
 class Program(models.Model):
     """
@@ -65,8 +70,7 @@ class Program(models.Model):
     group: Group = models.ForeignKey(
         to=Group,
         on_delete=models.CASCADE,
-        related_name='program_group',
-        unique=True)
+        related_name='program_group')
 
     def get_questions(self) -> List[Question]:
         """
@@ -76,6 +80,9 @@ class Program(models.Model):
             List[Question]: List of questions for this program.
         """
         return Question.objects.filter(program=self).all()
+    
+    def __str__(self) -> str:
+        return self.name
 
 class Question(models.Model):
     """
@@ -88,8 +95,7 @@ class Question(models.Model):
     program: Program = models.ForeignKey(
         to=Program,
         on_delete=models.CASCADE,
-        related_name='question_program',
-        unique=True)
+        related_name='question_program')
 
     def __str__(self) -> str:
         # Show the first 15 chars as a description.
