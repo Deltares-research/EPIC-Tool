@@ -1,27 +1,24 @@
 <template>
   <v-app>
-    <v-app-bar app>
+    <v-app-bar elevation="4" dense app>
+      <v-spacer></v-spacer>
+        <v-icon color="gray darken-2" @click="logout">mdi-logout</v-icon>
     </v-app-bar>
     <v-main>
-      <v-container fluid>
-        <router-view></router-view>
-      </v-container>
+      <router-view/>
     </v-main>
-
-    <v-footer app>
-      <!-- -->
-    </v-footer>
   </v-app>
 </template>
 
-<script lang="ts">
-import Vue from 'vue';
+<script>
 
-export default Vue.extend({
+export default {
   name: 'App',
-
-  data: () => ({
-    //
-  }),
-});
+  methods: {
+    logout: function () {
+      this.$store.state.token = "";
+      this.$router.push("/LoginPage");
+    }
+  }
+};
 </script>
