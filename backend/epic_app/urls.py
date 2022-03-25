@@ -1,3 +1,4 @@
+from django.views.generic.base import RedirectView
 from django.urls import include, path
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
@@ -14,6 +15,7 @@ router.register(r'answer', views.AnswerViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
+    path('', RedirectView.as_view(url='api/', permanent=False), name='index'),
     path('api/', include(router.urls)),
     path('api/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/token-auth/', obtain_auth_token, name='api_token_auth'),
