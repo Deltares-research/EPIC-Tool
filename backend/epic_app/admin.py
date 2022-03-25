@@ -4,19 +4,10 @@ from django.shortcuts import redirect, render
 from django.urls import path
 from epic_app.models import Answer, EpicUser, Question, Area, Group, Program
 
-# Models exposed to the admin page .
-admin.site.register(EpicUser)
-# admin.site.register(Area)
-admin.site.register(Group)
-admin.site.register(Program)
-admin.site.register(Question)
-admin.site.register(Answer)
-
 class CsvImportForm(forms.Form):
     csv_file = forms.FileField()
 
 
-@admin.register(Area)
 class AreaAdmin(admin.ModelAdmin):
     """
     Overriding of the Area list in the admin page so that we can add our custom import for all the data.
@@ -44,3 +35,11 @@ class AreaAdmin(admin.ModelAdmin):
         return render(
             request, "admin/csv_form.html", payload
         )
+
+# Models exposed to the admin page .
+admin.site.register(EpicUser)
+admin.site.register(Area, AreaAdmin)
+admin.site.register(Group)
+admin.site.register(Program)
+admin.site.register(Question)
+admin.site.register(Answer)
