@@ -22,12 +22,6 @@ pytest = "6.2.5"
 pytest-django = "^4.5.2"
 pytest-cov = "^3.0.0"
 
-[tool.pytest.ini_options]
-testpaths = [
-    "epic_app\\tests",
-    "epic_core\\tests",
-]
-
 [tool.black]
 line-length = 88
 target-version = ['py38', 'py39']
