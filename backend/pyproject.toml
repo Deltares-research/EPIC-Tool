@@ -17,6 +17,8 @@ black = { version = "*", allow-prereleases = true }
 pylint = "^2.12.2"
 flake8 = "^4.0.1"
 mypy = "^0.941"
+pytest-django = "^4.5.2"
+pytest = "^7.1.1"
 
 [tool.black]
 line-length = 88
