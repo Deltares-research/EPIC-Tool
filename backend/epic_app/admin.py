@@ -6,6 +6,12 @@ from epic_app.models import Answer, EpicUser, Question, Area, Group, Program
 import csv
 
 class CsvImportForm(forms.Form):
+    """
+    Simple form to allow importing a 'csv' file.
+
+    Args:
+        forms (forms.Form): Default Django form.
+    """
     csv_file = forms.FileField()
 
 
@@ -17,6 +23,12 @@ class AreaAdmin(admin.ModelAdmin):
     change_list_template = "areas_changelist.html"
 
     def get_urls(self):
+        """
+        Extends the default get_urls so we can inject the import-csv on
+
+        Returns:
+            List[str]: A list of the urls to load from the admin page.
+        """
         urls = super().get_urls()
         my_urls = [
             path('import-csv/', self.import_csv),
@@ -24,6 +36,15 @@ class AreaAdmin(admin.ModelAdmin):
         return my_urls + urls
 
     def import_csv(self, request):
+        """
+        Imports a csv file into the EPIC database structure.
+
+        Args:
+            request (_type_): HTML request.
+
+        Returns:
+            _type_: HTML response.
+        """
         if request.method == "POST":
             csv_file = request.FILES["csv_file"]
             reader = csv.reader(csv_file)

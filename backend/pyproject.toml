@@ -17,8 +17,16 @@ black = { version = "*", allow-prereleases = true }
 pylint = "^2.12.2"
 flake8 = "^4.0.1"
 mypy = "^0.941"
+pytest-pythonpath = "^0.7.4"
+pytest = "6.2.5"
 pytest-django = "^4.5.2"
-pytest = "^7.1.1"
+pytest-cov = "^3.0.0"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "epic_app\\tests",
+    "epic_core\\tests",
+]
 
 [tool.black]
 line-length = 88
