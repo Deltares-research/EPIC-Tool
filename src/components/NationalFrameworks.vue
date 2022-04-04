@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 style="color: darkred">Linkage with National Frameworks</h2>
-    <h3 style="color: darkred">River Basin Planning</h3>
+    <h3 style="color: darkred">{{title}}</h3>
     <v-textarea rows=4 :value="explanation[page-1]" readonly outlined></v-textarea>
     <v-row>
       <v-col md="8">
@@ -31,26 +31,24 @@
     <br/>
     <br/>
     <br/>
-    <h5>{{ page}} of 3 questions</h5>
+    <h5>{{ page }} of 3 questions</h5>
     <br/>
     <br/>
   </div>
 </template>
-<script lang="ts">
+<script>
 import Vue from 'vue'
 
 export default Vue.extend({
   name: 'NationalFrameworks',
   methods: {},
-  computed: {
-    progress: function () {
-      return 100 * (this.page - 1) / 3
-    }
+  mounted() {
+    let program = this.$store.state.programs.find(program => program.id === this.$store.state.currentProgramId);
+    this.title = program.name;
   },
   data: () => ({
     items: ['Yes', 'No'],
-    answersyes: [null, null, null],
-    answersno: [null, null, null],
+    title: "",
     page: 1,
     explanation: [
       "The preparation and periodic revision (at say five-year intervals) of a river basin management plan is typically required by the water resources law. Such a law will also typically specify the minimum content of river basin management plans and their legal relationship with other relevant plans (such as which has priority). It also will specify the plans’ role in the implementation of the water resources law itself, for example in the setting of priorities and decisions on water allocation as discussed in more detail below.",
