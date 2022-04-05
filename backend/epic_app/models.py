@@ -34,6 +34,22 @@ class Area(models.Model):
     def __str__(self) -> str:
         return self.name
 
+class Agency(models.Model):
+
+    name: str = models.CharField(max_length=50)
+    
+    def get_programs(self) -> List[Program]:
+        """
+        Gets all the programs that belong to this agency.
+
+        Returns:
+            List[Program]: _description_
+        """
+        return Program.objects.filter(agency=self).all()
+    
+    def __str__(self) -> str:
+        return self.name
+
 class Group(models.Model):
     """
     Higher up entity containing one or programs.
@@ -67,6 +83,13 @@ class Program(models.Model):
         models (models.Model): Derives directly from the base class Model.
     """
     name: str = models.CharField(max_length=50)
+    agency: Agency = models.ForeignKey(
+        to=Agency,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='programs'
+    )
     group: Group = models.ForeignKey(
         to=Group,
         on_delete=models.CASCADE,

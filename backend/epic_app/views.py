@@ -1,8 +1,8 @@
 # Create your views here.
 from rest_framework import viewsets, permissions
 
-from epic_app.serializers import EpicUserSerializer, QuestionSerializer, AnswerSerializer, AreaSerializer, GroupSerializer, ProgramSerializer
-from epic_app.models import EpicUser, Question, Answer, Area, Group, Program
+from epic_app.serializers import EpicUserSerializer, QuestionSerializer, AnswerSerializer, AreaSerializer, GroupSerializer, ProgramSerializer, AgencySerializer
+from epic_app.models import EpicUser, Question, Answer, Area, Group, Program, Agency
 
 class EpicUserViewSet(viewsets.ModelViewSet):
     """
@@ -24,6 +24,17 @@ class AreaViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Area.objects.all().order_by('name')
     serializer_class = AreaSerializer
+    permission_classes = [permissions.DjangoModelPermissions]
+
+class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Default view set for 'Agency'
+
+    Args:
+        viewsets (ModelViewSet): Derives directly from ModelViewSet
+    """
+    queryset = Agency.objects.all().order_by('name')
+    serializer_class = AgencySerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):

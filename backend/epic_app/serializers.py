@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from epic_app.models import EpicUser, Question, Answer, Area, Group, Program
+from epic_app.models import EpicUser, Question, Answer, Area, Group, Program, Agency
 
 class EpicUserSerializer(serializers.ModelSerializer):
     """
@@ -72,13 +72,24 @@ class ProgramSerializer(serializers.ModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model=Program
-        fields=('url', 'id', 'name', 'group', 'questions')
+        fields=('url', 'id', 'name', 'agency', 'group', 'questions')
+
+class SimpleProgramSerializer(serializers.ModelSerializer):
+    """
+    Serializer for 'Program' without embedded questions.
+    """
+    class Meta:
+        """
+        Overriden meta class for serializing purposes.
+        """
+        model = Program
+        fields=('url', 'id', 'name')
 
 class GroupSerializer(serializers.ModelSerializer):
     """
     Serializer for 'Group'
     """
-    programs = ProgramSerializer(
+    programs = SimpleProgramSerializer(
         many=True,
         read_only=True
     )
@@ -88,6 +99,23 @@ class GroupSerializer(serializers.ModelSerializer):
         """
         model=Group
         fields=('url', 'id', 'name', 'area', 'programs')
+
+class AgencySerializer(serializers.ModelSerializer):
+    """
+    Serializer for 'Agency'
+    """
+
+    programs = SimpleProgramSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        """
+        Overriden meta class for serializing purposes.
+        """
+        model = Agency
+        fields = ('url', 'id', 'name', 'programs')
 
 class AreaSerializer(serializers.ModelSerializer):
     """

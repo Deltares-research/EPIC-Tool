@@ -3,7 +3,7 @@ from django import forms
 from django.shortcuts import redirect, render
 from django.urls import path
 from epic_app.importers import EpicDomainImporter
-from epic_app.models import Answer, EpicUser, Question, Area, Group, Program
+from epic_app.models import Answer, EpicUser, Question, Area, Group, Program, Agency
 
 class CsvImportForm(forms.Form):
     """
@@ -62,6 +62,7 @@ class AreaAdmin(admin.ModelAdmin):
 # Models exposed to the admin page .
 admin.site.register(EpicUser)
 admin.site.register(Area, AreaAdmin)
+admin.site.register(Agency)
 admin.site.register(Group)
 admin.site.register(Program)
 admin.site.register(Question)
