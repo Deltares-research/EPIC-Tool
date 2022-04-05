@@ -1,7 +1,7 @@
 import csv
 import io
 from typing import Any, Dict, List, Optional, Tuple
-
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from epic_app.models import Area, Group, Program
 
 def tuple_to_dict(tup_lines: List[Tuple[str, List[Any]]]) -> Dict[str, List[Any]]:
@@ -86,7 +86,13 @@ class EpicDomainImporter:
                     c_program.save()
 
 
-    def import_csv(self, inmemory_csv_file):
+    def import_csv(self, inmemory_csv_file: InMemoryUploadedFile):
+        """
+        Imports a csv file saved in memory into the EPIC domain data.
+
+        Args:
+            inmemory_csv_file (InMemoryUploadedFile): File containing EPIC data.
+        """
         read_file = inmemory_csv_file.read().decode('utf-8')
         reader = csv.DictReader(io.StringIO(read_file))
         keys = dict(

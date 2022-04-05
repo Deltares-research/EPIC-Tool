@@ -40,15 +40,16 @@ class AreaAdmin(admin.ModelAdmin):
         Imports a csv file into the EPIC database structure.
 
         Args:
-            request (_type_): HTML request.
+            request (HTTPRequest): HTML request.
 
         Returns:
-            _type_: HTML response.
+            HTTPRequest: HTML response.
         """
         if request.method == "POST":
-            if(EpicDomainImporter().import_csv(request.FILES["csv_file"])):
+            try:
+                EpicDomainImporter().import_csv(request.FILES["csv_file"])
                 self.message_user(request, "Your csv file has been imported")
-            else:
+            except:
                 self.message_user(request, "It was not possible to import the requested csv file.")
             return redirect("..")
             
