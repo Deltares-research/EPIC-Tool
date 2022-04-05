@@ -1,3 +1,15 @@
+## v0.6.0 (2022-04-05)
+
+### Refactor
+
+- **epic_app/importers.py**: Extracted import logic for better maintainabilit
+
+### Feat
+
+- **epic_app/admin.py**: Added basic import functionality
+- **urls.py**: Added redirection for the admin page
+- **epic_app/urls.py**: We now directly redirect the default path to /api
+
 ## v0.5.0 (2022-03-23)
 
 ### Feat
