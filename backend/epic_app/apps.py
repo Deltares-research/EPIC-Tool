@@ -1,6 +1,8 @@
+from tabnanny import verbose
 from django.apps import AppConfig
 
 
 class EpicAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'epic_app'
+    verbose_name = 'An Epic App'
