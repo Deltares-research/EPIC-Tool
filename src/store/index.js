@@ -1,55 +1,40 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import createPersistedState from "vuex-persistedstate";
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-    plugins: [createPersistedState()],
     state: {
         token: "",
         areas: [],
         groups: [],
         programs: [],
-        currentProgramId: 0,
+        programSelection: {},
+        currentProgram: {},
         initialized: false,
-        selectedProgram: "",
-    },
-    getters: {
-        getGroupsForArea: (state) => (areaId) => {
-            let groups = [];
-            for (let group of state.groups) {
-                if (group.areaId !== areaId) continue;
-                groups.push(group);
-            }
-            return groups;
-        },
-        getProgramsForGroup: (state) => (groupId) => {
-            let programs = [];
-            for (let program of state.programs) {
-                if (program.groupId !== groupId) continue;
-                programs.push(program);
-            }
-            return programs;
-        },
     },
     mutations: {
         selectProgram(state, programId) {
-            let program = state.programs.find(program => program.id === programId);
-            program.selected = !program.selected;
+            const currentSelection = state.programSelection[programId] === undefined ? false : state.programSelection[programId];
+            state.programSelection[programId] = !currentSelection;
         },
         init(state) {
             state.initialized = true;
         },
         updateAreas(state, areas) {
             state.areas = areas;
+            state.groups = [];
+            state.programs = [];
+            for (const area of state.areas) {
+                for (const group of area.groups) {
+                    state.groups.push(group);
+                    for (const program of group.programs) {
+                        state.programs.push(program);
+                    }
+                }
+            }
+            state.programSelection = {};
         },
-        updateGroups(state, groups) {
-            state.groups = groups;
-        },
-        updatePrograms(state, programs) {
-            state.programs = programs;
-        }
     },
     actions: {},
     modules: {}

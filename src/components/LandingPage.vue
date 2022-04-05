@@ -36,8 +36,7 @@
                 src="../../public/arrow.png"
             ></v-img>
           </v-col>
-          <v-col md="2"></v-col>
-          <v-col md="1">
+          <v-col md="3">
             <v-btn to="SelectProgram" text color="primary" @click="e1 = 2">Select program(s)
               <v-icon>mdi-step-forward</v-icon>
             </v-btn>

@@ -73,7 +73,7 @@ import Vue from 'vue'
 export default Vue.extend({
   name: 'Evolution',
   mounted() {
-    let program = this.$store.state.programs.find(program => program.id === this.$store.state.currentProgramId);
+    let program = this.$store.state.currentProgram;
     this.title = program.name;
   },
   methods: {

@@ -63,17 +63,12 @@
         <v-row style="margin: 1px">
           <v-col md="3">
           </v-col>
-          <v-col md="5">
+          <v-col md="6">
             <v-img
                 src="../../public/arrow.png"
             ></v-img>
           </v-col>
-          <v-col md="1"></v-col>
-          <v-col md="1">
-            <v-btn to="Answers" text color="primary" @click="e1 = 2">Answers<v-icon>mdi-step-forward</v-icon>
-            </v-btn>
-          </v-col>
-          <v-col md="1">
+          <v-col md="3" class="text-right">
             <v-btn to="SelectProgram" text color="primary" @click="e1 = 2">Select program(s)
               <v-icon>mdi-step-forward</v-icon>
             </v-btn>

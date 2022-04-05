@@ -43,7 +43,7 @@ export default Vue.extend({
   name: 'NationalFrameworks',
   methods: {},
   mounted() {
-    let program = this.$store.state.programs.find(program => program.id === this.$store.state.currentProgramId);
+    let program = this.$store.state.currentProgram;
     this.title = program.name;
   },
   data: () => ({
