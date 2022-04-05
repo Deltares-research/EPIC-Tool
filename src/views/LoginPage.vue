@@ -4,7 +4,7 @@
     </v-col>
     <v-col md="6">
       <v-card>
-        <v-card-title class="justify-center">Please login with your user name and password</v-card-title>
+        <v-card-title class="justify-center">Please login with your username and password</v-card-title>
         <v-card-text>
           <v-row style="margin: 1px">
             <v-col md="3"></v-col>
