@@ -8,7 +8,7 @@
     <br>
     <v-card :elevation="2" color="blue-grey lighten-4" v-for="area in this.$store.state.areas" :key="area.id">
       <v-container fluid class="fill-height">
-        <v-row no-gutters v-for="(group,index) in getGroupsForArea(area.id)" :key="group.id">
+        <v-row no-gutters v-for="(group,index) in area.groups" :key="group.id">
           <v-col md="2">
             <h3 v-if="index===0">{{ area.name }}</h3></v-col>
           <v-col md="4">
@@ -18,9 +18,9 @@
               </v-list-item-content>
             </v-list-item>
           </v-col>
-          <v-col md="6" v-if="group.showDetails">
+          <v-col md="6">
             <v-list-item-group>
-              <v-list-item dense v-for="(program) in getProgramsForGroup(group.id)" :key="program.id">
+              <v-list-item dense v-for="(program) in group.programs" :key="program.id">
                 <v-list-item-action>
                   <v-checkbox :input-value="isSelected(program.id)"
                               @click="selectProgram(program.id)"></v-checkbox>
@@ -41,7 +41,7 @@ import Vue from 'vue'
 export default Vue.extend({
   name: 'SelectProgram',
   mounted() {
-    let program = this.$store.state.programs.find(program => program.id === this.$store.state.currentProgramId);
+    let program = this.$store.state.currentProgram;
     this.title = program.name;
   },
   methods: {
@@ -54,12 +54,6 @@ export default Vue.extend({
     },
     isSelected(programId) {
       return this.selectedPrograms.has(programId);
-    },
-    getGroupsForArea: function (areaId) {
-      return this.$store.getters.getGroupsForArea(areaId);
-    },
-    getProgramsForGroup: function (groupId) {
-      return this.$store.getters.getProgramsForGroup(groupId);
     },
   },
   data: () => ({

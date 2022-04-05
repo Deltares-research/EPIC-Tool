@@ -23,7 +23,7 @@
     </v-dialog>
     <v-card :elevation="2" color="blue-grey lighten-4" v-for="area in this.$store.state.areas" :key="area.id">
       <v-container fluid class="fill-height">
-        <v-row no-gutters v-for="(group,index) in getGroupsForArea(area.id)" :key="group.id">
+        <v-row no-gutters v-for="(group,index) in area.groups" :key="group.id">
           <v-col md="2">
             <h3 v-if="index===0">{{ area.name }}</h3></v-col>
           <v-col md="4">
@@ -31,11 +31,15 @@
               <v-list-item-content>
                 <v-list-item-title>{{ group.name }}</v-list-item-title>
               </v-list-item-content>
+              <v-list-item-icon>
+                <v-icon v-if="!isGroupSelected(group.id)">mdi-plus</v-icon>
+                <v-icon v-if="isGroupSelected(group.id)">mdi-minus</v-icon>
+              </v-list-item-icon>
             </v-list-item>
           </v-col>
-          <v-col md="6" v-if="group.showDetails">
-            <v-list-item-group>
-              <v-list-item dense v-for="(program) in getProgramsForGroup(group.id)" :key="program.id">
+          <v-col md="6">
+            <v-list-item-group v-if="isGroupSelected(group.id)">
+              <v-list-item dense v-for="(program) in group.programs" :key="program.id">
                 <v-list-item-action>
                   <v-checkbox :input-value="getCheckBoxValue(program.id)"
                               @click="selectProgram(program.id)"></v-checkbox>
@@ -79,65 +83,47 @@
 
 export default {
   name: 'SelectProgram',
-  mounted() {
+  async mounted() {
 
     if (this.$store.state.initialized) return;
     this.$store.commit("init");
-    let areas = [
-      {"id": 0, "name": "12"},
-      {"id": 1, "name": "34"},
-      {"id": 2, "name": "56"},
-      {"id": 3, "name": "78"},
-      {"id": 4, "name": "98"}
-    ];
+
+    const token = this.$store.state.token;
+    const options = {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Token ' + token,
+      },
+    }
+    let response = await fetch('http://localhost:8000/api/area/?format=json', options);
+    let areas = await response.json();
     this.$store.commit("updateAreas", areas);
-
-    let groups = [
-      {"id": 0, "areaId": 0, "name": "groupA", "showDetails": true},
-      {"id": 1, "areaId": 0, "name": "groupB", "showDetails": false},
-      {"id": 2, "areaId": 0, "name": "groupC", "showDetails": false},
-      {"id": 3, "areaId": 0, "name": "groupD", "showDetails": false},
-      {"id": 4, "areaId": 1, "name": "groupE", "showDetails": false},
-      {"id": 5, "areaId": 1, "name": "groupF", "showDetails": false},
-    ];
-    this.$store.commit("updateGroups", groups);
-
-    let programs = [
-      {"id": 0, "groupId": 0, "name": "test1", "selected": false},
-      {"id": 1, "groupId": 0, "name": "test2", "selected": false},
-      {"id": 2, "groupId": 1, "name": "abc0", "selected": false},
-      {"id": 3, "groupId": 1, "name": "abc1", "selected": false},
-      {"id": 4, "groupId": 4, "name": "abc111", "selected": false},
-      {"id": 5, "groupId": 4, "name": "abc1222", "selected": false}];
-
-    this.$store.commit("updatePrograms", programs);
 
   },
   data() {
     return {
+      programSelection: {},
       showDialog: false,
       programDescriptionTitle: "",
     }
   },
   methods: {
     getCheckBoxValue: function (programId) {
-      let program = this.$store.state.programs.find(program => program.id === programId);
-      return program.selected;
+      let selected = this.$store.state.programSelection[programId];
+      return selected;
     },
     selectProgram: function (programId) {
       this.$store.commit("selectProgram", programId);
     },
-    getGroupsForArea: function (areaId) {
-      return this.$store.getters.getGroupsForArea(areaId);
-    },
-    getProgramsForGroup: function (groupId) {
-      return this.$store.getters.getProgramsForGroup(groupId);
+    isGroupSelected: function (groupId) {
+      return this.programSelection[groupId];
     },
     showGroup: function (groupId) {
-      for (let group of this.$store.state.groups) {
-        if (group.id !== groupId) continue;
-        this.$set(group, "showDetails", !group.showDetails);
-      }
+      const currentSelection = this.programSelection[groupId];
+      this.$set(this.programSelection, groupId, !currentSelection)
     },
     showProgramDescription: function (program) {
       this.showDialog = true;

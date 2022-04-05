@@ -3,7 +3,11 @@ from django import forms
 from django.shortcuts import redirect, render
 from django.urls import path
 from epic_app.importers import EpicDomainImporter
+<<<<<<< HEAD
 from epic_app.models import Answer, EpicUser, Question, Area, Group, Program, Agency
+=======
+from epic_app.models import Answer, EpicUser, Question, Area, Group, Program
+>>>>>>> master
 
 class CsvImportForm(forms.Form):
     """
