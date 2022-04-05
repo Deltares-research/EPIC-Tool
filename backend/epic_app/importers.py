@@ -86,19 +86,18 @@ class EpicDomainImporter:
                     c_program = Program(name=r_program, group=c_group)
                     c_program.save()
 
-
-    def import_csv(self, inmemory_csv_file: Union[InMemoryUploadedFile, Path]):
+    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
         """
         Imports a csv file saved in memory into the EPIC domain data.
 
         Args:
-            inmemory_csv_file (InMemoryUploadedFile): File containing EPIC data.
+            input_csv_file (Union[InMemoryUploadedFile, Path]): File containing EPIC data.
         """
-        if not type(inmemory_csv_file) == Path:
-            read_file = inmemory_csv_file.read().decode('utf-8')
-            reader = csv.DictReader(io.StringIO(read_file))
+        if not isinstance(input_csv_file, Path):
+            read_text = io.StringIO(input_csv_file.read().decode('utf-8'))
         else:
-            reader = csv.DictReader(inmemory_csv_file)
+            read_text = io.StringIO(input_csv_file.read_text())
+        reader = csv.DictReader(read_text)        
         keys = dict(
             area=reader.fieldnames[0],
             group=reader.fieldnames[1],
