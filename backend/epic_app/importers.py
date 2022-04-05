@@ -1,6 +1,7 @@
 import csv
 import io
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
+from pathlib import Path
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from epic_app.models import Area, Group, Program
 
@@ -86,15 +87,18 @@ class EpicDomainImporter:
                     c_program.save()
 
 
-    def import_csv(self, inmemory_csv_file: InMemoryUploadedFile):
+    def import_csv(self, inmemory_csv_file: Union[InMemoryUploadedFile, Path]):
         """
         Imports a csv file saved in memory into the EPIC domain data.
 
         Args:
             inmemory_csv_file (InMemoryUploadedFile): File containing EPIC data.
         """
-        read_file = inmemory_csv_file.read().decode('utf-8')
-        reader = csv.DictReader(io.StringIO(read_file))
+        if not type(inmemory_csv_file) == Path:
+            read_file = inmemory_csv_file.read().decode('utf-8')
+            reader = csv.DictReader(io.StringIO(read_file))
+        else:
+            reader = csv.DictReader(inmemory_csv_file)
         keys = dict(
             area=reader.fieldnames[0],
             group=reader.fieldnames[1],

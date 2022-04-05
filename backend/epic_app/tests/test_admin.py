@@ -66,10 +66,16 @@ class TestAreaAdmin():
         # Define request.
         post_request = self._post_import_csv_request(csv_inmemoryfile)
 
-        # Verify initial expectations
-        assert len(Area.objects.all()) == 0
-        assert len(Group.objects.all()) == 0
-        assert len(Program.objects.all()) == 0
+        # Verify initial expectations       
+        dummy_area = Area(name="dummyArea")
+        dummy_area.save()
+        dummy_group = Group(name="dummyGroup", area = dummy_area)
+        dummy_group.save()
+        dummy_program = Program(name="dummyProgram", group=dummy_group)
+        dummy_program.save()
+        assert len(Area.objects.all()) == 1
+        assert len(Group.objects.all()) == 1
+        assert len(Program.objects.all()) == 1
 
         # Run test
         r_result = area_admin_site.import_csv(post_request)
@@ -82,16 +88,26 @@ class TestAreaAdmin():
         assert len(Area.objects.all()) == 5
         assert len(Group.objects.all()) == 11
         assert len(Program.objects.all()) == 43
+        # Verify the initial data has been removed.
+        assert dummy_area not in Area.objects.all()
+        assert dummy_group not in Group.objects.all()
+        assert dummy_program not in Program.objects.all()
 
     @pytest.mark.django_db
-    def test_post_import_csv_with_empty_data_imports_and_redirects(self,area_admin_site: AreaAdmin):
+    def test_post_import_csv_with_empty_data_imports_and_redirects(self, area_admin_site: AreaAdmin):
         # Define request.
         post_request = self._post_import_csv_request(None)
 
-        # Verify initial expectations
-        assert len(Area.objects.all()) == 0
-        assert len(Group.objects.all()) == 0
-        assert len(Program.objects.all()) == 0
+        # Verify initial expectations       
+        dummy_area = Area(name="dummyArea")
+        dummy_area.save()
+        dummy_group = Group(name="dummyGroup", area = dummy_area)
+        dummy_group.save()
+        dummy_program = Program(name="dummyProgram", group=dummy_group)
+        dummy_program.save()
+        assert len(Area.objects.all()) == 1
+        assert len(Group.objects.all()) == 1
+        assert len(Program.objects.all()) == 1
 
         # Run test
         r_result = area_admin_site.import_csv(post_request)
@@ -101,6 +117,11 @@ class TestAreaAdmin():
         # Status code is redirected.
         assert r_result.status_code == 302 
         assert r_result.url == '..'
-        assert len(Area.objects.all()) == 0
-        assert len(Group.objects.all()) == 0
-        assert len(Program.objects.all()) == 0
+        # Status has not changed.
+        assert len(Area.objects.all()) == 1
+        assert len(Group.objects.all()) == 1
+        assert len(Program.objects.all()) == 1
+        # Verify the initial data has been not removed.
+        assert dummy_area in Area.objects.all()
+        assert dummy_group in Group.objects.all()
+        assert dummy_program in Program.objects.all()
