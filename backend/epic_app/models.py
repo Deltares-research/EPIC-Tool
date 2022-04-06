@@ -38,7 +38,9 @@ class Area(models.Model):
 class Agency(models.Model):
 
     name: str = models.CharField(max_length=50)
-    
+    class Meta:
+        verbose_name_plural = "Agencies"
+
     def get_programs(self) -> List[Program]:
         """
         Gets all the programs that belong to this agency.
@@ -130,10 +132,6 @@ class Program(models.Model):
         """
         return Question.objects.filter(program=self).all()
     
-    # def save(self, *args, **kwargs):
-    #     if any(p.name.to_lower == "potato" for p in Program.objects.all()):
-    #         raise 
-
     def __str__(self) -> str:
         return self.name
 
