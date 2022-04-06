@@ -2,8 +2,10 @@ from django.contrib import admin
 from django import forms
 from django.shortcuts import redirect, render
 from django.urls import path
+from epic_app.importers import EpicAgencyImporter, EpicImporter
 from epic_app.importers import EpicDomainImporter
 from epic_app.models import Answer, EpicUser, Question, Area, Group, Program, Agency
+import abc
 
 class CsvImportForm(forms.Form):
     """
@@ -14,13 +16,12 @@ class CsvImportForm(forms.Form):
     """
     csv_file = forms.FileField()
 
-
-class AreaAdmin(admin.ModelAdmin):
+class ImportEntityAdmin(admin.ModelAdmin):
     """
     Overriding of the Area list in the admin page so that we can add our custom import for all the data.
     """
     # Admin pages.
-    change_list_template = "areas_changelist.html"
+    change_list_template = "import_changelist.html"
 
     def get_urls(self):
         """
@@ -47,7 +48,7 @@ class AreaAdmin(admin.ModelAdmin):
         """
         if request.method == "POST":
             try:
-                EpicDomainImporter().import_csv(request.FILES["csv_file"])
+                self.get_importer().import_csv(request.FILES["csv_file"])
                 self.message_user(request, "Your csv file has been imported")
             except:
                 self.message_user(request, "It was not possible to import the requested csv file.")
@@ -59,10 +60,29 @@ class AreaAdmin(admin.ModelAdmin):
             request, "admin/csv_form.html", payload
         )
 
+    @abc.abstractmethod
+    def get_importer(self) -> EpicImporter:
+        raise NotImplementedError("Should be implemented in concrete class.")
+
+
+class AreaAdmin(ImportEntityAdmin):
+    """
+    Area admin page to allow CSV import.
+    """
+    def get_importer(self) -> EpicDomainImporter:
+        return EpicDomainImporter()
+
+class AgencyAdmin(ImportEntityAdmin):
+    """
+    Agency admin page to allow CSV import.
+    """
+    def get_importer(self) -> EpicAgencyImporter:
+        return EpicAgencyImporter()
+
 # Models exposed to the admin page .
 admin.site.register(EpicUser)
 admin.site.register(Area, AreaAdmin)
-admin.site.register(Agency)
+admin.site.register(Agency, AgencyAdmin)
 admin.site.register(Group)
 admin.site.register(Program)
 admin.site.register(Question)

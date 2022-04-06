@@ -1,6 +1,6 @@
 import csv
 import io
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, Protocol
 from pathlib import Path
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from epic_app.models import Area, Group, Program
@@ -34,7 +34,11 @@ def group_entity(group_key: str, data_read: List[Any]) -> Dict[str, List[Any]]:
     tuple_list = [(x.__dict__[group_key], x) for x in data_read]
     return tuple_to_dict(tuple_list)
 
-class EpicDomainImporter:
+class EpicImporter(Protocol):
+    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
+        pass
+
+class EpicDomainImporter(EpicImporter):
     """
     Class that contains an importer for all the Epic elements.
     """
@@ -109,4 +113,8 @@ class EpicDomainImporter:
             line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
         self._cleanup_epic_domain()
         self._import_epic_domain(group_entity("area", line_objects))
-        
+
+
+class EpicAgencyImporter:
+    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
+        raise NotImplementedError("Not yet implemented.")

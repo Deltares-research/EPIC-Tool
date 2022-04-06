@@ -2,8 +2,8 @@ from io import BytesIO
 from pathlib import Path
 from typing import Optional
 from wsgiref.simple_server import WSGIRequestHandler
-from epic_app.admin import AreaAdmin
-from epic_app.models import Area, Group, Program
+from epic_app.admin import AreaAdmin, AgencyAdmin, ImportEntityAdmin
+from epic_app.models import Area, Group, Program, Agency
 from django.contrib import admin
 from django.test import RequestFactory
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -12,7 +12,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 
 import pytest
 
-class TestAreaAdmin():
+class TestAreaAdmin:
 
     @pytest.fixture(autouse=False)
     def area_admin_site(self) -> AreaAdmin:
@@ -35,8 +35,9 @@ class TestAreaAdmin():
         reg_area = next(( r_model for r_model in admin.site._registry if r_model is Area), None)
         assert reg_area is not None, "No Area was registered as a model."
         area_admin = admin.site._registry[reg_area]
-        assert type(area_admin) == AreaAdmin
-        assert area_admin.change_list_template == "areas_changelist.html"
+        assert isinstance(area_admin, AreaAdmin)
+        assert isinstance(area_admin, ImportEntityAdmin)
+        assert area_admin.change_list_template == "import_changelist.html"
         assert any('import-csv/' in str(t_url) for t_url in area_admin.urls)
 
     def test_get_import_csv_returns_success_code(self, area_admin_site: AreaAdmin):
@@ -125,3 +126,16 @@ class TestAreaAdmin():
         assert dummy_area in Area.objects.all()
         assert dummy_group in Group.objects.all()
         assert dummy_program in Program.objects.all()
+
+
+class TestAgencyAdmin:
+
+    def test_agency_admin_is_initialized(self):
+        assert admin.site.is_registered(Agency)
+        reg_area = next(( r_model for r_model in admin.site._registry if r_model is Agency), None)
+        assert reg_area is not None, "No Area was registered as a model."
+        agency_admin = admin.site._registry[reg_area]
+        assert isinstance(agency_admin, AgencyAdmin)
+        assert isinstance(agency_admin, ImportEntityAdmin)
+        assert agency_admin.change_list_template == "import_changelist.html"
+        assert any('import-csv/' in str(t_url) for t_url in agency_admin.urls)
