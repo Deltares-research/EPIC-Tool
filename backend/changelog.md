@@ -1,3 +1,9 @@
+## v0.8.0 (2022-04-06)
+
+### Feat
+
+- **epic_app/serializers.py**: Exposed description for programs
+
 ## v0.7.1 (2022-04-06)
 
 ### Fix
