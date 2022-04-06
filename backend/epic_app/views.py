@@ -1,8 +1,17 @@
 # Create your views here.
-from rest_framework import viewsets, permissions
+from rest_framework import permissions, viewsets
 
-from epic_app.serializers import EpicUserSerializer, QuestionSerializer, AnswerSerializer, AreaSerializer, GroupSerializer, ProgramSerializer, AgencySerializer
-from epic_app.models import EpicUser, Question, Answer, Area, Group, Program, Agency
+from epic_app.models import Agency, Answer, Area, EpicUser, Group, Program, Question
+from epic_app.serializers import (
+    AgencySerializer,
+    AnswerSerializer,
+    AreaSerializer,
+    EpicUserSerializer,
+    GroupSerializer,
+    ProgramSerializer,
+    QuestionSerializer,
+)
+
 
 class EpicUserViewSet(viewsets.ModelViewSet):
     """
@@ -11,9 +20,11 @@ class EpicUserViewSet(viewsets.ModelViewSet):
     Args:
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
-    queryset = EpicUser.objects.all().order_by('username')
+
+    queryset = EpicUser.objects.all().order_by("username")
     serializer_class = EpicUserSerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
 
 class AreaViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -22,9 +33,11 @@ class AreaViewSet(viewsets.ReadOnlyModelViewSet):
     Args:
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
-    queryset = Area.objects.all().order_by('name')
+
+    queryset = Area.objects.all().order_by("name")
     serializer_class = AreaSerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
 
 class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -33,9 +46,11 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     Args:
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
-    queryset = Agency.objects.all().order_by('name')
+
+    queryset = Agency.objects.all().order_by("name")
     serializer_class = AgencySerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -44,9 +59,11 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     Args:
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
-    queryset = Group.objects.all().order_by('name')
+
+    queryset = Group.objects.all().order_by("name")
     serializer_class = GroupSerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -55,9 +72,11 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     Args:
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
-    queryset = Program.objects.all().order_by('name')
+
+    queryset = Program.objects.all().order_by("name")
     serializer_class = ProgramSerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
 
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -66,9 +85,11 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     Args:
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
-    queryset = Question.objects.all().order_by('description')
+
+    queryset = Question.objects.all().order_by("description")
     serializer_class = QuestionSerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
 
 class AnswerViewSet(viewsets.ModelViewSet):
     """
@@ -77,6 +98,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
     Args:
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
-    queryset = Answer.objects.all().order_by('user')
+
+    queryset = Answer.objects.all().order_by("user")
     serializer_class = AnswerSerializer
     permission_classes = [permissions.IsAuthenticated]
