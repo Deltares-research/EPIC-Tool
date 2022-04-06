@@ -53,8 +53,8 @@ jobs:
       - name: Make django migrations
         run: |
           cd backend
-          poetry manage.py makemigrations
-          poetry manage.py migrate
+          poetry run python manage.py makemigrations
+          poetry run python manage.py migrate
 
       - name: Test with pytest
         run: |
