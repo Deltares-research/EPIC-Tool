@@ -39,11 +39,22 @@ jobs:
           poetry config virtualenvs.in-project false
           poetry config virtualenvs.path ~/.virtualenvs
 
+      - name: Generate .django_secrets
+        run: |
+          cd backend
+          python -c "import secrets; from pathlib import Path; Path('.django_secrets').write_text(secrets.token_hex(16))"
+
       - name: Install Dependencies
         run: |
           cd backend
           poetry install
         if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Make django migrations
+        run: |
+          cd backend
+          poetry run python manage.py makemigrations
+          poetry run python manage.py migrate
 
       - name: Test with pytest
         run: |
