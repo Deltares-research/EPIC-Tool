@@ -40,17 +40,20 @@ jobs:
           poetry config virtualenvs.path ~/.virtualenvs
 
       - name: Install Dependencies
-        run: poetry install
-        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           cd backend
+          poetry install
+        if: steps.cache.outputs.cache-hit != 'true'
 
       - name: Test with pytest
-        run: poetry run pytest --cov . --cov-report xml:coverage-reports/coverage-nbsdynamics-src.xml --junitxml=xunit-reports/xunit-result-nbsdynamics-src.xml
+        run: |
+          cd backend
+          poetry run pytest --cov . --cov-report xml:coverage-reports/coverage-nbsdynamics-src.xml --junitxml=xunit-reports/xunit-result-nbsdynamics-src.xml
 
       - name: Autoformat code if the check fails
         if: ${{ (matrix.os == 'ubuntu-18.04') && (matrix.python-version == 3.8) }}
         run: |
+          cd backend
           poetry run isort .
           poetry run black .
           git config --global user.name '${{ github.actor }}'
