@@ -1,3 +1,9 @@
+## v0.7.1 (2022-04-06)
+
+### Fix
+
+- **epic_app/serializers.py**: Fixed agency attribute for program serializer
+
 ## v0.7.0 (2022-04-06)
 
 ### Refactor
