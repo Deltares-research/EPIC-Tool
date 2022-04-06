@@ -22,10 +22,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
         run: |
           cd backend
-          python
-          import secrets
-          from pathlib import Path
-          Path('.django_secrets').write_text(secrets.token_hex(16))
+          python -c "import secrets; from pathlib import Path; Path('.django_secrets').write_text(secrets.token_hex(16))"
 
       - name: Run image
         uses: abatilo/actions-poetry@v2.0.0
