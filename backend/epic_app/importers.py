@@ -100,10 +100,9 @@ class EpicDomainImporter(EpicImporter):
                 # Create new group
                 c_group = Group(name=r_group, area=c_area)
                 c_group.save()
-                read_programs = group_entity("program", r_group_values)
-                for r_program in read_programs.keys():
+                for r_csv_value in r_group_values:
                     # Create new program
-                    c_program = Program(name=r_program, group=c_group)
+                    c_program = Program(name=r_csv_value.program, description=r_csv_value.description, group=c_group)
                     c_program.save()
 
     def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
@@ -125,7 +124,6 @@ class EpicDomainImporter(EpicImporter):
             line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
         self._cleanup_epic_domain()
         self._import_epic_domain(group_entity("area", line_objects))
-
 
 class EpicAgencyImporter:
     
