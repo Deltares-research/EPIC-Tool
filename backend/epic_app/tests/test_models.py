@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 import pytest
 import epic_app.models as epic_models
 from django.contrib.auth.models import User
@@ -30,11 +31,27 @@ def default_test_db():
     third_group.save()
 
     # Programs
-    epic_models.Program(name="a", group=first_group, agency=tia_agency).save()
-    epic_models.Program(name="b", group=first_group, agency=tia_agency).save()
-    epic_models.Program(name="c", group=first_group, agency=cia_agency).save()
-    epic_models.Program(name="d", group=second_group, agency=mi6_agency).save()
-    epic_models.Program(name="e", group=third_group, agency=rws_agency).save()
+    epic_models.Program(
+        name="a",
+        group=first_group,
+        agency=tia_agency,
+        description="May the Force be with you").save()
+    epic_models.Program(
+        name="b",
+        group=first_group,
+        agency=tia_agency,
+        description="You're all clear, kid. Now blow this thing and go home!").save()
+    epic_models.Program(
+        name="c",
+        group=first_group,
+        agency=cia_agency,
+        description="Do. Or do not. There is no try.").save()
+    epic_models.Program(
+        name="d",
+        group=second_group,
+        agency=mi6_agency,
+        description="Train yourself to let go of everything you fear to lose.").save()
+    epic_models.Program(name="e", group=third_group, agency=rws_agency, description="You will find only what you bring in.").save()
 
 @pytest.mark.django_db
 class TestEpicUser:
@@ -131,6 +148,7 @@ class TestProgram:
         assert program.agency.name == "R.W.S."
         assert isinstance(program.group, epic_models.Group)
         assert program.group.name == "third"
+        assert program.description == "You will find only what you bring in."
     
     def test_program_delete_does_not_delete_in_cascade(self):
         program: epic_models.Program = epic_models.Program.objects.filter(name="e").first()
@@ -141,6 +159,35 @@ class TestProgram:
         assert not epic_models.Program.objects.filter(name="e").exists()
         assert epic_models.Agency.objects.filter(name=a_name).exists()
         assert epic_models.Group.objects.filter(name=g_name).exists()
+
+    @pytest.mark.parametrize("name_case",
+    [
+        pytest.param("a simple case", id="lowercase"),
+        pytest.param("A Simple Case", id="camelCase"),
+        pytest.param("A SIMPLE CASE", id="UPPERCASE")])
+    def test_program_unique_name_attribute(self, name_case: str): 
+        # Create one new program
+        a_group: epic_models.Group = epic_models.Group.objects.all().first()
+        a_description = "Lorem ipsum"
+        a_name = "A simple case"
+        a_simple_case_program = epic_models.Program(
+            name=a_name,
+            group=a_group,
+            description=a_description
+        )
+        a_simple_case_program.save()
+        assert epic_models.Program.objects.filter(name=a_simple_case_program.name).exists()
+
+
+        # Try adding a new instance with the same name but different case.
+        with pytest.raises(ValidationError) as e_info:
+            epic_models.Program(
+                name=name_case,
+                group=a_group,
+                description=a_description
+            ).save()
+        assert str(e_info.value.message) == f"There's already a Program with the name: {a_name}."
+        assert not epic_models.Program.objects.filter(name=name_case).exists()
 
 @pytest.mark.django_db
 class TestAnswer:

@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List
 from django.db import models
 from django.contrib.auth.models import User
+from django.forms import ValidationError
 
 # region Default models
 class EpicUser(User):
@@ -82,7 +83,13 @@ class Program(models.Model):
     Args:
         models (models.Model): Derives directly from the base class Model.
     """
-    name: str = models.CharField(max_length=50)
+    name: str = models.CharField(
+        max_length=50,
+        unique=True,)
+    description: str = models.TextField(
+        max_length=250,
+        blank=False,
+        null=False,)
     agency: Agency = models.ForeignKey(
         to=Agency,
         on_delete=models.SET_NULL,
@@ -95,6 +102,25 @@ class Program(models.Model):
         on_delete=models.CASCADE,
         related_name='programs')
 
+    @staticmethod
+    def check_unique_name(value: str):
+        """
+        Checks whether there is a Program with provided value as a name.
+
+        Args:
+            value (str): Name to give to a new Program.
+
+        Raises:
+            ValidationError: When there is already a Program with the same case insensitive name.
+        """
+        p_name = next((p.name for p in Program.objects.all() if p.name.lower() == value.lower()), None)
+        if p_name:
+            raise ValidationError(f"There's already a Program with the name: {p_name}.")
+
+    def save(self, *args, **kwargs) -> None:
+        self.check_unique_name(self.name)
+        return super(Program, self).save(*args, **kwargs)
+
     def get_questions(self) -> List[Question]:
         """
         Gets a list of questions whose program is the caller.
@@ -104,6 +130,10 @@ class Program(models.Model):
         """
         return Question.objects.filter(program=self).all()
     
+    # def save(self, *args, **kwargs):
+    #     if any(p.name.to_lower == "potato" for p in Program.objects.all()):
+    #         raise 
+
     def __str__(self) -> str:
         return self.name
 
