@@ -72,7 +72,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model=Program
-        fields=('url', 'id', 'name', 'agencies', 'group', 'questions')
+        fields=('url', 'id', 'name', 'description', 'agencies', 'group', 'questions')
 
 class SimpleProgramSerializer(serializers.ModelSerializer):
     """
@@ -83,7 +83,7 @@ class SimpleProgramSerializer(serializers.ModelSerializer):
         Overriden meta class for serializing purposes.
         """
         model = Program
-        fields=('url', 'id', 'name')
+        fields=('url', 'id', 'name', 'description')
 
 class GroupSerializer(serializers.ModelSerializer):
     """
