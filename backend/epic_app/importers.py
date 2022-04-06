@@ -35,6 +35,20 @@ def group_entity(group_key: str, data_read: List[Any]) -> Dict[str, List[Any]]:
     tuple_list = [(x.__dict__[group_key], x) for x in data_read]
     return tuple_to_dict(tuple_list)
 
+def get_valid_csv_text(input_csv_file: Union[InMemoryUploadedFile, Path]) -> io.StringIO:
+    """
+    Gets a valid csv StringIo text from either source.
+
+    Args:
+        input_csv_file (Union[InMemoryUploadedFile, Path]): Different IO source.
+
+    Returns:
+        io.StringIO: Stream of decoded CSV text.
+    """
+    if not isinstance(input_csv_file, Path):
+        return io.StringIO(input_csv_file.read().decode('utf-8'))
+    return io.StringIO(input_csv_file.read_text(encoding='utf-8'))
+
 @runtime_checkable
 class EpicImporter(Protocol):
     def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
@@ -99,11 +113,7 @@ class EpicDomainImporter(EpicImporter):
         Args:
             input_csv_file (Union[InMemoryUploadedFile, Path]): File containing EPIC data.
         """
-        if not isinstance(input_csv_file, Path):
-            read_text = io.StringIO(input_csv_file.read().decode('utf-8'))
-        else:
-            read_text = io.StringIO(input_csv_file.read_text())
-        reader = csv.DictReader(read_text)        
+        reader = csv.DictReader(get_valid_csv_text(input_csv_file))
         keys = dict(
             area=reader.fieldnames[0],
             group=reader.fieldnames[1],
@@ -154,11 +164,13 @@ class EpicAgencyImporter:
                 existing_program.agencies.add(c_agency)
 
     def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
-        if not isinstance(input_csv_file, Path):
-            read_text = io.StringIO(input_csv_file.read().decode('utf-8'))
-        else:
-            read_text = io.StringIO(input_csv_file.read_text(encoding='utf-8'))
-        reader = csv.DictReader(read_text)        
+        """
+        Imports saved Agencies into the database and adds the relationships to existent Programs.
+
+        Args:
+            input_csv_file (Union[InMemoryUploadedFile, Path]): File containing EPIC Agencies.
+        """
+        reader = csv.DictReader(get_valid_csv_text(input_csv_file))
         keys = dict(
             agency=reader.fieldnames[0],
             program=reader.fieldnames[1],

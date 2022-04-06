@@ -94,7 +94,7 @@ class Program(models.Model):
         null=False,)
     agencies: List[Agency] = models.ManyToManyField(
         to=Agency,
-        null=True,
+        blank=True,
         related_name='programs'
     )
     group: Group = models.ForeignKey(
