@@ -1,29 +1,34 @@
-from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from epic_app.models import EpicUser, Question, Answer, Area, Group, Program, Agency
+from rest_framework import serializers
+
+from epic_app.models import Agency, Answer, Area, EpicUser, Group, Program, Question
+
 
 class EpicUserSerializer(serializers.ModelSerializer):
     """
     Serializer for 'EpicUser'
     """
+
     password = serializers.CharField(
         write_only=True,
         required=True,
-        help_text='Leave empty if no change needed',
-        style={'input_type': 'password', 'placeholder': 'Password'}
+        help_text="Leave empty if no change needed",
+        style={"input_type": "password", "placeholder": "Password"},
     )
+
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
-        model=EpicUser
-        fields = ('url', 'id', 'username', 'organization', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
+
+        model = EpicUser
+        fields = ("url", "id", "username", "organization", "password")
+        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        validated_data['password'] = make_password(validated_data.get('password'))
+        validated_data["password"] = make_password(validated_data.get("password"))
         return super(EpicUserSerializer, self).create(validated_data)
 
     def validate(self, attrs):
@@ -32,73 +37,82 @@ class EpicUserSerializer(serializers.ModelSerializer):
         # user = EpicUser(**attrs)
 
         # get the password from the data
-        password = attrs.get('password')
+        password = attrs.get("password")
 
-        errors = dict() 
+        errors = dict()
         try:
             # validate the password and catch the exception
             validate_password(password=password, user=EpicUser)
 
         # the exception raised here is different than serializers.ValidationError
         except exceptions.ValidationError as e_err:
-            errors['password'] = list(e_err.messages)
+            errors["password"] = list(e_err.messages)
 
         if errors:
             raise serializers.ValidationError(errors)
 
         return super(EpicUserSerializer, self).validate(attrs)
 
+
 class QuestionSerializer(serializers.ModelSerializer):
     """
     Serializer for 'Question'
     """
+
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
-        model=Question
-        fields=('url', 'id', 'description', 'program')
+
+        model = Question
+        fields = ("url", "id", "description", "program")
+
 
 class ProgramSerializer(serializers.ModelSerializer):
     """
     Serializer for 'Program'
     """
-    questions = QuestionSerializer(
-        many=True,
-        read_only=True
-    )
+
+    questions = QuestionSerializer(many=True, read_only=True)
+
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
-        model=Program
-        fields=('url', 'id', 'name', 'description', 'agencies', 'group', 'questions')
+
+        model = Program
+        fields = ("url", "id", "name", "description", "agencies", "group", "questions")
+
 
 class SimpleProgramSerializer(serializers.ModelSerializer):
     """
     Serializer for 'Program' without embedded questions.
     """
+
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
+
         model = Program
-        fields=('url', 'id', 'name', 'description')
+        fields = ("url", "id", "name", "description")
+
 
 class GroupSerializer(serializers.ModelSerializer):
     """
     Serializer for 'Group'
     """
-    programs = SimpleProgramSerializer(
-        many=True,
-        read_only=True
-    )
+
+    programs = SimpleProgramSerializer(many=True, read_only=True)
+
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
-        model=Group
-        fields=('url', 'id', 'name', 'area', 'programs')
+
+        model = Group
+        fields = ("url", "id", "name", "area", "programs")
+
 
 class AgencySerializer(serializers.ModelSerializer):
     """
@@ -114,42 +128,53 @@ class AgencySerializer(serializers.ModelSerializer):
         """
         Overriden meta class for serializing purposes.
         """
+
         model = Agency
-        fields = ('url', 'id', 'name', 'programs')
+        fields = ("url", "id", "name", "programs")
+
 
 class AreaSerializer(serializers.ModelSerializer):
     """
     Serializer for 'Area'
     """
+
     groups = GroupSerializer(
         many=True,
         read_only=True,
     )
+
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
-        model=Area
-        fields=('url', 'id', 'name', 'groups')
+
+        model = Area
+        fields = ("url", "id", "name", "groups")
+
 
 class AnswerSerializer(serializers.ModelSerializer):
     """
     Serializer for 'QuestionAnswerForm'
     """
-    
+
     class Meta:
         """
         Overriden meta class for serializing purposes.
         """
-        model=Answer
-        fields=('url', 'id', 'user', 'question', 'short_answer', 'long_answer')
-    
+
+        model = Answer
+        fields = ("url", "id", "user", "question", "short_answer", "long_answer")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         def get_user_query_set():
-            current_user = self.context['request'].user
+            current_user = self.context["request"].user
             if current_user.is_staff or current_user.is_superuser:
                 return EpicUser.objects.all()
             else:
                 return EpicUser.objects.all().filter(id=current_user.id)
-        self.fields['user'] = serializers.PrimaryKeyRelatedField(queryset=get_user_query_set())
+
+        self.fields["user"] = serializers.PrimaryKeyRelatedField(
+            queryset=get_user_query_set()
+        )
