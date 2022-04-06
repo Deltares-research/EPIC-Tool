@@ -1,3 +1,9 @@
+## v0.9.0 (2022-04-06)
+
+### Feat
+
+- **epic_app/importers.py**: Now we properly import the descriptions
+
 ## v0.8.0 (2022-04-06)
 
 ### Feat
