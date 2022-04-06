@@ -1,6 +1,6 @@
 from io import BytesIO
-from epic_app.importers import EpicDomainImporter
-from epic_app.models import Area, Group, Program
+from epic_app.importers import EpicImporter, EpicDomainImporter, EpicAgencyImporter
+from epic_app.models import Area, Group, Program, Agency
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from pathlib import Path
 import pytest
@@ -8,6 +8,10 @@ import pytest
 
 class TestEpicDomainImporter:
    
+    def test_epic_domain_importer(self):
+       importer = EpicDomainImporter()
+       assert isinstance(importer, EpicImporter)
+
     @pytest.mark.django_db
     def test_import_csv_from_filepath(self):
         # Define test data
@@ -70,3 +74,41 @@ class TestEpicDomainImporter:
         assert dummy_area not in Area.objects.all()
         assert dummy_group not in Group.objects.all()
         assert dummy_program not in Program.objects.all()
+
+class TestEpicAgencyImporter:
+
+    @pytest.fixture(autouse=True)
+    @pytest.mark.django_db
+    def default_epic_domain_data(self):
+        """
+        Fixture to load the predefined database so we can test importing agencies correctly.
+        """
+        # Define test data
+        test_file = Path(__file__).parent / "test_data" / "initial_epic_data.csv"
+        assert test_file.is_file()
+        EpicDomainImporter().import_csv(test_file)
+
+    @pytest.mark.django_db
+    def test_epic_agency_importer(self):
+        agency_importer = EpicAgencyImporter()
+        assert isinstance(agency_importer, EpicImporter)
+    
+    @pytest.mark.django_db
+    def test_import_csv_from_filepath(self):
+        # Define test data
+        test_file = Path(__file__).parent / "test_data" / "agency_data.csv"
+        assert test_file.is_file()
+
+        # Verify initial expectations       
+        dummy_agency = Agency(name="dummyAgency")
+        dummy_agency.save()
+        assert len(Agency.objects.all()) == 1
+
+        # Run test
+        EpicAgencyImporter().import_csv(test_file)
+
+        # Verify final expectations
+        assert len(Agency.objects.all()) == 6
+
+        # Verify the initial data has been removed.
+        assert dummy_agency not in Agency.objects.all()

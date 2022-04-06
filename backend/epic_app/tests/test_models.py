@@ -31,28 +31,36 @@ def default_test_db():
     third_group.save()
 
     # Programs
-    epic_models.Program(
+    a_program = epic_models.Program(
         name="a",
         group=first_group,
-        agency=tia_agency,
-        description="May the Force be with you").save()
-    epic_models.Program(
+        description="May the Force be with you")
+    a_program.save()
+    b_program = epic_models.Program(
         name="b",
         group=first_group,
-        agency=tia_agency,
-        description="You're all clear, kid. Now blow this thing and go home!").save()
-    epic_models.Program(
+        description="You're all clear, kid. Now blow this thing and go home!")
+    b_program.save()
+    c_program = epic_models.Program(
         name="c",
         group=first_group,
-        agency=cia_agency,
-        description="Do. Or do not. There is no try.").save()
-    epic_models.Program(
+        description="Do. Or do not. There is no try.")
+    c_program.save()
+    d_program = epic_models.Program(
         name="d",
         group=second_group,
-        agency=mi6_agency,
-        description="Train yourself to let go of everything you fear to lose.").save()
-    epic_models.Program(name="e", group=third_group, agency=rws_agency, description="You will find only what you bring in.").save()
-
+        description="Train yourself to let go of everything you fear to lose.")
+    d_program.save()
+    e_program = epic_models.Program(
+        name="e",
+        group=third_group,
+        description="You will find only what you bring in.")
+    e_program.save()
+    a_program.agencies.add(cia_agency, tia_agency)
+    b_program.agencies.add(cia_agency, tia_agency)
+    c_program.agencies.add(cia_agency, rws_agency)
+    d_program.agencies.add(mi6_agency, cia_agency)
+    e_program.agencies.add(rws_agency, mi6_agency)
 @pytest.mark.django_db
 class TestEpicUser:
 
@@ -114,7 +122,7 @@ class TestAgency:
         for p_name in program_names:
             p_program: epic_models.Program = epic_models.Program.objects.filter(name=p_name).first()
             assert isinstance(p_program, epic_models.Program)
-            assert p_program.agency is None    
+            assert not p_program.agencies.filter(name="T.I.A.").exists()
 
 @pytest.mark.django_db
 class TestGroup:
@@ -144,8 +152,8 @@ class TestProgram:
     def test_program_data(self):
         program: epic_models.Program = epic_models.Program.objects.filter(name="e").first()
         assert isinstance(program, epic_models.Program)
-        assert isinstance(program.agency, epic_models.Agency)
-        assert program.agency.name == "R.W.S."
+        assert all(isinstance(p_agency, epic_models.Agency) for p_agency in program.agencies.all())
+        assert program.agencies.filter(name = "R.W.S.").exists()
         assert isinstance(program.group, epic_models.Group)
         assert program.group.name == "third"
         assert program.description == "You will find only what you bring in."
@@ -153,7 +161,7 @@ class TestProgram:
     def test_program_delete_does_not_delete_in_cascade(self):
         program: epic_models.Program = epic_models.Program.objects.filter(name="e").first()
         g_name: str = program.group.name
-        a_name: str = program.agency.name
+        a_name: str = program.agencies.all().first().name
         assert isinstance(program, epic_models.Program)
         epic_models.Program.delete(program)
         assert not epic_models.Program.objects.filter(name="e").exists()

@@ -1,9 +1,10 @@
 import csv
 import io
-from typing import Any, Dict, List, Optional, Tuple, Union, Protocol
+from typing import Any, Dict, List, Optional, Tuple, Union, Protocol, runtime_checkable
 from pathlib import Path
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from epic_app.models import Area, Group, Program
+from django.forms import ValidationError
+from epic_app.models import Area, Group, Program, Agency
 
 def tuple_to_dict(tup_lines: List[Tuple[str, List[Any]]]) -> Dict[str, List[Any]]:
     """
@@ -34,6 +35,7 @@ def group_entity(group_key: str, data_read: List[Any]) -> Dict[str, List[Any]]:
     tuple_list = [(x.__dict__[group_key], x) for x in data_read]
     return tuple_to_dict(tuple_list)
 
+@runtime_checkable
 class EpicImporter(Protocol):
     def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
         pass
@@ -116,5 +118,53 @@ class EpicDomainImporter(EpicImporter):
 
 
 class EpicAgencyImporter:
+    
+    class CsvLineObject:
+        """
+        Maps a CSV row into a data object that we can better manipulate.
+        """
+        agency: str
+        program: str
+
+        @classmethod
+        def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
+            new_line = cls()
+            new_line.agency = dict_row.get(dict_keys["agency"])
+            new_line.program = dict_row.get(dict_keys["program"])
+            return new_line
+
+    def _import_agencies(self, agencies_dictionary: Dict[str, List[CsvLineObject]]):
+        missing_programs = []
+        for agency_csvobjs in agencies_dictionary.values():
+            for csv_obj in agency_csvobjs:
+                if Program.get_program_by_name(csv_obj.program.lower()) is None:
+                    missing_programs.append(csv_obj.program)
+        if any(missing_programs):
+            str_mp = ", ".join(set(missing_programs))
+            raise ValidationError(
+                f"The provided programs do not exist in the current database: \n{str_mp}")
+
+        # Remove all previous agency objects.
+        Agency.objects.all().delete()
+        for agency_name, agency_csvobj in agencies_dictionary.items():
+            c_agency = Agency(name=agency_name)
+            c_agency.save()
+            for csvobj in agency_csvobj:
+                existing_program: Program = Program.get_program_by_name(csvobj.program)
+                existing_program.agencies.add(c_agency)
+
     def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
-        raise NotImplementedError("Not yet implemented.")
+        if not isinstance(input_csv_file, Path):
+            read_text = io.StringIO(input_csv_file.read().decode('utf-8'))
+        else:
+            read_text = io.StringIO(input_csv_file.read_text(encoding='utf-8'))
+        reader = csv.DictReader(read_text)        
+        keys = dict(
+            agency=reader.fieldnames[0],
+            program=reader.fieldnames[1],
+        )
+        line_objects = []
+        for row in reader:
+            line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
+        
+        self._import_agencies(group_entity("agency", line_objects))

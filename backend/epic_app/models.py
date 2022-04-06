@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import List, Optional
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
@@ -46,9 +46,9 @@ class Agency(models.Model):
         Gets all the programs that belong to this agency.
 
         Returns:
-            List[Program]: _description_
+            List[Program]: List of programs registered for this agency.
         """
-        return Program.objects.filter(agency=self).all()
+        return Program.objects.filter(agencies=self).all()
     
     def __str__(self) -> str:
         return self.name
@@ -92,10 +92,8 @@ class Program(models.Model):
         max_length=250,
         blank=False,
         null=False,)
-    agency: Agency = models.ForeignKey(
+    agencies: List[Agency] = models.ManyToManyField(
         to=Agency,
-        on_delete=models.SET_NULL,
-        blank=True,
         null=True,
         related_name='programs'
     )
@@ -115,9 +113,22 @@ class Program(models.Model):
         Raises:
             ValidationError: When there is already a Program with the same case insensitive name.
         """
-        p_name = next((p.name for p in Program.objects.all() if p.name.lower() == value.lower()), None)
-        if p_name:
-            raise ValidationError(f"There's already a Program with the name: {p_name}.")
+        existing_program = Program.get_program_by_name(value)
+        if existing_program:
+            raise ValidationError(f"There's already a Program with the name: {existing_program.name}.")
+
+    @staticmethod
+    def get_program_by_name(value: str) -> Optional[Program]:
+        """
+        Gets the existing program wich name (case insensitive) matches the given value.
+
+        Args:
+            value (str): Program name.
+
+        Returns:
+            Optional[Program]: Found program.
+        """
+        return next((p for p in Program.objects.all() if p.name.lower() == value.lower()), None)
 
     def save(self, *args, **kwargs) -> None:
         self.check_unique_name(self.name)

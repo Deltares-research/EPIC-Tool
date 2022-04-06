@@ -132,9 +132,9 @@ class TestAgencyAdmin:
 
     def test_agency_admin_is_initialized(self):
         assert admin.site.is_registered(Agency)
-        reg_area = next(( r_model for r_model in admin.site._registry if r_model is Agency), None)
-        assert reg_area is not None, "No Area was registered as a model."
-        agency_admin = admin.site._registry[reg_area]
+        reg_agency = next(( r_model for r_model in admin.site._registry if r_model is Agency), None)
+        assert reg_agency is not None, "No Agency was registered as a model."
+        agency_admin = admin.site._registry[reg_agency]
         assert isinstance(agency_admin, AgencyAdmin)
         assert isinstance(agency_admin, ImportEntityAdmin)
         assert agency_admin.change_list_template == "import_changelist.html"
