@@ -1,7 +1,13 @@
 # Create your views here.
 from rest_framework import permissions, viewsets
 
-from epic_app.models.models import Agency, Area, EpicUser, Group, Program
+from epic_app.models.models import (
+    Agency,
+    Area,
+    EpicUser,
+    Group,
+    Program,
+)
 from epic_app.models.epic_questions import Answer, Question
 from epic_app.serializers import (
     AgencySerializer,
