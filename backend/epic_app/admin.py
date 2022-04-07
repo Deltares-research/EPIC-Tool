@@ -6,7 +6,7 @@ from django.shortcuts import redirect, render
 from django.urls import path
 
 from epic_app.importers import EpicAgencyImporter, EpicDomainImporter, EpicImporter
-from epic_app.models import Agency, Answer, Area, EpicUser, Group, Program, Question
+from epic_app.models.models import Agency, Answer, Area, EpicUser, Group, Program, Question
 
 
 class CsvImportForm(forms.Form):

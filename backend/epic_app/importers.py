@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Protocol, Tuple, Union, runtime_ch
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.forms import ValidationError
 
-from epic_app.models import Agency, Area, Group, Program
+from epic_app.models.models import Agency, Area, Group, Program
 
 
 def tuple_to_dict(tup_lines: List[Tuple[str, List[Any]]]) -> Dict[str, List[Any]]:

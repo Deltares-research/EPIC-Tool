@@ -2,7 +2,7 @@ import pytest
 from django.contrib.auth.models import User
 from django.forms import ValidationError
 
-import epic_app.models as epic_models
+import epic_app.models.models as epic_models
 
 
 @pytest.fixture(autouse=True)
