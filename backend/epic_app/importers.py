@@ -1,9 +1,13 @@
 import csv
 import io
-from typing import Any, Dict, List, Optional, Tuple, Union
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Protocol, Tuple, Union, runtime_checkable
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from epic_app.models import Area, Group, Program
+from django.forms import ValidationError
+
+from epic_app.models import Agency, Area, Group, Program
+
 
 def tuple_to_dict(tup_lines: List[Tuple[str, List[Any]]]) -> Dict[str, List[Any]]:
     """
@@ -20,6 +24,7 @@ def tuple_to_dict(tup_lines: List[Tuple[str, List[Any]]]) -> Dict[str, List[Any]
         new_dict.setdefault(key, []).append(list_obj)
     return new_dict
 
+
 def group_entity(group_key: str, data_read: List[Any]) -> Dict[str, List[Any]]:
     """
     Creates a dictionary grouping the data_read by the group_key representing an attribute of the objects.
@@ -34,14 +39,40 @@ def group_entity(group_key: str, data_read: List[Any]) -> Dict[str, List[Any]]:
     tuple_list = [(x.__dict__[group_key], x) for x in data_read]
     return tuple_to_dict(tuple_list)
 
-class EpicDomainImporter:
+
+def get_valid_csv_text(
+    input_csv_file: Union[InMemoryUploadedFile, Path]
+) -> io.StringIO:
+    """
+    Gets a valid csv StringIo text from either source.
+
+    Args:
+        input_csv_file (Union[InMemoryUploadedFile, Path]): Different IO source.
+
+    Returns:
+        io.StringIO: Stream of decoded CSV text.
+    """
+    if not isinstance(input_csv_file, Path):
+        return io.StringIO(input_csv_file.read().decode("utf-8"))
+    return io.StringIO(input_csv_file.read_text(encoding="utf-8"))
+
+
+@runtime_checkable
+class EpicImporter(Protocol):
+    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
+        pass
+
+
+class EpicDomainImporter(EpicImporter):
     """
     Class that contains an importer for all the Epic elements.
     """
+
     class CsvLineObject:
         """
         Maps a CSV row into a data object that we can better manipulate.
         """
+
         area: str
         group: str
         program: str
@@ -63,7 +94,7 @@ class EpicDomainImporter:
         Area.objects.all().delete()
         Group.objects.all().delete()
         Program.objects.all().delete()
-    
+
     def _import_epic_domain(self, areas_dictionary: Dict[str, List[CsvLineObject]]):
         """
         Imports all the read objects from the csv into the database.
@@ -80,10 +111,13 @@ class EpicDomainImporter:
                 # Create new group
                 c_group = Group(name=r_group, area=c_area)
                 c_group.save()
-                read_programs = group_entity("program", r_group_values)
-                for r_program in read_programs.keys():
+                for r_csv_value in r_group_values:
                     # Create new program
-                    c_program = Program(name=r_program, group=c_group)
+                    c_program = Program(
+                        name=r_csv_value.program,
+                        description=r_csv_value.description,
+                        group=c_group,
+                    )
                     c_program.save()
 
     def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
@@ -93,11 +127,7 @@ class EpicDomainImporter:
         Args:
             input_csv_file (Union[InMemoryUploadedFile, Path]): File containing EPIC data.
         """
-        if not isinstance(input_csv_file, Path):
-            read_text = io.StringIO(input_csv_file.read().decode('utf-8'))
-        else:
-            read_text = io.StringIO(input_csv_file.read_text())
-        reader = csv.DictReader(read_text)        
+        reader = csv.DictReader(get_valid_csv_text(input_csv_file))
         keys = dict(
             area=reader.fieldnames[0],
             group=reader.fieldnames[1],
@@ -109,4 +139,59 @@ class EpicDomainImporter:
             line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
         self._cleanup_epic_domain()
         self._import_epic_domain(group_entity("area", line_objects))
-        
+
+
+class EpicAgencyImporter:
+    class CsvLineObject:
+        """
+        Maps a CSV row into a data object that we can better manipulate.
+        """
+
+        agency: str
+        program: str
+
+        @classmethod
+        def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
+            new_line = cls()
+            new_line.agency = dict_row.get(dict_keys["agency"])
+            new_line.program = dict_row.get(dict_keys["program"])
+            return new_line
+
+    def _import_agencies(self, agencies_dictionary: Dict[str, List[CsvLineObject]]):
+        missing_programs = []
+        for agency_csvobjs in agencies_dictionary.values():
+            for csv_obj in agency_csvobjs:
+                if Program.get_program_by_name(csv_obj.program.lower()) is None:
+                    missing_programs.append(csv_obj.program)
+        if any(missing_programs):
+            str_mp = ", ".join(set(missing_programs))
+            raise ValidationError(
+                f"The provided programs do not exist in the current database: \n{str_mp}"
+            )
+
+        # Remove all previous agency objects.
+        Agency.objects.all().delete()
+        for agency_name, agency_csvobj in agencies_dictionary.items():
+            c_agency = Agency(name=agency_name)
+            c_agency.save()
+            for csvobj in agency_csvobj:
+                existing_program: Program = Program.get_program_by_name(csvobj.program)
+                existing_program.agencies.add(c_agency)
+
+    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
+        """
+        Imports saved Agencies into the database and adds the relationships to existent Programs.
+
+        Args:
+            input_csv_file (Union[InMemoryUploadedFile, Path]): File containing EPIC Agencies.
+        """
+        reader = csv.DictReader(get_valid_csv_text(input_csv_file))
+        keys = dict(
+            agency=reader.fieldnames[0],
+            program=reader.fieldnames[1],
+        )
+        line_objects = []
+        for row in reader:
+            line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
+
+        self._import_agencies(group_entity("agency", line_objects))

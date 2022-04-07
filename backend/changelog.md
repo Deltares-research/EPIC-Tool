@@ -1,3 +1,34 @@
+## v0.9.0 (2022-04-06)
+
+### Feat
+
+- **epic_app/importers.py**: Now we properly import the descriptions
+
+## v0.8.0 (2022-04-06)
+
+### Feat
+
+- **epic_app/serializers.py**: Exposed description for programs
+
+## v0.7.1 (2022-04-06)
+
+### Fix
+
+- **epic_app/serializers.py**: Fixed agency attribute for program serializer
+
+## v0.7.0 (2022-04-06)
+
+### Refactor
+
+- **epic_app/importers.py**: modified agency null (should be blank) attribute, refactored importer code to reduce duplicity
+
+### Feat
+
+- **epic_app/importers.py;epic_app/models.py**: Added import csv functionality
+- **epic_app/admin.py**: Added agency admin to import csv, adjusted tests
+- **epic_app/models.py**: Updated program to include description and a unique name case-insensitive attribute
+- **epic_app/models.py;epic_app/serializers.py**: Added Agency as a model and serializer, a cluster of programs
+
 ## v0.6.0 (2022-04-05)
 
 ### Refactor
