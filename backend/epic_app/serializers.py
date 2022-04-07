@@ -3,7 +3,15 @@ from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 from rest_framework import serializers
 
-from epic_app.models.models import Agency, Answer, Area, EpicUser, Group, Program, Question
+from epic_app.models.models import (
+    Agency,
+    Answer,
+    Area,
+    EpicUser,
+    Group,
+    Program,
+    Question,
+)
 
 
 class EpicUserSerializer(serializers.ModelSerializer):
