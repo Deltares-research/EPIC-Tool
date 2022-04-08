@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 import abc
+
 from django.db import models
+
 from epic_app.models import models as base_models
 
 
@@ -10,9 +13,9 @@ class Question(models.Model):
     program: base_models.Program = models.ForeignKey(
         to=base_models.Program, on_delete=models.CASCADE, related_name="questions"
     )
-    
+
     class Meta:
-        unique_together=['title', 'program']
+        unique_together = ["title", "program"]
 
     def __str__(self) -> str:
         return self.title[0:15]
@@ -21,15 +24,17 @@ class Question(models.Model):
     def get_answer(self):
         raise NotImplementedError
 
+
 class NationalFrameworkQuestion(Question):
-    description: str = models.TextField(
-        null=False, blank=False)
+    description: str = models.TextField(null=False, blank=False)
+
 
 class EvolutionChoiceType(models.TextChoices):
     NASCENT = "Nascent"
     ENGAGED = "Engaged"
     CAPABLE = "Capable"
     EFFECTIVE = "Effective"
+
 
 class EvolutionQuestion(Question):
     # Single choice among four options
@@ -46,10 +51,10 @@ class EvolutionQuestion(Question):
         null=False, blank=False, verbose_name=str(EvolutionChoiceType.EFFECTIVE)
     )
 
+
 class LinkagesQuestion(Question):
     # Up to 3 choices among all available programs in epic domain.
     pass
-
 
 
 # region Cross-Reference Tables
