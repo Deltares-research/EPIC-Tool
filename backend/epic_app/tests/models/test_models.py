@@ -6,6 +6,17 @@ import epic_app.models.models as epic_models
 from epic_app.tests.models.dummy_db import epic_test_db
 
 
+@pytest.fixture(autouse=True)
+def EpicModelsFixture(epic_test_db: pytest.fixture):
+    """
+    Dummy fixture just to load a default db from dummy_db.
+
+    Args:
+        epic_test_db (pytest.fixture): Fixture to load for the whole file tests.
+    """
+    pass
+
+
 @pytest.mark.django_db
 class TestEpicUser:
     def test_init_epicuser(self):
@@ -18,7 +29,7 @@ class TestEpicUser:
 
 @pytest.mark.django_db
 class TestArea:
-    def test_area_get_groups(self, epic_test_db: pytest.fixture):
+    def test_area_get_groups(self):
         alpha_area: epic_models.Area = epic_models.Area.objects.filter(
             name="alpha"
         ).first()
@@ -29,7 +40,7 @@ class TestArea:
         assert "second" in group_names
         assert str(alpha_area) == "alpha"
 
-    def test_delete_area_deletes_in_cascade(self, epic_test_db: pytest.fixture):
+    def test_delete_area_deletes_in_cascade(self):
         alpha_area: epic_models.Area = epic_models.Area.objects.filter(
             name="alpha"
         ).first()
@@ -52,7 +63,7 @@ class TestArea:
 
 @pytest.mark.django_db
 class TestAgency:
-    def test_agency_get_programs(self, epic_test_db: pytest.fixture):
+    def test_agency_get_programs(self):
         tia_agency: epic_models.Agency = epic_models.Agency.objects.filter(
             name="T.I.A."
         ).first()
@@ -63,9 +74,7 @@ class TestAgency:
         assert "b" in program_names
         assert str(tia_agency) == "T.I.A."
 
-    def test_delete_agency_does_not_delete_in_cascade(
-        self, epic_test_db: pytest.fixture
-    ):
+    def test_delete_agency_does_not_delete_in_cascade(self):
         tia_agency: epic_models.Agency = epic_models.Agency.objects.filter(
             name="T.I.A."
         ).first()
@@ -84,7 +93,7 @@ class TestAgency:
 
 @pytest.mark.django_db
 class TestGroup:
-    def test_group_get_programs(self, epic_test_db: pytest.fixture):
+    def test_group_get_programs(self):
         second_group: epic_models.Group = epic_models.Group.objects.filter(
             name="second"
         ).first()
@@ -95,7 +104,7 @@ class TestGroup:
         assert "d" == second_group.get_programs()[0].name
         assert str(second_group) == "second"
 
-    def test_delete_group_deletes_in_cascade(self, epic_test_db: pytest.fixture):
+    def test_delete_group_deletes_in_cascade(self):
         second_group: epic_models.Group = epic_models.Group.objects.filter(
             name="second"
         ).first()
@@ -112,7 +121,7 @@ class TestGroup:
 
 @pytest.mark.django_db
 class TestProgram:
-    def test_program_data(self, epic_test_db: pytest.fixture):
+    def test_program_data(self):
         program: epic_models.Program = epic_models.Program.objects.filter(
             name="e"
         ).first()
@@ -126,9 +135,7 @@ class TestProgram:
         assert program.group.name == "third"
         assert program.description == "You will find only what you bring in."
 
-    def test_program_delete_does_not_delete_in_cascade(
-        self, epic_test_db: pytest.fixture
-    ):
+    def test_program_delete_does_not_delete_in_cascade(self):
         program: epic_models.Program = epic_models.Program.objects.filter(
             name="e"
         ).first()
@@ -148,9 +155,7 @@ class TestProgram:
             pytest.param("A SIMPLE CASE", id="UPPERCASE"),
         ],
     )
-    def test_program_unique_name_attribute(
-        self, name_case: str, epic_test_db: pytest.fixture
-    ):
+    def test_program_unique_name_attribute(self, name_case: str):
         # Create one new program
         a_group: epic_models.Group = epic_models.Group.objects.all().first()
         a_description = "Lorem ipsum"

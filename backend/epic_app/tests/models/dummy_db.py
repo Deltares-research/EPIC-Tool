@@ -6,6 +6,10 @@ import epic_app.models.models as epic_models
 @pytest.fixture(autouse=False)
 @pytest.mark.django_db
 def epic_test_db():
+    """
+    Pytest automaticall sets and tears down this data for each test.
+    (Or at least it should)
+    """
     # Areas
     alpha_area = epic_models.Area(name="alpha")
     alpha_area.save()
