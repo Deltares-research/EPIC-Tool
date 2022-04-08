@@ -1,13 +1,16 @@
+from turtle import title
+
 import pytest
 from django.db import IntegrityError, transaction
 
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
+    LinkagesQuestion,
     NationalFrameworkQuestion,
     Question,
 )
 from epic_app.models.models import Program
-from epic_app.tests.models.dummy_db import epic_test_db
+from epic_app.tests.epic_db_fixture import epic_test_db
 
 
 @pytest.fixture(autouse=True)
@@ -126,3 +129,23 @@ class TestEvolutionQuestion:
         assert Question.objects.filter(title=nfq_title).exists()
         assert EvolutionQuestion.objects.filter(title=nfq_title).exists()
         assert isinstance(nfq, Question)
+
+
+@pytest.mark.django_db
+class TestLinkagesQuestion:
+    def test_linkages_constrained_one_per_program(self):
+        # Get one existing linkage question.
+        l_question: LinkagesQuestion = LinkagesQuestion.objects.all().first()
+        q_title = "Ad magna aliqua eiusmod sint est."
+
+        # Verify the titles are different.
+        assert q_title != l_question
+
+        with transaction.atomic():
+            with pytest.raises(IntegrityError) as e_info:
+                LinkagesQuestion(title=q_title, program=l_question.program).save()
+
+        assert (
+            str(e_info.value)
+            == "UNIQUE constraint failed: epic_app_question.program_id"
+        )

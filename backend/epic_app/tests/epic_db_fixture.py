@@ -1,6 +1,12 @@
 import pytest
 
 import epic_app.models.models as epic_models
+from epic_app.models.epic_questions import (
+    EvolutionQuestion,
+    LinkagesQuestion,
+    NationalFrameworkQuestion,
+    Question,
+)
 
 
 @pytest.fixture(autouse=False)
@@ -64,3 +70,32 @@ def epic_test_db():
     c_program.agencies.add(cia_agency, rws_agency)
     d_program.agencies.add(mi6_agency, cia_agency)
     e_program.agencies.add(rws_agency, mi6_agency)
+
+    # Add questions to program a (for instance).
+    NationalFrameworkQuestion(
+        title="Is this a National Framework question?",
+        program=a_program,
+        description="Commodo sint pariatur minim ea non nisi officia magna mollit officia.",
+    ).save()
+    NationalFrameworkQuestion(
+        title="Is this another National Framework question?",
+        program=a_program,
+        description="In ut ea ex labore in proident cupidatat elit laboris veniam.",
+    )
+    EvolutionQuestion(
+        title="Is this an Evolution question?",
+        program=a_program,
+        nascent_description="Incididunt sunt sunt in commodo culpa cupidatat.",
+        engaged_description="Cupidatat labore nulla irure consectetur aliquip cillum labore Lorem amet enim est laboris aliqua tempor.",
+        capable_description="In do eu anim occaecat ad ut sit eiusmod magna cillum.",
+        effective_description="Ipsum proident aliqua elit anim sit fugiat mollit amet.",
+    ).save()
+    EvolutionQuestion(
+        title="Is this yet another Evolution question?",
+        program=a_program,
+        nascent_description="Esse occaecat cillum duis amet anim laboris labore magna ipsum.",
+        engaged_description="Fugiat nulla culpa cillum esse consequat id irure laboris adipisicing esse veniam anim.",
+        capable_description="Non officia eu ut enim veniam nulla nostrud in laborum sit eiusmod qui id.",
+        effective_description="Velit aliqua laborum cillum ea fugiat mollit deserunt incididunt veniam cupidatat aute Lorem ea.",
+    ).save()
+    LinkagesQuestion(title="Finally a linkage question?", program=a_program).save()

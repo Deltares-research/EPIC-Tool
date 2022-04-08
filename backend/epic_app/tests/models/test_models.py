@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.forms import ValidationError
 
 import epic_app.models.models as epic_models
-from epic_app.tests.models.dummy_db import epic_test_db
+from epic_app.tests.epic_db_fixture import epic_test_db
 
 
 @pytest.fixture(autouse=True)

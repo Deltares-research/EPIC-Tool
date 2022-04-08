@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import abc
+from enum import unique
 
-from django.db import models
+from django.db import IntegrityError, models
 
 from epic_app.models import models as base_models
 
@@ -54,7 +55,19 @@ class EvolutionQuestion(Question):
 
 class LinkagesQuestion(Question):
     # Up to 3 choices among all available programs in epic domain.
-    pass
+    def save(self, *args, **kwargs) -> None:
+        """
+        Overriding the default save method to inject a 'fake' OneToOne constraint on the 'program' field.
+
+        Raises:
+            IntegrityError: When there's already a LinkagesQuestion for the same program.
+        """
+        # In theory this could be done with the OneToOne relationship. However I'm unable to override that field or the Meta class.
+        if LinkagesQuestion.objects.filter(program=self.program).exists():
+            raise IntegrityError(
+                "UNIQUE constraint failed: epic_app_question.program_id"
+            )
+        return super().save(*args, **kwargs)
 
 
 # region Cross-Reference Tables
