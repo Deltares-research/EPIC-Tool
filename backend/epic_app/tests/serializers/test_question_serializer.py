@@ -15,7 +15,6 @@ def QuestionSerializerFixture(epic_test_db: pytest.fixture):
     pass
 
 
-
 @pytest.mark.django_db
 class TestQuestionSerializer:
     def test_question_serializer_shows_valid_data(self):
