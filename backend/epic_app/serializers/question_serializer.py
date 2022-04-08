@@ -25,7 +25,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         """
 
         model = Question
-        fields = "__all__"
+        fields = ("url", "id", "title", "program")
 
 
 class NationalFrameworkQuestionSerializer(serializers.ModelSerializer):

@@ -1,6 +1,8 @@
-from typing import Dict, OrderedDict, Tuple
+from typing import Callable
 
 import pytest
+from rest_framework.request import Request
+from rest_framework.test import APIRequestFactory
 
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
@@ -8,7 +10,6 @@ from epic_app.models.epic_questions import (
     NationalFrameworkQuestion,
     Question,
 )
-from epic_app.models.models import Program
 from epic_app.serializers.question_serializer import (
     EvolutionQuestionSerializer,
     LinkagesQuestionSerializer,
@@ -19,7 +20,9 @@ from epic_app.tests.epic_db_fixture import epic_test_db
 
 
 @pytest.fixture(autouse=True)
-def QuestionSerializerFixture(epic_test_db: pytest.fixture):
+def question_serializer_fixture(
+    epic_test_db: pytest.fixture,
+):
     """
     Dummy fixture just to load a default db from dummy_db.
 
@@ -29,18 +32,33 @@ def QuestionSerializerFixture(epic_test_db: pytest.fixture):
     pass
 
 
+def get_serializer():
+    factory = APIRequestFactory()
+    request = factory.get("/")
+
+    return {
+        "request": Request(request),
+    }
+
+
+serializer_context = get_serializer()
+
+
 @pytest.mark.django_db
 class TestQuestionSerializer:
     def test_given_valid_instances_when_to_representation_returns_expected_data(self):
         def validate_fields(dict_item: dict) -> bool:
-            valid_fields = ["title", "program", "id"]
-            return all(d_key in valid_fields for d_key in dict_item.keys())
+            valid_fields = ["url", "id", "title", "program"]
+            return valid_fields == list(dict_item.keys())
 
+        # Define context
         serialized_data = list(
-            QuestionSerializer(Question.objects.all(), many=True).data
+            QuestionSerializer(
+                Question.objects.all(), many=True, context=serializer_context
+            ).data
         )
 
-        assert len(serialized_data) == 4
+        assert len(serialized_data) == 5
         assert all(map(validate_fields, serialized_data))
 
 
@@ -48,8 +66,7 @@ class TestQuestionSerializer:
 class TestNationalFrameworkSerializer:
     def test_given_valid_instances_when_to_representation_returns_expected_data(self):
         def validate_fields(dict_item: dict) -> bool:
-            valid_fields = ["title", "program", "id", "description"]
-            return all(d_key in valid_fields for d_key in dict_item.keys())
+            return "description" in list(dict_item.keys())
 
         serialized_data = list(
             NationalFrameworkQuestionSerializer(
@@ -66,15 +83,12 @@ class TestEvolutionQuestionSerializer:
     def test_given_valid_instances_when_to_representation_returns_expected_data(self):
         def validate_fields(dict_item: dict) -> bool:
             valid_fields = [
-                "title",
-                "program",
-                "id",
                 "nascent_description",
                 "engaged_description",
                 "capable_description",
                 "effective_description",
             ]
-            return all(d_key in valid_fields for d_key in dict_item.keys())
+            return all(v_field in list(dict_item.keys()) for v_field in valid_fields)
 
         serialized_data = list(
             EvolutionQuestionSerializer(EvolutionQuestion.objects.all(), many=True).data
@@ -87,13 +101,8 @@ class TestEvolutionQuestionSerializer:
 @pytest.mark.django_db
 class TestLinkagesQuestionSerializer:
     def test_given_valid_instances_when_to_representation_returns_expected_data(self):
-        def validate_fields(dict_item: dict) -> bool:
-            valid_fields = ["title", "program", "id"]
-            return all(d_key in valid_fields for d_key in dict_item.keys())
-
         serialized_data = list(
             LinkagesQuestionSerializer(LinkagesQuestion.objects.all(), many=True).data
         )
 
         assert len(serialized_data) == 1
-        assert all(map(validate_fields, serialized_data))

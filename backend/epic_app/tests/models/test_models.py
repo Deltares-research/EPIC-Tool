@@ -178,8 +178,3 @@ class TestProgram:
             == f"There's already a Program with the name: {a_name}."
         )
         assert not epic_models.Program.objects.filter(name=name_case).exists()
-
-
-@pytest.mark.django_db
-class TestAnswer:
-    pass
