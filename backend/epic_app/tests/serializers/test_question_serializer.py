@@ -60,8 +60,8 @@ class TestQuestionSerializer:
             serialized_dict, nfq: bool, evq: bool, lkq: bool
         ) -> bool:
             assert isinstance(serialized_dict["nationalframeworkquestion"], dict) == nfq
-            assert isinstance(serialized_dict["nationalframeworkquestion"], dict) == evq
-            assert isinstance(serialized_dict["evolutionquestion"], dict) == lkq
+            assert isinstance(serialized_dict["evolutionquestion"], dict) == evq
+            assert isinstance(serialized_dict["linkagesquestion"], dict) == lkq
 
         valdiate_concrete_questions(serialized_data[0], True, False, False)
         valdiate_concrete_questions(serialized_data[1], True, False, False)
