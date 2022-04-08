@@ -133,18 +133,40 @@ class TestEvolutionQuestion:
 
 @pytest.mark.django_db
 class TestLinkagesQuestion:
+    def test_linkagesquestion_data(self):
+        # Define initial data.
+        lq_title = "Id adipisicing labore magna est sunt duis amet nostrud labore est aute ullamco."
+        lq_program: Program = Program.objects.all().last()
+
+        # Verify initial expectations
+        assert not LinkagesQuestion.objects.filter(
+            title=lq_title, program=lq_program
+        ).exists()
+
+        # Create new LinkagesQuestion
+        lq_created = LinkagesQuestion(title=lq_title, program=lq_program)
+        lq_created.save()
+
+        # Verify final expectations
+        assert LinkagesQuestion.objects.filter(
+            title=lq_title, program=lq_program
+        ).exists()
+        assert isinstance(lq_created, Question)
+
     def test_linkages_constrained_one_per_program(self):
         # Get one existing linkage question.
         l_question: LinkagesQuestion = LinkagesQuestion.objects.all().first()
         q_title = "Ad magna aliqua eiusmod sint est."
 
-        # Verify the titles are different.
+        # Verify initial expectations.
         assert q_title != l_question
 
+        # Run test
         with transaction.atomic():
             with pytest.raises(IntegrityError) as e_info:
                 LinkagesQuestion(title=q_title, program=l_question.program).save()
 
+        # Verify final expectations.
         assert (
             str(e_info.value)
             == "UNIQUE constraint failed: epic_app_question.program_id"
