@@ -81,7 +81,7 @@ def epic_test_db():
         title="Is this another National Framework question?",
         program=a_program,
         description="In ut ea ex labore in proident cupidatat elit laboris veniam.",
-    )
+    ).save()
     EvolutionQuestion(
         title="Is this an Evolution question?",
         program=a_program,

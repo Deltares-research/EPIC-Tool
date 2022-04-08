@@ -27,6 +27,10 @@ class Question(models.Model):
 
 
 class NationalFrameworkQuestion(Question):
+    """
+    Question of type Yes / No and Justify.
+    """
+
     description: str = models.TextField(null=False, blank=False)
 
 
@@ -38,6 +42,10 @@ class EvolutionChoiceType(models.TextChoices):
 
 
 class EvolutionQuestion(Question):
+    """
+    Question of type 'pick one' between four categories and Justify.
+    """
+
     # Single choice among four options
     nascent_description: str = models.TextField(
         null=False, blank=False, verbose_name=str(EvolutionChoiceType.NASCENT)
@@ -54,7 +62,10 @@ class EvolutionQuestion(Question):
 
 
 class LinkagesQuestion(Question):
-    # Up to 3 choices among all available programs in epic domain.
+    """
+    Question of multiple (max 3) choices between all programs registered in the database.
+    """
+
     def save(self, *args, **kwargs) -> None:
         """
         Overriding the default save method to inject a 'fake' OneToOne constraint on the 'program' field.

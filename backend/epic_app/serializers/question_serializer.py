@@ -1,6 +1,16 @@
+from __future__ import annotations
+
+from typing import Dict, OrderedDict
+
 from rest_framework import serializers
 
-from epic_app.models.epic_questions import Answer, Question
+from epic_app.models.epic_questions import (
+    Answer,
+    EvolutionQuestion,
+    LinkagesQuestion,
+    NationalFrameworkQuestion,
+    Question,
+)
 from epic_app.models.models import EpicUser
 
 
@@ -15,7 +25,25 @@ class QuestionSerializer(serializers.ModelSerializer):
         """
 
         model = Question
-        fields = ("url", "id", "description", "program")
+        fields = "__all__"
+
+
+class NationalFrameworkQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NationalFrameworkQuestion
+        fields = "__all__"
+
+
+class EvolutionQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EvolutionQuestion
+        fields = "__all__"
+
+
+class LinkagesQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LinkagesQuestion
+        fields = "__all__"
 
 
 class AnswerSerializer(serializers.ModelSerializer):
