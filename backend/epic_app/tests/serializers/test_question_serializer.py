@@ -47,10 +47,6 @@ serializer_context = get_serializer()
 @pytest.mark.django_db
 class TestQuestionSerializer:
     def test_given_valid_instances_when_to_representation_returns_expected_data(self):
-        def validate_fields(dict_item: dict) -> bool:
-            valid_fields = ["url", "id", "title", "program"]
-            return valid_fields == list(dict_item.keys())
-
         # Define context
         serialized_data = list(
             QuestionSerializer(
@@ -59,7 +55,19 @@ class TestQuestionSerializer:
         )
 
         assert len(serialized_data) == 5
-        assert all(map(validate_fields, serialized_data))
+
+        def valdiate_concrete_questions(
+            serialized_dict, nfq: bool, evq: bool, lkq: bool
+        ) -> bool:
+            assert isinstance(serialized_dict["nationalframeworkquestion"], dict) == nfq
+            assert isinstance(serialized_dict["nationalframeworkquestion"], dict) == evq
+            assert isinstance(serialized_dict["evolutionquestion"], dict) == lkq
+
+        valdiate_concrete_questions(serialized_data[0], True, False, False)
+        valdiate_concrete_questions(serialized_data[1], True, False, False)
+        valdiate_concrete_questions(serialized_data[2], False, True, False)
+        valdiate_concrete_questions(serialized_data[3], False, True, False)
+        valdiate_concrete_questions(serialized_data[4], False, False, True)
 
 
 @pytest.mark.django_db
@@ -70,7 +78,9 @@ class TestNationalFrameworkSerializer:
 
         serialized_data = list(
             NationalFrameworkQuestionSerializer(
-                NationalFrameworkQuestion.objects.all(), many=True
+                NationalFrameworkQuestion.objects.all(),
+                many=True,
+                context=serializer_context,
             ).data
         )
 
@@ -91,7 +101,9 @@ class TestEvolutionQuestionSerializer:
             return all(v_field in list(dict_item.keys()) for v_field in valid_fields)
 
         serialized_data = list(
-            EvolutionQuestionSerializer(EvolutionQuestion.objects.all(), many=True).data
+            EvolutionQuestionSerializer(
+                EvolutionQuestion.objects.all(), many=True, context=serializer_context
+            ).data
         )
 
         assert len(serialized_data) == 2
@@ -102,7 +114,9 @@ class TestEvolutionQuestionSerializer:
 class TestLinkagesQuestionSerializer:
     def test_given_valid_instances_when_to_representation_returns_expected_data(self):
         serialized_data = list(
-            LinkagesQuestionSerializer(LinkagesQuestion.objects.all(), many=True).data
+            LinkagesQuestionSerializer(
+                LinkagesQuestion.objects.all(), many=True, context=serializer_context
+            ).data
         )
 
         assert len(serialized_data) == 1

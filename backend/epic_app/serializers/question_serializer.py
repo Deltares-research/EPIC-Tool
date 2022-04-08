@@ -14,20 +14,6 @@ from epic_app.models.epic_questions import (
 from epic_app.models.models import EpicUser
 
 
-class QuestionSerializer(serializers.ModelSerializer):
-    """
-    Serializer for 'Question'
-    """
-
-    class Meta:
-        """
-        Overriden meta class for serializing purposes.
-        """
-
-        model = Question
-        fields = ("url", "id", "title", "program")
-
-
 class NationalFrameworkQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = NationalFrameworkQuestion
@@ -37,13 +23,44 @@ class NationalFrameworkQuestionSerializer(serializers.ModelSerializer):
 class EvolutionQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvolutionQuestion
-        fields = "__all__"
+        fields = (
+            "nascent_description",
+            "engaged_description",
+            "capable_description",
+            "effective_description",
+        )
 
 
 class LinkagesQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = LinkagesQuestion
         fields = "__all__"
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for 'Question'
+    """
+
+    nationalframeworkquestion = NationalFrameworkQuestionSerializer(read_only=True)
+    evolutionquestion = EvolutionQuestionSerializer(read_only=True)
+    linkagesquestion = LinkagesQuestionSerializer(read_only=True)
+
+    class Meta:
+        """
+        Overriden meta class for serializing purposes.
+        """
+
+        model = Question
+        fields = (
+            "url",
+            "id",
+            "title",
+            "program",
+            "nationalframeworkquestion",
+            "evolutionquestion",
+            "linkagesquestion",
+        )
 
 
 class AnswerSerializer(serializers.ModelSerializer):
