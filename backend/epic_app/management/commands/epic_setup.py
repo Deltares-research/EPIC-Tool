@@ -45,5 +45,3 @@ class Command(BaseCommand):
             self._migrate_db()
         except Exception as e_info:
             self.stdout.write(self.style.ERROR(f"Error setting up EPIC. Detailed info: {str(e_info)}"))
-        # return super().handle(*args, **options)
-
