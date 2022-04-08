@@ -43,19 +43,12 @@ Installing django is pretty simple. For the next steps we assume poetry has been
     >> Path('.django_secrets').write_text(secrets.token_hex(16))
     ```
     > A new file is now generated containing your unique token key expected by /epic_core/settings.py. In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
-* Migrate the database to ensure you have the correct scheme
+* Run our custom command to create the database and add an admin user:
     ```
-    python manage.py migrate
+    python manage.py epic_setup
     ```
-* Run the Django server with the defined settings
-    ```
-    python manage.py runserver
-    ```
+    > The command line will prompt you to add the username, e-mail and password for your admin user.
     > An output in the command line will show you where the server is deployed. By default you should be able to check its functioning here: http://127.0.0.1:8000/ 
-* During this process, you might need to create your own admin account, simply run the following command:
-    ```
-    python manage.py createsuperuser
-    ```
 
 ## Creating new models.
 During development it is naturall to create new tables or define new columns on a database entry. The most important is to manage the Django migrations with the following steps:
