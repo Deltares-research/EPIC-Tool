@@ -3,65 +3,7 @@ from django.contrib.auth.models import User
 from django.forms import ValidationError
 
 import epic_app.models.models as epic_models
-
-
-@pytest.fixture(autouse=True)
-@pytest.mark.django_db
-def default_test_db():
-    # Areas
-    alpha_area = epic_models.Area(name="alpha")
-    alpha_area.save()
-    beta_area = epic_models.Area(name="beta")
-    beta_area.save()
-
-    # Agency
-    tia_agency = epic_models.Agency(name="T.I.A.")
-    tia_agency.save()
-    cia_agency = epic_models.Agency(name="C.I.A.")
-    cia_agency.save()
-    mi6_agency = epic_models.Agency(name="M.I.6")
-    mi6_agency.save()
-    rws_agency = epic_models.Agency(name="R.W.S.")
-    rws_agency.save()
-
-    # Groups
-    first_group = epic_models.Group(name="first", area=alpha_area)
-    first_group.save()
-    second_group = epic_models.Group(name="second", area=alpha_area)
-    second_group.save()
-    third_group = epic_models.Group(name="third", area=beta_area)
-    third_group.save()
-
-    # Programs
-    a_program = epic_models.Program(
-        name="a", group=first_group, description="May the Force be with you"
-    )
-    a_program.save()
-    b_program = epic_models.Program(
-        name="b",
-        group=first_group,
-        description="You're all clear, kid. Now blow this thing and go home!",
-    )
-    b_program.save()
-    c_program = epic_models.Program(
-        name="c", group=first_group, description="Do. Or do not. There is no try."
-    )
-    c_program.save()
-    d_program = epic_models.Program(
-        name="d",
-        group=second_group,
-        description="Train yourself to let go of everything you fear to lose.",
-    )
-    d_program.save()
-    e_program = epic_models.Program(
-        name="e", group=third_group, description="You will find only what you bring in."
-    )
-    e_program.save()
-    a_program.agencies.add(cia_agency, tia_agency)
-    b_program.agencies.add(cia_agency, tia_agency)
-    c_program.agencies.add(cia_agency, rws_agency)
-    d_program.agencies.add(mi6_agency, cia_agency)
-    e_program.agencies.add(rws_agency, mi6_agency)
+from epic_app.tests.models.dummy_db import epic_test_db
 
 
 @pytest.mark.django_db
@@ -76,7 +18,7 @@ class TestEpicUser:
 
 @pytest.mark.django_db
 class TestArea:
-    def test_area_get_groups(self):
+    def test_area_get_groups(self, epic_test_db: pytest.fixture):
         alpha_area: epic_models.Area = epic_models.Area.objects.filter(
             name="alpha"
         ).first()
@@ -87,7 +29,7 @@ class TestArea:
         assert "second" in group_names
         assert str(alpha_area) == "alpha"
 
-    def test_delete_area_deletes_in_cascade(self):
+    def test_delete_area_deletes_in_cascade(self, epic_test_db: pytest.fixture):
         alpha_area: epic_models.Area = epic_models.Area.objects.filter(
             name="alpha"
         ).first()
@@ -110,7 +52,7 @@ class TestArea:
 
 @pytest.mark.django_db
 class TestAgency:
-    def test_agency_get_programs(self):
+    def test_agency_get_programs(self, epic_test_db: pytest.fixture):
         tia_agency: epic_models.Agency = epic_models.Agency.objects.filter(
             name="T.I.A."
         ).first()
@@ -121,7 +63,9 @@ class TestAgency:
         assert "b" in program_names
         assert str(tia_agency) == "T.I.A."
 
-    def test_delete_agency_does_not_delete_in_cascade(self):
+    def test_delete_agency_does_not_delete_in_cascade(
+        self, epic_test_db: pytest.fixture
+    ):
         tia_agency: epic_models.Agency = epic_models.Agency.objects.filter(
             name="T.I.A."
         ).first()
@@ -140,7 +84,7 @@ class TestAgency:
 
 @pytest.mark.django_db
 class TestGroup:
-    def test_group_get_programs(self):
+    def test_group_get_programs(self, epic_test_db: pytest.fixture):
         second_group: epic_models.Group = epic_models.Group.objects.filter(
             name="second"
         ).first()
@@ -151,7 +95,7 @@ class TestGroup:
         assert "d" == second_group.get_programs()[0].name
         assert str(second_group) == "second"
 
-    def test_delete_group_deletes_in_cascade(self):
+    def test_delete_group_deletes_in_cascade(self, epic_test_db: pytest.fixture):
         second_group: epic_models.Group = epic_models.Group.objects.filter(
             name="second"
         ).first()
@@ -168,7 +112,7 @@ class TestGroup:
 
 @pytest.mark.django_db
 class TestProgram:
-    def test_program_data(self):
+    def test_program_data(self, epic_test_db: pytest.fixture):
         program: epic_models.Program = epic_models.Program.objects.filter(
             name="e"
         ).first()
@@ -182,7 +126,9 @@ class TestProgram:
         assert program.group.name == "third"
         assert program.description == "You will find only what you bring in."
 
-    def test_program_delete_does_not_delete_in_cascade(self):
+    def test_program_delete_does_not_delete_in_cascade(
+        self, epic_test_db: pytest.fixture
+    ):
         program: epic_models.Program = epic_models.Program.objects.filter(
             name="e"
         ).first()
@@ -202,7 +148,9 @@ class TestProgram:
             pytest.param("A SIMPLE CASE", id="UPPERCASE"),
         ],
     )
-    def test_program_unique_name_attribute(self, name_case: str):
+    def test_program_unique_name_attribute(
+        self, name_case: str, epic_test_db: pytest.fixture
+    ):
         # Create one new program
         a_group: epic_models.Group = epic_models.Group.objects.all().first()
         a_description = "Lorem ipsum"
