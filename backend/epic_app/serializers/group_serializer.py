@@ -1,6 +1,7 @@
+from rest_framework import serializers
+
 from epic_app.models.models import Group
 from epic_app.serializers.program_serializer import SimpleProgramSerializer
-from rest_framework import serializers
 
 
 class GroupSerializer(serializers.ModelSerializer):
