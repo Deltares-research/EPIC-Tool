@@ -6,14 +6,8 @@
     <br>
     <v-dialog v-model="showDialog" width="500">
       <v-card>
-        <v-card-title class="text-h5 grey lighten-2">{{ programDescriptionTitle }}</v-card-title>
-        <v-card-text>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-          labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-          laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-          voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat
-          non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </v-card-text>
+        <v-card-title class="text-h5 grey lighten-2">{{ title }}</v-card-title>
+        <v-card-text>{{ description }}</v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -21,6 +15,15 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-row>
+      <v-col md="12" :key="updateCheckBox">
+        <v-btn :color="isAgencySelected(agency)?'red lighten-5':'blue-grey lighten-4'" small class="ma-2"
+               v-for="agency in agencies" :key="agency.id" elevation="3"
+               @click="selectProgramsForAgency(agency)">{{ agency.name }}
+        </v-btn>
+      </v-col>
+    </v-row>
+    <br>
     <v-card :elevation="2" color="blue-grey lighten-4" v-for="area in this.$store.state.areas" :key="area.id">
       <v-container fluid class="fill-height">
         <v-row no-gutters v-for="(group,index) in area.groups" :key="group.id">
@@ -41,10 +44,10 @@
             <v-list-item-group v-if="isGroupSelected(group.id)">
               <v-list-item dense v-for="(program) in group.programs" :key="program.id">
                 <v-list-item-action>
-                  <v-checkbox :input-value="getCheckBoxValue(program.id)"
+                  <v-checkbox :key="updateCheckBox" :input-value="getCheckBoxValue(program.id)"
                               @click="selectProgram(program.id)"></v-checkbox>
                 </v-list-item-action>
-                <v-btn color="black" x-small text @click="showProgramDescription(program.name)">{{ program.name }}
+                <v-btn color="black" x-small text @click="showProgramDescription(program)">{{ program.name }}
                 </v-btn>
               </v-list-item>
             </v-list-item-group>
@@ -84,10 +87,6 @@
 export default {
   name: 'SelectProgram',
   async mounted() {
-
-    if (this.$store.state.initialized) return;
-    this.$store.commit("init");
-
     const token = this.$store.state.token;
     const options = {
       method: 'GET',
@@ -98,36 +97,56 @@ export default {
         'Authorization': 'Token ' + token,
       },
     }
+    response = await fetch('http://localhost:8000/api/agency/?format=json', options);
+    this.agencies = await response.json();
+    this.agencies.sort((a, b) => a.id - b.id);
+
+    if (this.$store.state.initialized) return;
     let response = await fetch('http://localhost:8000/api/area/?format=json', options);
     let areas = await response.json();
     this.$store.commit("updateAreas", areas);
-
+    this.$store.commit("init");
   },
   data() {
     return {
-      programSelection: {},
+      updateCheckBox: 0,
+      agencies: [],
+      groupSelection: new Set(),
       showDialog: false,
-      programDescriptionTitle: "",
+      title: "",
+      description: ""
     }
   },
   methods: {
+    isAgencySelected: function (agency) {
+      return this.$store.state.selectedAgencies.has(agency.id);
+    },
+    selectProgramsForAgency: function (agency) {
+      this.$store.commit("toggleAgencySelection", agency);
+      this.updateCheckBox++;
+    },
     getCheckBoxValue: function (programId) {
-      let selected = this.$store.state.programSelection[programId];
-      return selected;
+      return this.$store.state.programSelection.has(programId);
     },
     selectProgram: function (programId) {
-      this.$store.commit("selectProgram", programId);
+      this.$store.commit("toggleSelection", programId);
     },
     isGroupSelected: function (groupId) {
-      return this.programSelection[groupId];
+      return this.groupSelection.has(groupId);
     },
     showGroup: function (groupId) {
-      const currentSelection = this.programSelection[groupId];
-      this.$set(this.programSelection, groupId, !currentSelection)
+      const selected = this.groupSelection.has(groupId);
+      if (selected) {
+        this.groupSelection.delete(groupId);
+      } else {
+        this.groupSelection.add(groupId);
+      }
+      this.updateCheckBox++;
     },
     showProgramDescription: function (program) {
       this.showDialog = true;
-      this.programDescriptionTitle = program;
+      this.title = program.name;
+      this.description = program.description;
     }
   },
   components: {}

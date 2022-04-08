@@ -37,7 +37,7 @@
             <v-row>
               <v-col md="6">
               </v-col>
-              <v-col md="6"  class="text-right">
+              <v-col md="6" class="text-right">
                 <v-btn text color="primary" @click="e1 = 2">National framework
                   <v-icon>mdi-step-forward</v-icon>
                 </v-btn>
@@ -102,7 +102,7 @@
                 Key agency actions
               </v-btn>
             </v-col>
-            <v-col md="6"  class="text-right">
+            <v-col md="6" class="text-right">
               <v-btn text color="primary" @click="e1 = 6">References
                 <v-icon>mdi-step-forward</v-icon>
               </v-btn>
@@ -230,7 +230,7 @@ export default {
         if (area.id !== areaId) continue;
         for (const group of area.groups) {
           for (const program of group.programs) {
-            if (!this.$store.state.programSelection[program.id]) continue
+            if (!this.$store.state.programSelection.has(program.id)) continue
             programs.push(program);
           }
         }
