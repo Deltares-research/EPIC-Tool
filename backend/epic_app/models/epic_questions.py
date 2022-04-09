@@ -21,7 +21,7 @@ class Question(models.Model):
         return self.title[0:15]
 
     @abc.abstractmethod
-    def get_answer(self):
+    def get_answer(self) -> Answer:
         raise NotImplementedError
 
 
@@ -116,16 +116,16 @@ class YesNoAnswer(Answer):
         NO = "N"
 
     short_answer: str = models.CharField(
-        YesNoAnswerType.choices, max_length=50, blank=False
+        YesNoAnswerType.choices, max_length=50, blank=True
     )
-    justify_answer: str = models.TextField(blank=False)
+    justify_answer: str = models.TextField(blank=True)
 
 
 class SingleChoiceAnswer(Answer):
     selected_choice: str = models.CharField(
-        EvolutionChoiceType.choices, max_length=50, blank=False
+        EvolutionChoiceType.choices, max_length=50, blank=True
     )
-    justify_answer: str = models.TextField(blank=False)
+    justify_answer: str = models.TextField(blank=True)
 
     def get_selected_choice_text(self) -> str:
         return next(
@@ -136,8 +136,8 @@ class SingleChoiceAnswer(Answer):
 
 
 class MultipleChoiceAnswer(Answer):
-    selected_programs = models.ManyToManyRel(
-        to=base_models.Program, blank=False, related_name="selected_answers"
+    selected_programs = models.ManyToManyField(
+        to=base_models.Program, blank=True, related_name="selected_answers"
     )
 
 
