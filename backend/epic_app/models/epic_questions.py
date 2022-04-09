@@ -38,6 +38,9 @@ class NationalFrameworkQuestion(Question):
             return YesNoAnswer.objects.create(user=q_user, question=self)
         return YesNoAnswer.objects.filter(user=q_user, question=self).first()
 
+class YesNoAnswerType(models.TextChoices):
+    YES = "Y"
+    NO = "N"
 
 class EvolutionChoiceType(models.TextChoices):
     NASCENT = "Nascent"
@@ -120,17 +123,6 @@ class Answer(models.Model):
 
 
 class YesNoAnswer(Answer):
-    class YesNoAnswerType(models.TextChoices):
-        """
-        Defines the Yes / No answer types.
-
-        Args:
-            models (models.TextChocies): Derives directly from the base class TextChoices.
-        """
-
-        YES = "Y"
-        NO = "N"
-
     short_answer: str = models.CharField(
         YesNoAnswerType.choices, max_length=50, blank=True
     )

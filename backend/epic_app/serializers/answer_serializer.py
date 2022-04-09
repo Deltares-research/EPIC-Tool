@@ -24,7 +24,7 @@ class SingleChoiceAnswerSerializer(serializers.ModelSerializer):
 class MultipleChoiceAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = MultipleChoiceAnswer
-        fields = "selected_programs"
+        fields = ("selected_programs",)
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -42,7 +42,15 @@ class AnswerSerializer(serializers.ModelSerializer):
         """
 
         model = Answer
-        fields = ("url", "id", "user", "question")
+        fields = (
+            "url",
+            "id",
+            "user",
+            "question",
+            "yesnoanswer",
+            "singlechoiceanswer",
+            "multiplechoiceanswer",
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

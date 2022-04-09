@@ -54,18 +54,18 @@ class TestQuestionSerializer:
 
         assert len(serialized_data) == 5
 
-        def valdiate_concrete_questions(
+        def validate_concrete_questions(
             serialized_dict, nfq: bool, evq: bool, lkq: bool
         ) -> bool:
             assert isinstance(serialized_dict["nationalframeworkquestion"], dict) == nfq
             assert isinstance(serialized_dict["evolutionquestion"], dict) == evq
             assert isinstance(serialized_dict["linkagesquestion"], dict) == lkq
 
-        valdiate_concrete_questions(serialized_data[0], True, False, False)
-        valdiate_concrete_questions(serialized_data[1], True, False, False)
-        valdiate_concrete_questions(serialized_data[2], False, True, False)
-        valdiate_concrete_questions(serialized_data[3], False, True, False)
-        valdiate_concrete_questions(serialized_data[4], False, False, True)
+        validate_concrete_questions(serialized_data[0], True, False, False)
+        validate_concrete_questions(serialized_data[1], True, False, False)
+        validate_concrete_questions(serialized_data[2], False, True, False)
+        validate_concrete_questions(serialized_data[3], False, True, False)
+        validate_concrete_questions(serialized_data[4], False, False, True)
 
 
 @pytest.mark.django_db
