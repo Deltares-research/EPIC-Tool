@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 
+import questionary
 from django.db import IntegrityError, models
 
 from epic_app.models import models as base_models
@@ -21,7 +22,7 @@ class Question(models.Model):
         return self.title[0:15]
 
     @abc.abstractmethod
-    def get_answer(self) -> Answer:
+    def get_answer(self, q_user: base_models.EpicUser) -> Answer:
         raise NotImplementedError
 
 
@@ -31,6 +32,11 @@ class NationalFrameworkQuestion(Question):
     """
 
     description: str = models.TextField(null=False, blank=False)
+
+    def get_answer(self, q_user: base_models.EpicUser) -> YesNoAnswer:
+        if not YesNoAnswer.objects.filter(user=q_user, question=self).exists():
+            return YesNoAnswer.objects.create(user=q_user, question=self)
+        return YesNoAnswer.objects.filter(user=q_user, question=self).first()
 
 
 class EvolutionChoiceType(models.TextChoices):
@@ -59,6 +65,11 @@ class EvolutionQuestion(Question):
         null=False, blank=False, verbose_name=str(EvolutionChoiceType.EFFECTIVE)
     )
 
+    def get_answer(self, q_user: base_models.EpicUser) -> SingleChoiceAnswer:
+        if not SingleChoiceAnswer.objects.filter(user=q_user, question=self).exists():
+            return SingleChoiceAnswer.objects.create(user=q_user, question=self)
+        return SingleChoiceAnswer.objects.filter(user=q_user, question=self).first()
+
 
 class LinkagesQuestion(Question):
     """
@@ -78,6 +89,11 @@ class LinkagesQuestion(Question):
                 "UNIQUE constraint failed: epic_app_question.program_id"
             )
         return super().save(*args, **kwargs)
+
+    def get_answer(self, q_user: base_models.EpicUser) -> MultipleChoiceAnswer:
+        if not MultipleChoiceAnswer.objects.filter(user=q_user, question=self).exists():
+            return MultipleChoiceAnswer.objects.create(user=q_user, question=self)
+        return MultipleChoiceAnswer.objects.filter(user=q_user, question=self).first()
 
 
 # region Cross-Reference Tables

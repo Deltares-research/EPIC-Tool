@@ -5,7 +5,6 @@ from epic_app.models.epic_questions import (
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
-    Question,
 )
 
 
@@ -16,6 +15,9 @@ def epic_test_db():
     Pytest automaticall sets and tears down this data for each test.
     (Or at least it should)
     """
+    # Epic users (no admins)
+    epic_models.EpicUser.objects.create(organization="DummyOrg")
+
     # Areas
     alpha_area = epic_models.Area(name="alpha")
     alpha_area.save()
