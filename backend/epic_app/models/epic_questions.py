@@ -38,9 +38,11 @@ class NationalFrameworkQuestion(Question):
             return YesNoAnswer.objects.create(user=q_user, question=self)
         return YesNoAnswer.objects.filter(user=q_user, question=self).first()
 
+
 class YesNoAnswerType(models.TextChoices):
     YES = "Y"
     NO = "N"
+
 
 class EvolutionChoiceType(models.TextChoices):
     NASCENT = "Nascent"
