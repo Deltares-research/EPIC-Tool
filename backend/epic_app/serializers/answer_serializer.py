@@ -56,7 +56,7 @@ class AnswerSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
         def get_user_query_set():
-            current_user = self.context["request"].user
+            current_user: EpicUser = self.context["request"].user
             if current_user.is_staff or current_user.is_superuser:
                 return EpicUser.objects.all()
             else:
