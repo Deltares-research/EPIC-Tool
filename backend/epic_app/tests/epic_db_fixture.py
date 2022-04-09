@@ -16,7 +16,9 @@ def epic_test_db():
     (Or at least it should)
     """
     # Epic users (no admins)
-    epic_models.EpicUser.objects.create(organization="DummyOrg")
+    epic_models.EpicUser.objects.create(
+        username="Anakin", organization="Gallactic Empire"
+    )
 
     # Areas
     alpha_area = epic_models.Area(name="alpha")

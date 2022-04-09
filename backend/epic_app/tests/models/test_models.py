@@ -20,8 +20,9 @@ def EpicModelsFixture(epic_test_db: pytest.fixture):
 @pytest.mark.django_db
 class TestEpicUser:
     def test_init_epicuser(self):
-        created_user = epic_models.EpicUser(organization="random")
-        created_user.save()
+        created_user = epic_models.EpicUser.objects.create(
+            username="Luke", organization="Rebel Alliance"
+        )
         assert isinstance(created_user, epic_models.EpicUser)
         assert isinstance(created_user, User)
         assert created_user.is_superuser is False
