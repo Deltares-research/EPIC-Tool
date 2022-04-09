@@ -96,6 +96,14 @@ class Answer(models.Model):
         to=Question, on_delete=models.CASCADE, related_name="question_answers"
     )
 
+    class Meta:
+        unique_together = ["user", "question"]
+
+    def __str__(self) -> str:
+        return f"[{self.user}] {self.question}"
+
+
+class YesNoAnswer(Answer):
     class YesNoAnswerType(models.TextChoices):
         """
         Defines the Yes / No answer types.
@@ -108,12 +116,29 @@ class Answer(models.Model):
         NO = "N"
 
     short_answer: str = models.CharField(
-        YesNoAnswerType.choices, max_length=50, blank=True
+        YesNoAnswerType.choices, max_length=50, blank=False
     )
-    long_answer: str = models.TextField(blank=True)
+    justify_answer: str = models.TextField(blank=False)
 
-    def __str__(self) -> str:
-        return f"[{self.user}] {self.question}: {self.short_answer}"
+
+class SingleChoiceAnswer(Answer):
+    selected_choice: str = models.CharField(
+        EvolutionChoiceType.choices, max_length=50, blank=False
+    )
+    justify_answer: str = models.TextField(blank=False)
+
+    def get_selected_choice_text(self) -> str:
+        return next(
+            c_field
+            for c_field in self._meta.get_fields()
+            if c_field.verbose_name.lower() == self.selected_choice.lower()
+        )
+
+
+class MultipleChoiceAnswer(Answer):
+    selected_programs = models.ManyToManyRel(
+        to=base_models.Program, blank=False, related_name="selected_answers"
+    )
 
 
 # endregion
