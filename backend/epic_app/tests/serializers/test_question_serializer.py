@@ -1,5 +1,3 @@
-from typing import Callable
-
 import pytest
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
