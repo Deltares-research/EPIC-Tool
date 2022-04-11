@@ -1,5 +1,7 @@
 # Create your views here.
 from rest_framework import permissions, viewsets
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from epic_app.models.epic_questions import Answer, Question
 from epic_app.models.epic_user import EpicUser
@@ -25,7 +27,17 @@ class EpicUserViewSet(viewsets.ModelViewSet):
 
     queryset = EpicUser.objects.all().order_by("username")
     serializer_class = EpicUserSerializer
-    permission_classes = [permissions.DjangoModelPermissions]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            queryset = EpicUser.objects.all().order_by("username")
+        else:
+            queryset = EpicUser.objects.filter(id=self.request.user.id)
+        serializer = EpicUserSerializer(
+            queryset, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
 
 
 class AreaViewSet(viewsets.ReadOnlyModelViewSet):

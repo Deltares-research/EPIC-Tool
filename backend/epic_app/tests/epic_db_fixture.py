@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import User
 
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
@@ -16,6 +17,16 @@ def epic_test_db():
     Pytest automaticall sets and tears down this data for each test.
     (Or at least it should)
     """
+    admin_user = User(
+        username="admin",
+        email="admin@testdb.com",
+        first_name="Star",
+        last_name="Lord",
+    )
+    admin_user.set_password("admin")
+    admin_user.is_superuser = True
+    admin_user.is_staff = True
+    admin_user.save()
     # Epic users (no admins)
     def set_epic_user(username: str, organization: str) -> EpicUser:
         u_created = EpicUser(username=username, organization=organization)
