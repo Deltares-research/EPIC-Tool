@@ -1,11 +1,12 @@
 import pytest
 
-import epic_app.models.models as epic_models
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
 )
+from epic_app.models.epic_user import EpicUser
+from epic_app.models.models import Agency, Area, Group, Program
 
 
 @pytest.fixture(autouse=False)
@@ -16,59 +17,43 @@ def epic_test_db():
     (Or at least it should)
     """
     # Epic users (no admins)
-    epic_models.EpicUser.objects.create(
-        username="Anakin", organization="Gallactic Empire"
-    )
+    EpicUser.objects.create(username="Anakin", organization="Gallactic Empire")
 
     # Areas
-    alpha_area = epic_models.Area(name="alpha")
-    alpha_area.save()
-    beta_area = epic_models.Area(name="beta")
-    beta_area.save()
+    alpha_area = Area.objects.create(name="alpha")
+    beta_area = Area.objects.create(name="beta")
 
     # Agency
-    tia_agency = epic_models.Agency(name="T.I.A.")
-    tia_agency.save()
-    cia_agency = epic_models.Agency(name="C.I.A.")
-    cia_agency.save()
-    mi6_agency = epic_models.Agency(name="M.I.6")
-    mi6_agency.save()
-    rws_agency = epic_models.Agency(name="R.W.S.")
-    rws_agency.save()
+    tia_agency = Agency.objects.create(name="T.I.A.")
+    cia_agency = Agency.objects.create(name="C.I.A.")
+    mi6_agency = Agency.objects.create(name="M.I.6")
+    rws_agency = Agency.objects.create(name="R.W.S.")
 
     # Groups
-    first_group = epic_models.Group(name="first", area=alpha_area)
-    first_group.save()
-    second_group = epic_models.Group(name="second", area=alpha_area)
-    second_group.save()
-    third_group = epic_models.Group(name="third", area=beta_area)
-    third_group.save()
+    first_group = Group.objects.create(name="first", area=alpha_area)
+    second_group = Group.objects.create(name="second", area=alpha_area)
+    third_group = Group.objects.create(name="third", area=beta_area)
 
     # Programs
-    a_program = epic_models.Program(
+    a_program = Program.objects.create(
         name="a", group=first_group, description="May the Force be with you"
     )
-    a_program.save()
-    b_program = epic_models.Program(
+    b_program = Program.objects.create(
         name="b",
         group=first_group,
         description="You're all clear, kid. Now blow this thing and go home!",
     )
-    b_program.save()
-    c_program = epic_models.Program(
+    c_program = Program.objects.create(
         name="c", group=first_group, description="Do. Or do not. There is no try."
     )
-    c_program.save()
-    d_program = epic_models.Program(
+    d_program = Program.objects.create(
         name="d",
         group=second_group,
         description="Train yourself to let go of everything you fear to lose.",
     )
-    d_program.save()
-    e_program = epic_models.Program(
+    e_program = Program.objects.create(
         name="e", group=third_group, description="You will find only what you bring in."
     )
-    e_program.save()
     a_program.agencies.add(cia_agency, tia_agency)
     b_program.agencies.add(cia_agency, tia_agency)
     c_program.agencies.add(cia_agency, rws_agency)
@@ -76,30 +61,32 @@ def epic_test_db():
     e_program.agencies.add(rws_agency, mi6_agency)
 
     # Add questions to program a (for instance).
-    NationalFrameworkQuestion(
+    NationalFrameworkQuestion.objects.create(
         title="Is this a National Framework question?",
         program=a_program,
         description="Commodo sint pariatur minim ea non nisi officia magna mollit officia.",
-    ).save()
-    NationalFrameworkQuestion(
+    )
+    NationalFrameworkQuestion.objects.create(
         title="Is this another National Framework question?",
         program=a_program,
         description="In ut ea ex labore in proident cupidatat elit laboris veniam.",
-    ).save()
-    EvolutionQuestion(
+    )
+    EvolutionQuestion.objects.create(
         title="Is this an Evolution question?",
         program=a_program,
         nascent_description="Incididunt sunt sunt in commodo culpa cupidatat.",
         engaged_description="Cupidatat labore nulla irure consectetur aliquip cillum labore Lorem amet enim est laboris aliqua tempor.",
         capable_description="In do eu anim occaecat ad ut sit eiusmod magna cillum.",
         effective_description="Ipsum proident aliqua elit anim sit fugiat mollit amet.",
-    ).save()
-    EvolutionQuestion(
+    )
+    EvolutionQuestion.objects.create(
         title="Is this yet another Evolution question?",
         program=a_program,
         nascent_description="Esse occaecat cillum duis amet anim laboris labore magna ipsum.",
         engaged_description="Fugiat nulla culpa cillum esse consequat id irure laboris adipisicing esse veniam anim.",
         capable_description="Non officia eu ut enim veniam nulla nostrud in laborum sit eiusmod qui id.",
         effective_description="Velit aliqua laborum cillum ea fugiat mollit deserunt incididunt veniam cupidatat aute Lorem ea.",
-    ).save()
-    LinkagesQuestion(title="Finally a linkage question?", program=a_program).save()
+    )
+    LinkagesQuestion.objects.create(
+        title="Finally a linkage question?", program=a_program
+    )
