@@ -99,6 +99,7 @@ class Command(BaseCommand):
             # Use the same username but with lowercase (it's a test!)
             c_user.set_password(user_name.lower())
             c_user.save()
+
         create_user("Zelda", "Nintendo")
         create_user("Ganon", "Nintendo")
         create_user("Luke", "Rebel Alliance")
