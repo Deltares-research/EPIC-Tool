@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import abc
 
-import questionary
 from django.db import IntegrityError, models
 
 from epic_app.models import models as base_models
+from epic_app.models.epic_user import EpicUser
 
 
 class Question(models.Model):
@@ -22,7 +22,7 @@ class Question(models.Model):
         return self.title[0:15]
 
     @abc.abstractmethod
-    def get_answer(self, q_user: base_models.EpicUser) -> Answer:
+    def get_answer(self, q_user: EpicUser) -> Answer:
         raise NotImplementedError
 
 
@@ -33,7 +33,7 @@ class NationalFrameworkQuestion(Question):
 
     description: str = models.TextField(null=False, blank=False)
 
-    def get_answer(self, q_user: base_models.EpicUser) -> YesNoAnswer:
+    def get_answer(self, q_user: EpicUser) -> YesNoAnswer:
         if not YesNoAnswer.objects.filter(user=q_user, question=self).exists():
             return YesNoAnswer.objects.create(user=q_user, question=self)
         return YesNoAnswer.objects.filter(user=q_user, question=self).first()
@@ -70,7 +70,7 @@ class EvolutionQuestion(Question):
         null=False, blank=False, verbose_name=str(EvolutionChoiceType.EFFECTIVE)
     )
 
-    def get_answer(self, q_user: base_models.EpicUser) -> SingleChoiceAnswer:
+    def get_answer(self, q_user: EpicUser) -> SingleChoiceAnswer:
         if not SingleChoiceAnswer.objects.filter(user=q_user, question=self).exists():
             return SingleChoiceAnswer.objects.create(user=q_user, question=self)
         return SingleChoiceAnswer.objects.filter(user=q_user, question=self).first()
@@ -95,7 +95,7 @@ class LinkagesQuestion(Question):
             )
         return super().save(*args, **kwargs)
 
-    def get_answer(self, q_user: base_models.EpicUser) -> MultipleChoiceAnswer:
+    def get_answer(self, q_user: EpicUser) -> MultipleChoiceAnswer:
         if not MultipleChoiceAnswer.objects.filter(user=q_user, question=self).exists():
             return MultipleChoiceAnswer.objects.create(user=q_user, question=self)
         return MultipleChoiceAnswer.objects.filter(user=q_user, question=self).first()
@@ -111,7 +111,7 @@ class Answer(models.Model):
     """
 
     user = models.ForeignKey(
-        to=base_models.EpicUser, on_delete=models.CASCADE, related_name="user_answers"
+        to=EpicUser, on_delete=models.CASCADE, related_name="user_answers"
     )
     question = models.ForeignKey(
         to=Question, on_delete=models.CASCADE, related_name="question_answers"

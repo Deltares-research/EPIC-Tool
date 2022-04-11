@@ -9,12 +9,12 @@ from epic_app.models.epic_questions import (
     LinkagesQuestion,
     MultipleChoiceAnswer,
     NationalFrameworkQuestion,
-    Question,
     SingleChoiceAnswer,
     YesNoAnswer,
     YesNoAnswerType,
 )
-from epic_app.models.models import EpicUser, Program
+from epic_app.models.epic_user import EpicUser
+from epic_app.models.models import Program
 from epic_app.serializers.answer_serializer import (
     AnswerSerializer,
     MultipleChoiceAnswerSerializer,

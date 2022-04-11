@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
 from epic_app.importers import EpicAgencyImporter, EpicDomainImporter
-from epic_app.models.models import EpicUser
+from epic_app.models.epic_user import EpicUser
 
 
 class Command(BaseCommand):
@@ -89,6 +89,11 @@ class Command(BaseCommand):
         EpicUser.objects.create(username="Ganon", organization="Nintendo")
         EpicUser.objects.create(username="Luke", organization="Rebel Alliance")
         EpicUser.objects.create(username="Leia", organization="Rebel Alliance")
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Created some 'dummy' users: 'Zelda', 'Ganon', 'Luke' and 'Leia'."
+            )
+        )
 
     def _import_test_db(self):
         test_data_dir: Path = self.epic_app_dir / "tests" / "test_data"
