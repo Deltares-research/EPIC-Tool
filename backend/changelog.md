@@ -1,3 +1,11 @@
+## v0.11.0 (2022-04-11)
+
+### Feat
+
+- **epic_app/serializers/answer_serializer.py**: Extended answer serializer definition to match question types
+- **epic_app/models/epic_questions.py**: Now questions return a new (or existing) answer for the requested user. Added tests
+- **epic_app/models/epic_questions.py**: Added answer types
+
 ## v0.10.0 (2022-04-08)
 
 ### Feat
