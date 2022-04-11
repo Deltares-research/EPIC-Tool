@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
-        selectedAgencies: new Set(),
+        selectedAgency: {},
         token: "",
         areas: [],
         groups: [],
@@ -16,14 +16,19 @@ export default new Vuex.Store({
     },
     mutations: {
         toggleAgencySelection(state, agency) {
-            let alreadySelected = state.selectedAgencies.has(agency.id);
-            if (alreadySelected) {
-                state.selectedAgencies.delete(agency.id);
-            } else {
-                state.selectedAgencies.add(agency.id);
+            if (state.selectedAgency.programs !== undefined) {
+                for (const program of state.selectedAgency.programs) {
+                    state.programSelection.delete(program.id);
+                }
             }
-            for (const program of agency.programs) {
-                alreadySelected ? state.programSelection.delete(program.id) : state.programSelection.add(program.id);
+            const alreadySelected = agency.id === state.selectedAgency.id;
+            if (alreadySelected) {
+                state.selectedAgency = {};
+            } else {
+                for (const program of agency.programs) {
+                    state.programSelection.add(program.id);
+                }
+                state.selectedAgency = agency;
             }
         },
         select(state, programId) {

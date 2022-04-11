@@ -8,7 +8,7 @@
 <script>
 export default {
   name: 'ProgramDescription',
-  async mounted() {
+  mounted() {
     let program = this.$store.state.currentProgram;
     this.title = program.name;
     this.description = program.description;

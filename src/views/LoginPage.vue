@@ -34,7 +34,7 @@
           <v-row style="margin: 1px">
             <v-col md="6"></v-col>
             <v-col md="3" class="text-right">
-              <v-btn class="ma-2" right="true" dark color="primary" @click="login">
+              <v-btn class="ma-2" right dark color="primary" @click="login">
                 login
                 <v-icon right>mdi-login</v-icon>
               </v-btn>

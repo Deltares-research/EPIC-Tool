@@ -119,7 +119,8 @@ export default {
   },
   methods: {
     isAgencySelected: function (agency) {
-      return this.$store.state.selectedAgencies.has(agency.id);
+      if (this.$store.state.selectedAgency === undefined) return false;
+      return this.$store.state.selectedAgency.id === agency.id;
     },
     selectProgramsForAgency: function (agency) {
       this.$store.commit("toggleAgencySelection", agency);

@@ -147,6 +147,7 @@ export default {
     this.visiblePrograms = this.getVisiblePrograms(this.$store.state.areas[this.selectedAreaIndex].id);
     this.$store.state.currentProgram = this.visiblePrograms[0];
     this.nextProgram = this.getNextProgram();
+    this.forceUpdateProgramDescription++;
   },
   data() {
     return {
