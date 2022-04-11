@@ -17,7 +17,9 @@ def epic_test_db():
     (Or at least it should)
     """
     # Epic users (no admins)
-    EpicUser.objects.create(username="Anakin", organization="Gallactic Empire")
+    u_anakin = EpicUser(username="Anakin", organization="Gallactic Empire")
+    u_anakin.set_password("anakin")
+    u_anakin.save()
 
     # Areas
     alpha_area = Area.objects.create(name="alpha")
