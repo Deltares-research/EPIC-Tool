@@ -1,14 +1,12 @@
 import pytest
-from django.contrib.auth.models import User
 from django.forms import ValidationError
 
-from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 from epic_app.tests.epic_db_fixture import epic_test_db
 
 
 @pytest.fixture(autouse=True)
-def EpicModelsFixture(epic_test_db: pytest.fixture):
+def epic_models_fixture(epic_test_db: pytest.fixture):
     """
     Dummy fixture just to load a default db from dummy_db.
 
@@ -16,17 +14,6 @@ def EpicModelsFixture(epic_test_db: pytest.fixture):
         epic_test_db (pytest.fixture): Fixture to load for the whole file tests.
     """
     pass
-
-
-@pytest.mark.django_db
-class TestEpicUser:
-    def test_init_epicuser(self):
-        created_user = EpicUser.objects.create(
-            username="Luke", organization="Rebel Alliance"
-        )
-        assert isinstance(created_user, EpicUser)
-        assert isinstance(created_user, User)
-        assert created_user.is_superuser is False
 
 
 @pytest.mark.django_db

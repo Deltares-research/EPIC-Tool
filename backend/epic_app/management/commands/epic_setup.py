@@ -43,6 +43,12 @@ class Command(BaseCommand):
         )
 
     def _import_files(self, test_data_dir: Path):
+        """
+        Imports all the available files to create a reliable test environment.
+
+        Args:
+            test_data_dir (Path): Path to the test directory.
+        """
         epic_domain_csv = test_data_dir / "initial_epic_data.csv"
         if epic_domain_csv.is_file():
             self.stdout.write(
@@ -63,6 +69,9 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("Import successful."))
 
     def _create_superuser(self):
+        """
+        Creates an admin 'superuser' with classic 'admin'/'admin' user/pass.
+        """
         # Create an admin user.
         admin_user = User(
             username="admin",
@@ -85,10 +94,14 @@ class Command(BaseCommand):
             call_command("createsuperuser")
 
         # Create a few basic users.
-        EpicUser.objects.create(username="Zelda", organization="Nintendo")
-        EpicUser.objects.create(username="Ganon", organization="Nintendo")
-        EpicUser.objects.create(username="Luke", organization="Rebel Alliance")
-        EpicUser.objects.create(username="Leia", organization="Rebel Alliance")
+        zelda = EpicUser.objects.create(username="Zelda", organization="Nintendo")
+        zelda.set_password("zelda")
+        ganon = EpicUser.objects.create(username="Ganon", organization="Nintendo")
+        ganon.set_password("ganon")
+        luke = EpicUser.objects.create(username="Luke", organization="Rebel Alliance")
+        luke.set_password("luke")
+        leia = EpicUser.objects.create(username="Leia", organization="Rebel Alliance")
+        leia.set_password("leia")
         self.stdout.write(
             self.style.SUCCESS(
                 "Created some 'dummy' users: 'Zelda', 'Ganon', 'Luke' and 'Leia'."
