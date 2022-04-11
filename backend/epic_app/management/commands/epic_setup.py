@@ -94,17 +94,18 @@ class Command(BaseCommand):
             call_command("createsuperuser")
 
         # Create a few basic users.
-        zelda = EpicUser.objects.create(username="Zelda", organization="Nintendo")
-        zelda.set_password("zelda")
-        ganon = EpicUser.objects.create(username="Ganon", organization="Nintendo")
-        ganon.set_password("ganon")
-        luke = EpicUser.objects.create(username="Luke", organization="Rebel Alliance")
-        luke.set_password("luke")
-        leia = EpicUser.objects.create(username="Leia", organization="Rebel Alliance")
-        leia.set_password("leia")
+        def create_user(user_name: str, user_org: str):
+            c_user = EpicUser(username=user_name, organization=user_org)
+            # Use the same username but with lowercase (it's a test!)
+            c_user.set_password(user_name.lower())
+            c_user.save()
+        create_user("Zelda", "Nintendo")
+        create_user("Ganon", "Nintendo")
+        create_user("Luke", "Rebel Alliance")
+        create_user("Leia", "Rebel Alliance")
         self.stdout.write(
             self.style.SUCCESS(
-                "Created some 'dummy' users: 'Zelda', 'Ganon', 'Luke' and 'Leia'."
+                "Created some 'dummy' users: 'Zelda', 'Ganon', 'Luke' and 'Leia'. Their passwords match the lowercase username."
             )
         )
 
