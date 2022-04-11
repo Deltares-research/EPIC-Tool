@@ -1,3 +1,24 @@
+## v0.11.0 (2022-04-11)
+
+### Feat
+
+- **epic_app/serializers/answer_serializer.py**: Extended answer serializer definition to match question types
+- **epic_app/models/epic_questions.py**: Now questions return a new (or existing) answer for the requested user. Added tests
+- **epic_app/models/epic_questions.py**: Added answer types
+
+## v0.10.0 (2022-04-08)
+
+### Feat
+
+- **epic_app/serializers/question_serializer.py**: Improved serializer so we have information of its subtypes directly
+- **epic_app/models/epic_questions.py**: Added one-to-one constraint for linkages question by overriding the default save method
+- **epic_app/models/epic_questions.py**: Added class for questions and created one model class per type from the mockups
+
+### Refactor
+
+- **epic_app/serializers**: Moved serializers into different directory to better maintain them
+- **epic_app/models**: Moved models into separate directory for better maintainability
+
 ## v0.9.0 (2022-04-06)
 
 ### Feat

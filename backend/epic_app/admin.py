@@ -6,7 +6,13 @@ from django.shortcuts import redirect, render
 from django.urls import path
 
 from epic_app.importers import EpicAgencyImporter, EpicDomainImporter, EpicImporter
-from epic_app.models import Agency, Answer, Area, EpicUser, Group, Program, Question
+from epic_app.models.epic_questions import (
+    Answer,
+    EvolutionQuestion,
+    LinkagesQuestion,
+    NationalFrameworkQuestion,
+)
+from epic_app.models.models import Agency, Area, EpicUser, Group, Program
 
 
 class CsvImportForm(forms.Form):
@@ -94,5 +100,7 @@ admin.site.register(Area, AreaAdmin)
 admin.site.register(Agency, AgencyAdmin)
 admin.site.register(Group)
 admin.site.register(Program)
-admin.site.register(Question)
+admin.site.register(NationalFrameworkQuestion)
+admin.site.register(EvolutionQuestion)
+admin.site.register(LinkagesQuestion)
 admin.site.register(Answer)

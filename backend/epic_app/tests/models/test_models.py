@@ -2,73 +2,27 @@ import pytest
 from django.contrib.auth.models import User
 from django.forms import ValidationError
 
-import epic_app.models as epic_models
+import epic_app.models.models as epic_models
+from epic_app.tests.epic_db_fixture import epic_test_db
 
 
 @pytest.fixture(autouse=True)
-@pytest.mark.django_db
-def default_test_db():
-    # Areas
-    alpha_area = epic_models.Area(name="alpha")
-    alpha_area.save()
-    beta_area = epic_models.Area(name="beta")
-    beta_area.save()
+def EpicModelsFixture(epic_test_db: pytest.fixture):
+    """
+    Dummy fixture just to load a default db from dummy_db.
 
-    # Agency
-    tia_agency = epic_models.Agency(name="T.I.A.")
-    tia_agency.save()
-    cia_agency = epic_models.Agency(name="C.I.A.")
-    cia_agency.save()
-    mi6_agency = epic_models.Agency(name="M.I.6")
-    mi6_agency.save()
-    rws_agency = epic_models.Agency(name="R.W.S.")
-    rws_agency.save()
-
-    # Groups
-    first_group = epic_models.Group(name="first", area=alpha_area)
-    first_group.save()
-    second_group = epic_models.Group(name="second", area=alpha_area)
-    second_group.save()
-    third_group = epic_models.Group(name="third", area=beta_area)
-    third_group.save()
-
-    # Programs
-    a_program = epic_models.Program(
-        name="a", group=first_group, description="May the Force be with you"
-    )
-    a_program.save()
-    b_program = epic_models.Program(
-        name="b",
-        group=first_group,
-        description="You're all clear, kid. Now blow this thing and go home!",
-    )
-    b_program.save()
-    c_program = epic_models.Program(
-        name="c", group=first_group, description="Do. Or do not. There is no try."
-    )
-    c_program.save()
-    d_program = epic_models.Program(
-        name="d",
-        group=second_group,
-        description="Train yourself to let go of everything you fear to lose.",
-    )
-    d_program.save()
-    e_program = epic_models.Program(
-        name="e", group=third_group, description="You will find only what you bring in."
-    )
-    e_program.save()
-    a_program.agencies.add(cia_agency, tia_agency)
-    b_program.agencies.add(cia_agency, tia_agency)
-    c_program.agencies.add(cia_agency, rws_agency)
-    d_program.agencies.add(mi6_agency, cia_agency)
-    e_program.agencies.add(rws_agency, mi6_agency)
+    Args:
+        epic_test_db (pytest.fixture): Fixture to load for the whole file tests.
+    """
+    pass
 
 
 @pytest.mark.django_db
 class TestEpicUser:
     def test_init_epicuser(self):
-        created_user = epic_models.EpicUser(organization="random")
-        created_user.save()
+        created_user = epic_models.EpicUser.objects.create(
+            username="Luke", organization="Rebel Alliance"
+        )
         assert isinstance(created_user, epic_models.EpicUser)
         assert isinstance(created_user, User)
         assert created_user.is_superuser is False
@@ -225,8 +179,3 @@ class TestProgram:
             == f"There's already a Program with the name: {a_name}."
         )
         assert not epic_models.Program.objects.filter(name=name_case).exists()
-
-
-@pytest.mark.django_db
-class TestAnswer:
-    pass

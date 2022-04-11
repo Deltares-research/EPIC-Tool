@@ -11,7 +11,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.test import RequestFactory
 
 from epic_app.admin import AgencyAdmin, AreaAdmin, ImportEntityAdmin
-from epic_app.models import Agency, Area, Group, Program
+from epic_app.models.models import Agency, Area, Group, Program
 
 
 class TestAreaAdmin:
