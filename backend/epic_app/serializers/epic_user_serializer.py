@@ -24,7 +24,14 @@ class EpicUserSerializer(serializers.ModelSerializer):
         """
 
         model = EpicUser
-        fields = ("url", "id", "username", "organization", "password")
+        fields = (
+            "url",
+            "id",
+            "username",
+            "organization",
+            "selected_programs",
+            "password",
+        )
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
