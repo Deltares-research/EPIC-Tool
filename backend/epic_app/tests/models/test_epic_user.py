@@ -3,6 +3,7 @@ import json
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.response import Response as RfResponse
 from rest_framework.test import APIRequestFactory
 
 from epic_app.models.epic_user import EpicUser
@@ -49,7 +50,7 @@ class TestEpicUser:
 
 @pytest.mark.django_db
 class TestEpicUserRequest:
-    def test_get_epicuser_valid_username_pass(self):
+    def test_POST_valid_username_password_to_token_auth_succeeds(self):
         # Set test data
         eu_name: str = "Waldo"
         eu_pass: str = "iamwaldo"
@@ -60,5 +61,22 @@ class TestEpicUserRequest:
         # Or the password is not correct.
         factory = APIRequestFactory()
         request = factory.post(url, json.dumps(data), content_type="application/json")
-        response = obtain_auth_token(request)
+        response: RfResponse = obtain_auth_token(request)
         assert response.status_code == 200
+        assert response.data.get("token") is not None
+    
+    def test_POST_wrong_username_password_to_token_auth_fails(self):
+        # Set test data
+        eu_name: str = "Waldo"
+        eu_pass: str = "not_the_pass"
+        url = "api/token-auth"
+        data = {"username": eu_name, "password": eu_pass}
+
+        # Either the url is not being picke up (test config probably).
+        # Or the password is not correct.
+        factory = APIRequestFactory()
+        request = factory.post(url, json.dumps(data), content_type="application/json")
+        response: RfResponse = obtain_auth_token(request)
+        assert response.status_code == 400
+        assert response.data.get("token") is None
+    
