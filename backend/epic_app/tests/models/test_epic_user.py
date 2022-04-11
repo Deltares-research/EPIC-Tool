@@ -64,7 +64,7 @@ class TestEpicUserRequest:
         response: RfResponse = obtain_auth_token(request)
         assert response.status_code == 200
         assert response.data.get("token") is not None
-    
+
     def test_POST_wrong_username_password_to_token_auth_fails(self):
         # Set test data
         eu_name: str = "Waldo"
@@ -79,4 +79,3 @@ class TestEpicUserRequest:
         response: RfResponse = obtain_auth_token(request)
         assert response.status_code == 400
         assert response.data.get("token") is None
-    
