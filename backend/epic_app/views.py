@@ -8,7 +8,6 @@ from epic_app.models.epic_questions import (
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
-    Question,
 )
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Agency, Area, Group, Program

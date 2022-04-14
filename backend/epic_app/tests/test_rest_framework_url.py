@@ -2,7 +2,9 @@ import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 
+from epic_app.models.epic_questions import Question
 from epic_app.models.epic_user import EpicUser
+from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
 
 
@@ -351,7 +353,7 @@ class TestProgramViewSet:
         "url_suffix, expected_entries",
         [
             pytest.param("", 5, id="get-list"),
-            pytest.param("1/", 9, id="get-retrieve (Program 'a' with 9 fields)"),
+            pytest.param("1/", 7, id="get-retrieve (Program 'a' with 9 fields)"),
         ],
     )
     def test_GET_program(
@@ -382,8 +384,9 @@ class TestQuestionsViewSet:
         [
             pytest.param(
                 "Palpatine",
-                id="Non admins user.",
+                id="Non admin user with the selected programs.",
             ),
+            pytest.param("Anakin", id="Non admin user without the selected programs."),
             pytest.param(
                 "admin",
                 id="Admins user.",
@@ -410,19 +413,6 @@ class TestQuestionsViewSet:
     ):
         # Run request.
         set_user_auth_token(api_client, epic_username)
-        if (
-            question_url[-2].isdigit()
-            and EpicUser.objects.filter(username=epic_username).exists()
-        ):
-            epic_user: EpicUser = EpicUser.objects.filter(
-                username=epic_username
-            ).first()
-            question_id = int(question_url[-2])
-            assert any(
-                True
-                for sp in epic_user.selected_programs.all()
-                if sp.questions.filter(pk=question_id).exists()
-            )
         response = api_client.get(question_url)
 
         # Verify final exepctations.
