@@ -28,6 +28,7 @@ def epic_test_db():
     admin_user.is_superuser = True
     admin_user.is_staff = True
     admin_user.save()
+    Token.objects.get_or_create(user=admin_user)
     # Epic users (no admins)
     def set_epic_user(username: str, organization: str) -> EpicUser:
         u_created = EpicUser(username=username, organization=organization)

@@ -1,7 +1,6 @@
 # Create your views here.
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, viewsets
-from rest_framework.request import Request
 from rest_framework.response import Response
 
 from epic_app.models.epic_questions import Answer, Question
