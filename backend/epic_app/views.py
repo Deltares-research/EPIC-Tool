@@ -1,4 +1,5 @@
 # Create your views here.
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -37,6 +38,12 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         serializer = EpicUserSerializer(
             queryset, many=True, context={"request": request}
         )
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = EpicUser.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = EpicUserSerializer(user, context={"request": request})
         return Response(serializer.data)
 
 

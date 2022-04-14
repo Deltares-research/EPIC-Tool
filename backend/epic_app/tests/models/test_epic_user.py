@@ -84,37 +84,3 @@ class TestEpicUserTokenAuthRequest:
         assert response.status_code == 400
         assert response.data.get("token") is None
 
-
-@pytest.mark.django_db
-class TestEpicUser:
-    def test_GET_epicuser_when_user_is_admin(self):
-        # Define test data.
-        url = "api/epicuser/"
-        admin_user: User = User.objects.filter(username="admin").first()
-        assert admin_user.is_superuser is True
-        assert admin_user.is_staff is True
-        # Run request.
-        factory = APIRequestFactory()
-        request = factory.get(url)
-        request.user = admin_user
-        response: RfResponse = EpicUserViewSet.as_view({"get": "list"})(request)
-
-        # Verify final exepctations.
-        assert response.status_code == 200
-        assert len(response.data) >= 3
-
-    def test_GET_epicuser_when_user_is_not_admin(self):
-        # Define test data.
-        url = "api/epicuser/"
-        found_user: User = EpicUser.objects.filter(username="Anakin").first()
-        assert found_user.is_superuser is False
-        assert found_user.is_staff is False
-        # Run request.
-        factory = APIRequestFactory()
-        request = factory.get(url)
-        request.user = found_user
-        response: RfResponse = EpicUserViewSet.as_view({"get": "list"})(request)
-
-        # Verify final exepctations.
-        assert response.status_code == 200
-        assert len(response.data) == 1

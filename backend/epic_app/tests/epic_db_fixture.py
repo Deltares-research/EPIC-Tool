@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
@@ -32,6 +33,7 @@ def epic_test_db():
         u_created = EpicUser(username=username, organization=organization)
         u_created.set_password(username.lower())
         u_created.save()
+        Token.objects.get_or_create(user=u_created)
         return u_created
 
     u_palpatine: EpicUser = set_epic_user("Palpatine", "Gallactic Empire")
