@@ -1,7 +1,11 @@
 from rest_framework import serializers
 
 from epic_app.models.models import Program
-from epic_app.serializers.question_serializer import QuestionSerializer
+from epic_app.serializers.question_serializer import (
+    EvolutionQuestionSerializer,
+    LinkagesQuestionSerializer,
+    NationalFrameworkQuestionSerializer,
+)
 
 
 class ProgramSerializer(serializers.ModelSerializer):
@@ -9,7 +13,11 @@ class ProgramSerializer(serializers.ModelSerializer):
     Serializer for 'Program'
     """
 
-    questions = QuestionSerializer(many=True, read_only=True)
+    nationalframeworkquestions = NationalFrameworkQuestionSerializer(
+        many=True, read_only=True
+    )
+    evolutionquestions = EvolutionQuestionSerializer(many=True, read_only=True)
+    linkagesquestions = LinkagesQuestionSerializer(many=True, read_only=True)
 
     class Meta:
         """
@@ -17,7 +25,17 @@ class ProgramSerializer(serializers.ModelSerializer):
         """
 
         model = Program
-        fields = ("url", "id", "name", "description", "agencies", "group", "questions")
+        fields = (
+            "url",
+            "id",
+            "name",
+            "description",
+            "agencies",
+            "group",
+            "nationalframeworkquestions",
+            "evolutionquestions",
+            "linkagesquestions",
+        )
 
 
 class SimpleProgramSerializer(serializers.ModelSerializer):

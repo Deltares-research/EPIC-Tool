@@ -5,4 +5,8 @@ from epic_app.serializers.area_serializer import AreaSerializer
 from epic_app.serializers.epic_user_serializer import EpicUserSerializer
 from epic_app.serializers.group_serializer import GroupSerializer
 from epic_app.serializers.program_serializer import ProgramSerializer
-from epic_app.serializers.question_serializer import QuestionSerializer
+from epic_app.serializers.question_serializer import (
+    EvolutionQuestionSerializer,
+    LinkagesQuestionSerializer,
+    NationalFrameworkQuestionSerializer,
+)

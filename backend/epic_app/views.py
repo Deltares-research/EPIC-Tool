@@ -1,12 +1,15 @@
 # Create your views here.
-from urllib.request import Request
-
 from django.shortcuts import get_object_or_404
-from requests import request
 from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 
-from epic_app.models.epic_questions import Answer, Question
+from epic_app.models.epic_questions import (
+    Answer,
+    EvolutionQuestion,
+    LinkagesQuestion,
+    NationalFrameworkQuestion,
+    Question,
+)
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 from epic_app.serializers import (
@@ -14,9 +17,11 @@ from epic_app.serializers import (
     AnswerSerializer,
     AreaSerializer,
     EpicUserSerializer,
+    EvolutionQuestionSerializer,
     GroupSerializer,
+    LinkagesQuestionSerializer,
+    NationalFrameworkQuestionSerializer,
     ProgramSerializer,
-    QuestionSerializer,
 )
 
 
@@ -99,21 +104,26 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         viewsets (ModelViewSet): Derives directly from ModelViewSet
     """
 
-    queryset = Program.objects.all().order_by("name")
+    queryset = Program.objects.all()
     serializer_class = ProgramSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 
-class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Default view set for 'Question'
+class NationalFrameworkQuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = NationalFrameworkQuestion.objects.all()
+    serializer_class = NationalFrameworkQuestionSerializer
+    permission_classes = [permissions.DjangoModelPermissions]
 
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
-    """
 
-    queryset = Question.objects.all().order_by("title")
-    serializer_class = QuestionSerializer
+class EvolutionQuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = EvolutionQuestion.objects.all()
+    serializer_class = EvolutionQuestionSerializer
+    permission_classes = [permissions.DjangoModelPermissions]
+
+
+class LinkagesQuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = LinkagesQuestion.objects.all()
+    serializer_class = LinkagesQuestionSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 

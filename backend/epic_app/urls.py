@@ -11,7 +11,9 @@ router.register(r"area", views.AreaViewSet)
 router.register(r"agency", views.AgencyViewSet)
 router.register(r"group", views.GroupViewSet)
 router.register(r"program", views.ProgramViewSet)
-router.register(r"question", views.QuestionViewSet)
+router.register(r"nationalframeworkquestion", views.NationalFrameworkQuestionViewSet)
+router.register(r"evolutionquestion", views.EvolutionQuestionViewSet)
+router.register(r"linkagesquestion", views.LinkagesQuestionViewSet)
 router.register(r"answer", views.AnswerViewSet)
 
 # Wire up our API using automatic URL routing.
