@@ -1,5 +1,8 @@
 # Create your views here.
+from urllib.request import Request
+
 from django.shortcuts import get_object_or_404
+from requests import request
 from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 
@@ -29,18 +32,21 @@ class EpicUserViewSet(viewsets.ModelViewSet):
     serializer_class = EpicUserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def list(self, request, *args, **kwargs):
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            queryset = EpicUser.objects.all().order_by("username")
+    def _get_based_on_permissions(self, auth_user: EpicUser):
+        if auth_user.is_staff or auth_user.is_superuser:
+            return EpicUser.objects.all()
         else:
-            queryset = EpicUser.objects.filter(id=self.request.user.id)
+            return EpicUser.objects.filter(id=self.request.user.id)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self._get_based_on_permissions(self.request.user)
         serializer = EpicUserSerializer(
             queryset, many=True, context={"request": request}
         )
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        queryset = EpicUser.objects.all()
+        queryset = self._get_based_on_permissions(self.request.user)
         user = get_object_or_404(queryset, pk=pk)
         serializer = EpicUserSerializer(user, context={"request": request})
         return Response(serializer.data)
