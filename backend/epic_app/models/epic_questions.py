@@ -83,6 +83,9 @@ class LinkagesQuestion(Question):
 
     _linkages_title = "Please select three programs that will help you deliver better results in your program if you could have better collaboration? "
 
+    def __str__(self) -> str:
+        return f"Linkages for: {self.program}"
+
     def save(self, *args, **kwargs) -> None:
         """
         Overriding the default save method to inject a 'fake' OneToOne constraint on the 'program' field.

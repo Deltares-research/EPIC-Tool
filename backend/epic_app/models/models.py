@@ -136,15 +136,6 @@ class Program(models.Model):
         self.check_unique_name(self.name)
         return super(Program, self).save(*args, **kwargs)
 
-    # def get_questions(self) -> List[epic_questions.Question]:
-    #     """
-    #     Gets a list of questions whose program is the caller.
-
-    #     Returns:
-    #         List[Question]: List of questions for this program.
-    #     """
-    #     return epic_questions.Question.objects.filter(program=self).all()
-
     def __str__(self) -> str:
         return self.name
 

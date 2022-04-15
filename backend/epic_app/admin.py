@@ -119,8 +119,39 @@ class EvoAdmin(ImportEntityAdmin):
         return EvolutionQuestionImporter()
 
 
-class LnkAdmin(ImportEntityAdmin):
-    pass
+class LnkAdmin(admin.ModelAdmin):
+    # Admin pages.
+    change_list_template = "generate_changelist.html"
+
+    def get_urls(self):
+        """
+        Extends the default get_urls so we can inject the import-csv on
+
+        Returns:
+            List[str]: A list of the urls to load from the admin page.
+        """
+        urls = super().get_urls()
+        my_urls = [
+            path("generate/", self.generate_links),
+        ]
+        return my_urls + urls
+
+    def generate_links(self, request):
+        """
+        Imports a csv file into the EPIC database structure.
+
+        Args:
+            request (HTTPRequest): HTML request.
+
+        Returns:
+            HTTPRequest: HTML response.
+        """
+        LinkagesQuestion.objects.all().delete()
+        LinkagesQuestion.generate_linkages()
+        self.message_user(
+            request, "Generated one linkage question per existent program"
+        )
+        return redirect("..")
 
 
 # Models exposed to the admin page .
@@ -131,5 +162,5 @@ admin.site.register(Group)
 admin.site.register(Program)
 admin.site.register(NationalFrameworkQuestion, NfqAdmin)
 admin.site.register(EvolutionQuestion, EvoAdmin)
-admin.site.register(LinkagesQuestion)
+admin.site.register(LinkagesQuestion, LnkAdmin)
 admin.site.register(Answer)
