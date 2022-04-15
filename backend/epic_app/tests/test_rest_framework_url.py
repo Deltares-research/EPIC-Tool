@@ -372,6 +372,31 @@ class TestProgramViewSet:
         assert response.status_code == 200
         assert len(response.data) == expected_entries
 
+    @pytest.mark.parametrize(
+        "url_suffix, expected_entries",
+        [
+            pytest.param("nationalframework/", 2),
+            pytest.param("evolution/", 2),
+            pytest.param("linkages/", 1),
+        ],
+    )
+    def test_GET_program_questions(
+        self,
+        url_suffix: str,
+        expected_entries: int,
+        api_client: APIClient,
+    ):
+        # Program a has 5 questions (2xNFQ, 2xEVO, 1xLNK)
+        a_program: Program = Program.objects.filter(name="a").first()
+        full_url = self.url_root + f"{a_program.pk}/" + "question-" + url_suffix
+        # Run request.
+        set_user_auth_token(api_client, "Palpatine")
+        response = api_client.get(full_url)
+
+        # Verify final exepctations.
+        assert response.status_code == 200
+        assert len(response.data) == expected_entries
+
 
 @pytest.mark.django_db
 class TestQuestionsViewSet:

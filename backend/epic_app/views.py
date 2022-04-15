@@ -1,6 +1,8 @@
 # Create your views here.
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, serializers, viewsets
+from rest_framework.decorators import action
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from epic_app.models.epic_questions import (
@@ -8,6 +10,7 @@ from epic_app.models.epic_questions import (
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
+    Question,
 )
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
@@ -106,6 +109,74 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Program.objects.all()
     serializer_class = ProgramSerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
+    def _get_question(
+        self, request: Request, question_type: Question, pk: str = None
+    ) -> Response:
+        question_serializers = {
+            NationalFrameworkQuestion: NationalFrameworkQuestionSerializer,
+            EvolutionQuestion: EvolutionQuestionSerializer,
+            LinkagesQuestion: LinkagesQuestionSerializer,
+        }
+        queryset: Question = question_type.objects.filter(program=pk)
+        serializer: serializers.ModelSerializer = question_serializers[question_type](
+            queryset, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
+    @action(
+        detail=True,
+        url_path="question-nationalframework",
+        url_name="question_nationalframework",
+    )
+    def get_nationalframework_question(self, request: Request, pk: str = None):
+        """
+        Gets all the `NationalFrameworkQuestions` related to the program (`pk`).
+
+        Args:
+            request (Request): API Request.
+            pk (str, optional): Id of the selected program. Defaults to None.
+
+        Returns:
+            Response: Result of the queryset.
+        """
+        return self._get_question(request, NationalFrameworkQuestion, pk)
+
+    @action(
+        detail=True,
+        url_path="question-evolution",
+        url_name="question_evolution",
+    )
+    def get_evolution_question(self, request: Request, pk: str = None):
+        """
+        Gets all the `EvolutionQuestion` related to the program (`pk`).
+
+        Args:
+            request (Request): API Request.
+            pk (str, optional): Id of the selected program. Defaults to None.
+
+        Returns:
+            Response: Result of the queryset.
+        """
+        return self._get_question(request, EvolutionQuestion, pk)
+
+    @action(
+        detail=True,
+        url_path="question-linkages",
+        url_name="question_linkages",
+    )
+    def get_linkages_question(self, request: Request, pk: str = None):
+        """
+        Gets all the `LinkagesQuestion` related to the program (`pk`).
+
+        Args:
+            request (Request): API Request.
+            pk (str, optional): Id of the selected program. Defaults to None.
+
+        Returns:
+            Response: Result of the queryset.
+        """
+        return self._get_question(request, LinkagesQuestion, pk)
 
 
 class NationalFrameworkQuestionViewSet(viewsets.ReadOnlyModelViewSet):

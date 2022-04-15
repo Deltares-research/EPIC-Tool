@@ -6,7 +6,6 @@ from epic_app.models.epic_questions import (
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
-    Question,
 )
 
 
