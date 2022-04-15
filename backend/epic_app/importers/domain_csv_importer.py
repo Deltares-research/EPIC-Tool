@@ -26,10 +26,10 @@ class EpicDomainImporter(BaseEpicImporter):
         @classmethod
         def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
             new_line = cls()
-            new_line.area = dict_row.get(dict_keys["area"])
-            new_line.group = dict_row.get(dict_keys["group"])
-            new_line.program = dict_row.get(dict_keys["program"])
-            new_line.description = dict_row.get(dict_keys["description"])
+            new_line.area = dict_row.get(dict_keys["area"]).strip()
+            new_line.group = dict_row.get(dict_keys["group"]).strip()
+            new_line.program = dict_row.get(dict_keys["program"]).strip()
+            new_line.description = dict_row.get(dict_keys["description"]).strip()
             return new_line
 
     def _cleanup_epic_domain(self):

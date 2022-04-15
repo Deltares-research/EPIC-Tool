@@ -3,10 +3,17 @@ from typing import Any, Optional
 
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from epic_app.importers import EpicAgencyImporter, EpicDomainImporter
+from epic_app.importers.csv_base_importer import BaseEpicImporter
+from epic_app.importers.question_csv_importer import (
+    EvolutionQuestionImporter,
+    NationalFrameworkQuestionImporter,
+)
+from epic_app.models.epic_questions import LinkagesQuestion
 from epic_app.models.epic_user import EpicUser
+from epic_app.tests import test_data_dir
 
 
 class Command(BaseCommand):
@@ -49,24 +56,23 @@ class Command(BaseCommand):
         Args:
             test_data_dir (Path): Path to the test directory.
         """
-        epic_domain_csv = test_data_dir / "initial_epic_data.csv"
-        if epic_domain_csv.is_file():
-            self.stdout.write(
-                self.style.MIGRATE_HEADING(
-                    f"Importing main data from {epic_domain_csv}."
+
+        def import_and_log(filepath: Path, epic_importer: BaseEpicImporter):
+            test_file = test_data_dir / filepath
+            if test_file.is_file():
+                self.stdout.write(
+                    self.style.MIGRATE_HEADING(f"Importing main data from {test_file}.")
                 )
-            )
-            EpicDomainImporter().import_csv(epic_domain_csv)
-            self.stdout.write(self.style.SUCCESS("Import successful."))
-        epic_agency_csv = test_data_dir / "agency_data.csv"
-        if epic_agency_csv.is_file():
-            self.stdout.write(
-                self.style.MIGRATE_HEADING(
-                    f"Importing agencies from {epic_agency_csv}."
-                )
-            )
-            EpicAgencyImporter().import_csv(epic_agency_csv)
-            self.stdout.write(self.style.SUCCESS("Import successful."))
+                epic_importer().import_csv(test_file)
+                self.stdout.write(self.style.SUCCESS("Import successful."))
+
+        import_and_log("initial_epic_data.csv", EpicDomainImporter)
+        import_and_log("agency_data.csv", EpicAgencyImporter)
+        import_and_log(
+            "nationalframeworkquestions.csv", NationalFrameworkQuestionImporter
+        )
+        import_and_log("evolutionquestions.csv", EvolutionQuestionImporter)
+        LinkagesQuestion.generate_linkages()
 
     def _create_superuser(self):
         """
@@ -111,7 +117,6 @@ class Command(BaseCommand):
         )
 
     def _import_test_db(self):
-        test_data_dir: Path = self.epic_app_dir / "tests" / "test_data"
         if not test_data_dir.is_dir():
             self.stdout.write(
                 self.style.ERROR(

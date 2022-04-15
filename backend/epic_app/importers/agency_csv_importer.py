@@ -21,8 +21,8 @@ class EpicAgencyImporter(BaseEpicImporter):
         @classmethod
         def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
             new_line = cls()
-            new_line.agency = dict_row.get(dict_keys["agency"])
-            new_line.program = dict_row.get(dict_keys["program"])
+            new_line.agency = dict_row.get(dict_keys["agency"]).strip()
+            new_line.program = dict_row.get(dict_keys["program"]).strip()
             return new_line
 
     def _import_agencies(self, agencies_dictionary: Dict[str, List[CsvLineObject]]):
