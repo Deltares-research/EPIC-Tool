@@ -21,7 +21,6 @@ router.register(r"answer", views.AnswerViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
-core_version = "0.11.0"
 urlpatterns = [
     path("", RedirectView.as_view(url="api/", permanent=False), name="index"),
     path(
@@ -37,7 +36,7 @@ urlpatterns = [
         get_schema_view(
             title="EPIC OpenAPI",
             description="API disclosure of all available calls.",
-            version=core_version,
+            version="0.11.0",
         ),
         name="openapi-schema",
     ),  # Declaring the openapi schema seems to be mandatory in order to produce the following two

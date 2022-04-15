@@ -1,3 +1,16 @@
+## v0.13.0 (2022-04-15)
+
+### Feat
+
+- **epic_app/admin.py**: Added admin action to generate all linkages from available programs
+- **epic_app/admin.py**: Added admin views to import national framework and evolution questions
+- **question_csv_importer.py**: Added csv importers for NationalFrameworkQuestion and EvolutionQuestion
+
+### Refactor
+
+- **importers**: Extracted each importer in a separate file for better consistency
+- **importers**: Moved importers into a separate directory to allow better maintainance
+
 ## v0.12.1 (2022-04-15)
 
 ### Refactor

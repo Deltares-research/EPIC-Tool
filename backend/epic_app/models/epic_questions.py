@@ -15,8 +15,8 @@ class Question(models.Model):
         to=base_models.Program, on_delete=models.CASCADE, related_name="questions"
     )
 
-    class Meta:
-        unique_together = ["title", "program"]
+    # class Meta:
+    #     unique_together = ["title", "program"]
 
     def __str__(self) -> str:
         return self.title[0:15]
@@ -81,6 +81,11 @@ class LinkagesQuestion(Question):
     Question of multiple (max 3) choices between all programs registered in the database.
     """
 
+    _linkages_title = "Please select three programs that will help you deliver better results in your program if you could have better collaboration? "
+
+    def __str__(self) -> str:
+        return f"Linkages for: {self.program}"
+
     def save(self, *args, **kwargs) -> None:
         """
         Overriding the default save method to inject a 'fake' OneToOne constraint on the 'program' field.
@@ -99,6 +104,16 @@ class LinkagesQuestion(Question):
         if not MultipleChoiceAnswer.objects.filter(user=q_user, question=self).exists():
             return MultipleChoiceAnswer.objects.create(user=q_user, question=self)
         return MultipleChoiceAnswer.objects.filter(user=q_user, question=self).first()
+
+    @staticmethod
+    def generate_linkages():
+        """
+        Generates linkages questions for all the available programs
+        """
+        for p_obj in base_models.Program.objects.all():
+            LinkagesQuestion(
+                title=LinkagesQuestion._linkages_title, program=p_obj
+            ).save()
 
 
 # region Cross-Reference Tables
