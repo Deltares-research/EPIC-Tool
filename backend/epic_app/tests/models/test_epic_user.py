@@ -83,4 +83,3 @@ class TestEpicUserTokenAuthRequest:
         # Verify final expectations.
         assert response.status_code == 400
         assert response.data.get("token") is None
-
