@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "coreapi",
+    # "swagger-ui",
 ]
 
 # region Rest framework definitions

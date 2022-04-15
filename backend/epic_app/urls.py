@@ -1,8 +1,10 @@
 from django.urls import include, path
+from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.documentation import include_docs_urls
+from rest_framework.schemas import get_schema_view
 
 from epic_app import apps, views
 
@@ -19,6 +21,7 @@ router.register(r"answer", views.AnswerViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
+core_version = "0.11.0"
 urlpatterns = [
     path("", RedirectView.as_view(url="api/", permanent=False), name="index"),
     path(
@@ -29,5 +32,26 @@ urlpatterns = [
     path("api/", include(router.urls), name="api"),
     path("api/api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("api/token-auth/", obtain_auth_token, name="api_token_auth"),
-    path("api/docs/", include_docs_urls(title="EPIC API Reference", public=False)),
+    path(
+        "api/docs/",
+        get_schema_view(
+            title="EPIC OpenAPI",
+            description="API disclosure of all available calls.",
+            version=core_version,
+        ),
+        name="openapi-schema",
+    ),  # Declaring the openapi schema seems to be mandatory in order to produce the following two
+    path(
+        "api/docs/reference",
+        include_docs_urls(title="EPIC API Reference", public=False),
+        name="docs-reference",
+    ),
+    path(
+        "api/docs/swagger",
+        TemplateView.as_view(
+            template_name="swagger-ui.html",
+            extra_context={"schema_url": "openapi-schema"},
+        ),
+        name="docs-swagger",
+    ),
 ]

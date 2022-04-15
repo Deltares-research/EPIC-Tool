@@ -1,8 +1,7 @@
 # Create your views here.
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers, viewsets
-from rest_framework.decorators import action, api_view
-from rest_framework.decorators import permission_classes as permission_decorator
+from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
