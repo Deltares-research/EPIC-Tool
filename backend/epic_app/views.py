@@ -30,10 +30,7 @@ from epic_app.serializers import (
 
 class EpicUserViewSet(viewsets.ModelViewSet):
     """
-    Default view set for 'EpicUser'
-
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
+    Acess point for CRUD operations on `EpicUser` table.
     """
 
     queryset = EpicUser.objects.all().order_by("username")
@@ -46,14 +43,33 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         else:
             return EpicUser.objects.filter(id=self.request.user.id)
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request: Request, *args, **kwargs) -> Response:
+        """
+        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
+
+        Args:
+            request (Request): API Request
+
+        Returns:
+            Response: Result of the queryset.
+        """
         queryset = self._get_based_on_permissions(self.request.user)
         serializer = EpicUserSerializer(
             queryset, many=True, context={"request": request}
         )
         return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request: Request, pk: str = None) -> Response:
+        """
+        GET detail `EpicUser`. When not an admin or self it will return a 404 response.
+
+        Args:
+            request (Request): API Request.
+            pk (str, optional): Id of the `EpicUser` to retrieve. Defaults to None.
+
+        Returns:
+            Response: Result of the request.
+        """
         queryset = self._get_based_on_permissions(self.request.user)
         user = get_object_or_404(queryset, pk=pk)
         serializer = EpicUserSerializer(user, context={"request": request})
@@ -62,10 +78,7 @@ class EpicUserViewSet(viewsets.ModelViewSet):
 
 class AreaViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Default view set for 'Area'
-
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
+    Acess point for CRUD operations on `Area` table.
     """
 
     queryset = Area.objects.all().order_by("name")
@@ -75,10 +88,7 @@ class AreaViewSet(viewsets.ReadOnlyModelViewSet):
 
 class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Default view set for 'Agency'
-
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
+    Acess point for CRUD operations on `Agency` table.
     """
 
     queryset = Agency.objects.all().order_by("name")
@@ -88,10 +98,7 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Default view set for 'Group'
-
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
+    Acess point for CRUD operations on `Group` table.
     """
 
     queryset = Group.objects.all().order_by("name")
@@ -101,10 +108,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Default view set for 'Program'
-
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
+    Acess point for CRUD operations on `Program` table.
     """
 
     queryset = Program.objects.all()
@@ -132,7 +136,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     )
     def get_nationalframework_question(self, request: Request, pk: str = None):
         """
-        Gets all the `NationalFrameworkQuestions` related to the program (`pk`).
+        GET List `NationalFrameworkQuestions` related to the program (`pk`).
 
         Args:
             request (Request): API Request.
@@ -150,7 +154,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     )
     def get_evolution_question(self, request: Request, pk: str = None):
         """
-        Gets all the `EvolutionQuestion` related to the program (`pk`).
+        GET List `EvolutionQuestion` related to the program (`pk`).
 
         Args:
             request (Request): API Request.
@@ -168,7 +172,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     )
     def get_linkages_question(self, request: Request, pk: str = None):
         """
-        Gets all the `LinkagesQuestion` related to the program (`pk`).
+        GET List `LinkagesQuestion` related to the program (`pk`).
 
         Args:
             request (Request): API Request.
@@ -181,18 +185,30 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class NationalFrameworkQuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Acess point for CRUD operations on `NationalFrameworkQuestion` table.
+    """
+
     queryset = NationalFrameworkQuestion.objects.all()
     serializer_class = NationalFrameworkQuestionSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 
 class EvolutionQuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Acess point for CRUD operations on `EvolutionQuestion` table.
+    """
+
     queryset = EvolutionQuestion.objects.all()
     serializer_class = EvolutionQuestionSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 
 class LinkagesQuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Acess point for CRUD operations on `LinkagesQuestion` table.
+    """
+
     queryset = LinkagesQuestion.objects.all()
     serializer_class = LinkagesQuestionSerializer
     permission_classes = [permissions.DjangoModelPermissions]
@@ -200,10 +216,7 @@ class LinkagesQuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
 class AnswerViewSet(viewsets.ModelViewSet):
     """
-    Default view set for 'Answer'
-
-    Args:
-        viewsets (ModelViewSet): Derives directly from ModelViewSet
+    Acess point for CRUD operations on `Answer` table.
     """
 
     queryset = Answer.objects.all().order_by("user")

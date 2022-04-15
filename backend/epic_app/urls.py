@@ -2,6 +2,7 @@ from django.urls import include, path
 from django.views.generic.base import RedirectView
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.documentation import include_docs_urls
 
 from epic_app import apps, views
 
@@ -28,4 +29,5 @@ urlpatterns = [
     path("api/", include(router.urls), name="api"),
     path("api/api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("api/token-auth/", obtain_auth_token, name="api_token_auth"),
+    path("api/docs/", include_docs_urls(title="EPIC API Reference", public=False)),
 ]
