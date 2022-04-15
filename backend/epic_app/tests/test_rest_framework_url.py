@@ -375,12 +375,14 @@ class TestProgramViewSet:
     @pytest.mark.parametrize(
         "url_suffix, expected_entries",
         [
-            pytest.param("nationalframework/", 2),
-            pytest.param("evolution/", 2),
-            pytest.param("linkages/", 1),
+            pytest.param(
+                "question-nationalframework/", 2, id="LIST NationalFramework Questions"
+            ),
+            pytest.param("question-evolution/", 2, id="LIST Evolution Questions"),
+            pytest.param("question-linkages/", 1, id="LIST Linkages Questions"),
         ],
     )
-    def test_GET_program_questions(
+    def test_GET_list_program_questions(
         self,
         url_suffix: str,
         expected_entries: int,
@@ -388,7 +390,7 @@ class TestProgramViewSet:
     ):
         # Program a has 5 questions (2xNFQ, 2xEVO, 1xLNK)
         a_program: Program = Program.objects.filter(name="a").first()
-        full_url = self.url_root + f"{a_program.pk}/" + "question-" + url_suffix
+        full_url = self.url_root + f"{a_program.pk}/" + url_suffix
         # Run request.
         set_user_auth_token(api_client, "Palpatine")
         response = api_client.get(full_url)
