@@ -5,7 +5,13 @@ from django.contrib import admin
 from django.shortcuts import redirect, render
 from django.urls import path
 
-from epic_app.importers import BaseEpicImporter, EpicAgencyImporter, EpicDomainImporter
+from epic_app.importers import (
+    BaseEpicImporter,
+    EpicAgencyImporter,
+    EpicDomainImporter,
+    EvolutionQuestionImporter,
+    NationalFrameworkQuestionImporter,
+)
 from epic_app.models.epic_questions import (
     Answer,
     EvolutionQuestion,
@@ -95,13 +101,35 @@ class AgencyAdmin(ImportEntityAdmin):
         return EpicAgencyImporter()
 
 
+class NfqAdmin(ImportEntityAdmin):
+    """
+    National Framework Question admin page to allow CSV import.
+    """
+
+    def get_importer(self) -> NationalFrameworkQuestionImporter:
+        return NationalFrameworkQuestionImporter()
+
+
+class EvoAdmin(ImportEntityAdmin):
+    """
+    Evolution Question admin page to allow CSV import.
+    """
+
+    def get_importer(self) -> EvolutionQuestionImporter:
+        return EvolutionQuestionImporter()
+
+
+class LnkAdmin(ImportEntityAdmin):
+    pass
+
+
 # Models exposed to the admin page .
 admin.site.register(EpicUser)
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Agency, AgencyAdmin)
 admin.site.register(Group)
 admin.site.register(Program)
-admin.site.register(NationalFrameworkQuestion)
-admin.site.register(EvolutionQuestion)
+admin.site.register(NationalFrameworkQuestion, NfqAdmin)
+admin.site.register(EvolutionQuestion, EvoAdmin)
 admin.site.register(LinkagesQuestion)
 admin.site.register(Answer)

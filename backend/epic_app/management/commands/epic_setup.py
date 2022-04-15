@@ -73,6 +73,9 @@ class Command(BaseCommand):
         )
         import_and_log("evolutionquestions.csv", EvolutionQuestionImporter)
         LinkagesQuestion.generate_linkages()
+        self.stdout.write(
+            self.style.SUCCESS("Generated one linkage question per loaded program.")
+        )
 
     def _create_superuser(self):
         """
