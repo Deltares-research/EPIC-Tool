@@ -1,3 +1,9 @@
+## v0.12.1 (2022-04-15)
+
+### Refactor
+
+- **views.py**: Improved EpicUserViewSet class definition; Extended related GET - detail test.
+
 ## v0.12.0 (2022-04-15)
 
 ### Feat
