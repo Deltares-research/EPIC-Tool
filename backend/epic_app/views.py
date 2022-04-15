@@ -1,5 +1,7 @@
 # Create your views here.
-from django.shortcuts import get_object_or_404
+from typing import List
+
+from django.db.models import QuerySet
 from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -32,47 +34,30 @@ class EpicUserViewSet(viewsets.ModelViewSet):
     Acess point for CRUD operations on `EpicUser` table.
     """
 
-    queryset = EpicUser.objects.all().order_by("username")
+    queryset = EpicUser.objects.all()
     serializer_class = EpicUserSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
-    def _get_based_on_permissions(self, auth_user: EpicUser):
-        if auth_user.is_staff or auth_user.is_superuser:
-            return EpicUser.objects.all()
-        else:
-            return EpicUser.objects.filter(id=self.request.user.id)
+    def get_permissions(self) -> List[permissions.BasePermission]:
+        """
+        `EpicUser` can only be created, updated or deleted when the authorized user is an admin.
 
-    def list(self, request: Request, *args, **kwargs) -> Response:
+        Returns:
+            List[permissions.BasePermission]: List of permissions for the request being done.
+        """
+        if self.request.method in ["POST", "PUT", "DELETE"]:
+            return [permissions.IsAdminUser()]
+        return [permissions.IsAuthenticated()]
+
+    def get_queryset(self) -> QuerySet:
         """
         GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
 
-        Args:
-            request (Request): API Request
-
         Returns:
-            Response: Result of the queryset.
+            QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
         """
-        queryset = self._get_based_on_permissions(self.request.user)
-        serializer = EpicUserSerializer(
-            queryset, many=True, context={"request": request}
-        )
-        return Response(serializer.data)
-
-    def retrieve(self, request: Request, pk: str = None) -> Response:
-        """
-        GET detail `EpicUser`. When not an admin or self it will return a 404 response.
-
-        Args:
-            request (Request): API Request.
-            pk (str, optional): Id of the `EpicUser` to retrieve. Defaults to None.
-
-        Returns:
-            Response: Result of the request.
-        """
-        queryset = self._get_based_on_permissions(self.request.user)
-        user = get_object_or_404(queryset, pk=pk)
-        serializer = EpicUserSerializer(user, context={"request": request})
-        return Response(serializer.data)
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return EpicUser.objects.all()
+        return EpicUser.objects.filter(id=self.request.user.id)
 
 
 class AreaViewSet(viewsets.ReadOnlyModelViewSet):

@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
@@ -149,25 +151,33 @@ class TestEpicUserViewSet:
         else:
             assert len(response.data) > 1
 
+    anakin_json_data = {
+        "url": "http://testserver/api/epicuser/3/",
+        "id": 3,
+        "username": "Anakin",
+        "organization": "Gallactic Empire",
+        "selected_programs": [2, 4],
+    }
+
     @pytest.mark.parametrize(
-        "epic_username, find_username, expected_code",
+        "epic_username, find_username, expected_response",
         [
             pytest.param(
                 "Palpatine",
                 "Anakin",
-                404,
+                dict(status_code=404, content={"detail": "Not found."}),
                 id="Non admins cannot retrieve other users.",
             ),
             pytest.param(
                 "Anakin",
                 "Anakin",
-                200,
+                dict(status_code=200, content=anakin_json_data),
                 id="Non admins can retrieve themselves.",
             ),
             pytest.param(
                 "admin",
                 "Anakin",
-                200,
+                dict(status_code=200, content=anakin_json_data),
                 id="Admins can retrieve other users.",
             ),
         ],
@@ -176,7 +186,7 @@ class TestEpicUserViewSet:
         self,
         epic_username: str,
         find_username: str,
-        expected_code: int,
+        expected_response: dict,
         api_client: APIClient,
     ):
         # Define test data.
@@ -188,7 +198,8 @@ class TestEpicUserViewSet:
         response = api_client.get(url)
 
         # Verify final exepctations.
-        assert response.status_code == expected_code
+        assert response.status_code == expected_response["status_code"]
+        assert json.loads(response.content) == expected_response["content"]
 
     @pytest.mark.parametrize(
         "epic_username",
