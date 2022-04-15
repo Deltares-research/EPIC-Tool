@@ -7,6 +7,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from epic_app.importers import EpicAgencyImporter, EpicDomainImporter, EpicImporter
 from epic_app.models.models import Agency, Area, Group, Program
 
+test_data_dir: Path = Path(__file__).parent.parent / "test_data"
+
 
 class TestEpicDomainImporter:
     def test_epic_domain_importer(self):
@@ -16,7 +18,7 @@ class TestEpicDomainImporter:
     @pytest.mark.django_db
     def test_import_csv_from_filepath(self):
         # Define test data
-        test_file = Path(__file__).parent / "test_data" / "initial_epic_data.csv"
+        test_file = test_data_dir / "initial_epic_data.csv"
         assert test_file.is_file()
 
         # Verify initial expectations
@@ -48,7 +50,7 @@ class TestEpicDomainImporter:
     @pytest.mark.django_db
     def test_import_csv_from_inmemoryuploaddedfile(self):
         # Define request.
-        test_file = Path(__file__).parent / "test_data" / "initial_epic_data.csv"
+        test_file = test_data_dir / "initial_epic_data.csv"
         assert test_file.is_file()
         with test_file.open("rb") as csv_file:
             file_io = BytesIO(csv_file.read())
@@ -99,7 +101,7 @@ class TestEpicAgencyImporter:
         Fixture to load the predefined database so we can test importing agencies correctly.
         """
         # Define test data
-        test_file = Path(__file__).parent / "test_data" / "initial_epic_data.csv"
+        test_file = test_data_dir / "initial_epic_data.csv"
         assert test_file.is_file()
         EpicDomainImporter().import_csv(test_file)
 
@@ -111,7 +113,7 @@ class TestEpicAgencyImporter:
     @pytest.mark.django_db
     def test_import_csv_from_filepath(self):
         # Define test data
-        test_file = Path(__file__).parent / "test_data" / "agency_data.csv"
+        test_file = test_data_dir / "agency_data.csv"
         assert test_file.is_file()
 
         # Verify initial expectations

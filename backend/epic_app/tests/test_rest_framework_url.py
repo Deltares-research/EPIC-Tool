@@ -4,7 +4,6 @@ import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 
-from epic_app.models.epic_questions import Question
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
