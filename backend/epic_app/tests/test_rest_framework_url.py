@@ -190,23 +190,60 @@ class TestEpicUserViewSet:
         # Verify final exepctations.
         assert response.status_code == expected_code
 
-    def test_POST_epic_user(self, api_client: APIClient):
-        ck_username = "Clark Kent"
+    @pytest.mark.parametrize(
+        "epic_username",
+        [
+            pytest.param(None, id="No user authenticated"),
+            pytest.param("Palpatine", id="Authenticated USER"),
+        ],
+    )
+    def test_POST_when_not_admin_returns_error(
+        self, epic_username: str, api_client: APIClient
+    ):
+        """
+        Note: This test is to verify that we DO NOT allow user creation unless
+        from an admin. In the future we might allow anyone to create new ones.
+        """
+        ck_username = "ClarkKent"
         data_dict = {
             "username": ck_username,
-            "password": "superman",
+            "password": "IamSup3rm4n!",
             "organization": "Daily Planet",
         }
         assert not EpicUser.objects.filter(username=ck_username).exists()
 
         # Run request.
+        if epic_username:
+            set_user_auth_token(api_client, epic_username)
         response = api_client.post(self.url_root, data_dict, format="json")
 
         # Verify final expectations.
-        assert response.status_code == 200, "It should be possible to create a user."
+        assert response.status_code in [
+            403,
+            405,
+        ], "It should NOT be possible to create a user."
+        assert not EpicUser.objects.filter(
+            username=ck_username
+        ).exists(), "User was created despite not having to."
+
+    def test_POST_when_admin_returns_created(self, api_client: APIClient):
+        ck_username = "ClarkKent"
+        data_dict = {
+            "username": ck_username,
+            "password": "IamSup3rm4n!",
+            "organization": "Daily Planet",
+        }
+        assert not EpicUser.objects.filter(username=ck_username).exists()
+
+        # Run request.
+        set_user_auth_token(api_client, "admin")
+        response = api_client.post(self.url_root, data_dict, format="json")
+
+        # Verify final expectations.
+        assert response.status_code == 201
         assert EpicUser.objects.filter(
             username=ck_username
-        ).exists(), "User was not created despite a succesful request."
+        ).exists(), "User was not created despite succesful response."
 
 
 @pytest.mark.django_db
