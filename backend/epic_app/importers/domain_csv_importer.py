@@ -49,18 +49,18 @@ class EpicDomainImporter(BaseEpicImporter):
         """
         for r_area, r_area_values in areas_dictionary.items():
             # Create new area
-            c_area = Area(name=r_area)
+            c_area = Area(name=r_area.strip())
             c_area.save()
             read_groups = self.group_entity("group", r_area_values)
             for r_group, r_group_values in read_groups.items():
                 # Create new group
-                c_group = Group(name=r_group, area=c_area)
+                c_group = Group(name=r_group.strip(), area=c_area)
                 c_group.save()
                 for r_csv_value in r_group_values:
                     # Create new program
                     c_program = Program(
-                        name=r_csv_value.program,
-                        description=r_csv_value.description,
+                        name=r_csv_value.program.strip(),
+                        description=r_csv_value.description.strip(),
                         group=c_group,
                     )
                     c_program.save()

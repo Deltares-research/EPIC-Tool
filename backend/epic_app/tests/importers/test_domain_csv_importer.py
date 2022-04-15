@@ -9,13 +9,13 @@ from epic_app.models.models import Area, Group, Program
 from epic_app.tests import test_data_dir
 
 
+@pytest.mark.django_db
 class TestEpicDomainImporter:
     def test_epic_domain_importer(self):
         domain_importer = EpicDomainImporter()
         assert isinstance(domain_importer, BaseEpicImporter)
         assert isinstance(domain_importer, ProtocoEpicImporter)
 
-    @pytest.mark.django_db
     def test_import_csv_from_filepath(self):
         # Define test data
         test_file = test_data_dir / "initial_epic_data.csv"
@@ -47,7 +47,6 @@ class TestEpicDomainImporter:
         assert dummy_group not in Group.objects.all()
         assert dummy_program not in Program.objects.all()
 
-    @pytest.mark.django_db
     def test_import_csv_from_inmemoryuploaddedfile(self):
         # Define request.
         test_file = test_data_dir / "initial_epic_data.csv"

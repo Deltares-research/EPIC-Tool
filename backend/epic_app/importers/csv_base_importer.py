@@ -16,7 +16,9 @@ class ProtocoEpicImporter(Protocol):
 
 class BaseEpicImporter:
     class CsvLineObject:
-        pass
+        @classmethod
+        def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
+            pass
 
     def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
         pass
