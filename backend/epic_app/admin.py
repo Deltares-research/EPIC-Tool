@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.shortcuts import redirect, render
 from django.urls import path
 
-from epic_app.importers import EpicAgencyImporter, EpicDomainImporter, EpicImporter
+from epic_app.importers import BaseEpicImporter, EpicAgencyImporter, EpicDomainImporter
 from epic_app.models.epic_questions import (
     Answer,
     EvolutionQuestion,
@@ -73,7 +73,7 @@ class ImportEntityAdmin(admin.ModelAdmin):
         return render(request, "admin/csv_form.html", payload)
 
     @abc.abstractmethod
-    def get_importer(self) -> EpicImporter:
+    def get_importer(self) -> BaseEpicImporter:
         raise NotImplementedError("Should be implemented in concrete class.")
 
 
