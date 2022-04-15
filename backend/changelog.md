@@ -1,3 +1,18 @@
+## v0.12.1 (2022-04-15)
+
+### Refactor
+
+- **views.py**: Improved EpicUserViewSet class definition; Extended related GET - detail test.
+
+## v0.12.0 (2022-04-15)
+
+### Feat
+
+- **epic_app/views.py;question_serializer.py**: We now expose a get to get (all/detail) a question category for a given program
+- **epic_app/urls.py;epic_app/serializers/question_serializer.py**: We now expose each question category individually
+- **epic_app/serializers/epic_user_serializer.py**: Now we expose the list of selected programs for a given user
+- **epic_app/models/epic_user.py**: Extended user definition to include list of selected programs
+
 ## v0.11.0 (2022-04-11)
 
 ### Feat

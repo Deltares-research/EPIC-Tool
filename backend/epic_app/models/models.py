@@ -2,23 +2,11 @@ from __future__ import annotations
 
 from typing import List, Optional
 
-from django.contrib.auth.models import User
 from django.db import models
 from django.forms import ValidationError
 
 
 # region Default models
-class EpicUser(User):
-    """
-    Defines the properties for a typical user in EpicTool.
-
-    Args:
-        User (auth.models.User): Derives directly from the base class User.
-    """
-
-    organization: str = models.CharField(max_length=50)
-
-
 class Area(models.Model):
     """
     Higher up entity containing a set of Groups.

@@ -6,7 +6,7 @@ from epic_app.models.epic_questions import (
     SingleChoiceAnswer,
     YesNoAnswer,
 )
-from epic_app.models.models import EpicUser
+from epic_app.models.epic_user import EpicUser
 
 
 class YesNoAnswerSerializer(serializers.ModelSerializer):

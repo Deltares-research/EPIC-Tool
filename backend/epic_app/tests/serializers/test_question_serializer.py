@@ -6,13 +6,11 @@ from epic_app.models.epic_questions import (
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
-    Question,
 )
 from epic_app.serializers.question_serializer import (
     EvolutionQuestionSerializer,
     LinkagesQuestionSerializer,
     NationalFrameworkQuestionSerializer,
-    QuestionSerializer,
 )
 from epic_app.tests.epic_db_fixture import epic_test_db
 
@@ -40,32 +38,6 @@ def get_serializer():
 
 
 serializer_context = get_serializer()
-
-
-@pytest.mark.django_db
-class TestQuestionSerializer:
-    def test_given_valid_instances_when_to_representation_returns_expected_data(self):
-        # Define context
-        serialized_data = list(
-            QuestionSerializer(
-                Question.objects.all(), many=True, context=serializer_context
-            ).data
-        )
-
-        assert len(serialized_data) == 5
-
-        def validate_concrete_questions(
-            serialized_dict, nfq: bool, evq: bool, lkq: bool
-        ) -> bool:
-            assert isinstance(serialized_dict["nationalframeworkquestion"], dict) == nfq
-            assert isinstance(serialized_dict["evolutionquestion"], dict) == evq
-            assert isinstance(serialized_dict["linkagesquestion"], dict) == lkq
-
-        validate_concrete_questions(serialized_data[0], True, False, False)
-        validate_concrete_questions(serialized_data[1], True, False, False)
-        validate_concrete_questions(serialized_data[2], False, True, False)
-        validate_concrete_questions(serialized_data[3], False, True, False)
-        validate_concrete_questions(serialized_data[4], False, False, True)
 
 
 @pytest.mark.django_db

@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
 from epic_app.importers import EpicAgencyImporter, EpicDomainImporter
-from epic_app.models.models import EpicUser
+from epic_app.models.epic_user import EpicUser
 
 
 class Command(BaseCommand):
@@ -43,6 +43,12 @@ class Command(BaseCommand):
         )
 
     def _import_files(self, test_data_dir: Path):
+        """
+        Imports all the available files to create a reliable test environment.
+
+        Args:
+            test_data_dir (Path): Path to the test directory.
+        """
         epic_domain_csv = test_data_dir / "initial_epic_data.csv"
         if epic_domain_csv.is_file():
             self.stdout.write(
@@ -63,6 +69,9 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS("Import successful."))
 
     def _create_superuser(self):
+        """
+        Creates an admin 'superuser' with classic 'admin'/'admin' user/pass.
+        """
         # Create an admin user.
         admin_user = User(
             username="admin",
@@ -85,10 +94,21 @@ class Command(BaseCommand):
             call_command("createsuperuser")
 
         # Create a few basic users.
-        EpicUser.objects.create(username="Zelda", organization="Nintendo")
-        EpicUser.objects.create(username="Ganon", organization="Nintendo")
-        EpicUser.objects.create(username="Luke", organization="Rebel Alliance")
-        EpicUser.objects.create(username="Leia", organization="Rebel Alliance")
+        def create_user(user_name: str, user_org: str):
+            c_user = EpicUser(username=user_name, organization=user_org)
+            # Use the same username but with lowercase (it's a test!)
+            c_user.set_password(user_name.lower())
+            c_user.save()
+
+        create_user("Zelda", "Nintendo")
+        create_user("Ganon", "Nintendo")
+        create_user("Luke", "Rebel Alliance")
+        create_user("Leia", "Rebel Alliance")
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Created some 'dummy' users: 'Zelda', 'Ganon', 'Luke' and 'Leia'. Their passwords match the lowercase username."
+            )
+        )
 
     def _import_test_db(self):
         test_data_dir: Path = self.epic_app_dir / "tests" / "test_data"

@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 from rest_framework import serializers
 
-from epic_app.models.models import EpicUser
+from epic_app.models.epic_user import EpicUser
 
 
 class EpicUserSerializer(serializers.ModelSerializer):
@@ -24,7 +24,14 @@ class EpicUserSerializer(serializers.ModelSerializer):
         """
 
         model = EpicUser
-        fields = ("url", "id", "username", "organization", "password")
+        fields = (
+            "url",
+            "id",
+            "username",
+            "organization",
+            "selected_programs",
+            "password",
+        )
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):

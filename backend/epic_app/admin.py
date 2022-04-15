@@ -12,7 +12,8 @@ from epic_app.models.epic_questions import (
     LinkagesQuestion,
     NationalFrameworkQuestion,
 )
-from epic_app.models.models import Agency, Area, EpicUser, Group, Program
+from epic_app.models.epic_user import EpicUser
+from epic_app.models.models import Agency, Area, Group, Program
 
 
 class CsvImportForm(forms.Form):
