@@ -116,12 +116,15 @@ class NfqAdmin(ImportEntityAdmin):
     def get_importer(self) -> NationalFrameworkQuestionImporter:
         return NationalFrameworkQuestionImporter()
 
+
 class KaaAdmin(ImportEntityAdmin):
     """
     Key Agency Actions Question admin page to allow CSV import.
     """
+
     def get_importer(self) -> KeyAgencyActionsQuestionImporter:
         return KeyAgencyActionsQuestionImporter()
+
 
 class EvoAdmin(ImportEntityAdmin):
     """
