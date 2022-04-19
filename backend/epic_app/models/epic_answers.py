@@ -5,12 +5,13 @@ import abc
 from django.db import IntegrityError, models
 
 from epic_app.models import models as base_models
-from epic_app.models.epic_questions import (
-    EvolutionChoiceType,
-    Question,
-    YesNoAnswerType,
-)
+from epic_app.models.epic_questions import EvolutionChoiceType, Question
 from epic_app.models.epic_user import EpicUser
+
+
+class YesNoAnswerType(models.TextChoices):
+    YES = "Y"
+    NO = "N"
 
 
 # region Cross-Reference Tables

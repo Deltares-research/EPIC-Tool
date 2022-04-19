@@ -7,13 +7,13 @@ from epic_app.models.epic_answers import (
     MultipleChoiceAnswer,
     SingleChoiceAnswer,
     YesNoAnswer,
+    YesNoAnswerType,
 )
 from epic_app.models.epic_questions import (
     EvolutionChoiceType,
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
-    YesNoAnswerType,
 )
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Program

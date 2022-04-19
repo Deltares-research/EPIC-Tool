@@ -21,10 +21,6 @@ class Question(models.Model):
     def __str__(self) -> str:
         return self.title[0:15]
 
-    # @abc.abstractmethod
-    # def get_answer(self, q_user: EpicUser) -> Answer:
-    #     raise NotImplementedError
-
 
 class NationalFrameworkQuestion(Question):
     """
@@ -32,16 +28,6 @@ class NationalFrameworkQuestion(Question):
     """
 
     description: str = models.TextField(null=False, blank=False)
-
-    # def get_answer(self, q_user: EpicUser) -> YesNoAnswer:
-    #     if not YesNoAnswer.objects.filter(user=q_user, question=self).exists():
-    #         return YesNoAnswer.objects.create(user=q_user, question=self)
-    #     return YesNoAnswer.objects.filter(user=q_user, question=self).first()
-
-
-class YesNoAnswerType(models.TextChoices):
-    YES = "Y"
-    NO = "N"
 
 
 class EvolutionChoiceType(models.TextChoices):
@@ -70,11 +56,6 @@ class EvolutionQuestion(Question):
         null=False, blank=False, verbose_name=str(EvolutionChoiceType.EFFECTIVE)
     )
 
-    # def get_answer(self, q_user: EpicUser) -> SingleChoiceAnswer:
-    #     if not SingleChoiceAnswer.objects.filter(user=q_user, question=self).exists():
-    #         return SingleChoiceAnswer.objects.create(user=q_user, question=self)
-    #     return SingleChoiceAnswer.objects.filter(user=q_user, question=self).first()
-
 
 class LinkagesQuestion(Question):
     """
@@ -99,11 +80,6 @@ class LinkagesQuestion(Question):
                 "UNIQUE constraint failed: epic_app_question.program_id"
             )
         return super().save(*args, **kwargs)
-
-    # def get_answer(self, q_user: EpicUser) -> MultipleChoiceAnswer:
-    #     if not MultipleChoiceAnswer.objects.filter(user=q_user, question=self).exists():
-    #         return MultipleChoiceAnswer.objects.create(user=q_user, question=self)
-    #     return MultipleChoiceAnswer.objects.filter(user=q_user, question=self).first()
 
     @staticmethod
     def generate_linkages():
