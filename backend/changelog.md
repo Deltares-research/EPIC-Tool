@@ -1,3 +1,69 @@
+## v0.14.0 (2022-04-19)
+
+### Feat
+
+- **epic_app/models/epic_questions.py**: Added Key Agency Actions table
+- **answer_serializer.py**: Fixed posting answers
+- **epic_app/views.py**: Changed views for answers so it's possible to post as an user or an admin
+
+### Fix
+
+- **epic_questions.py**: Fixed meta inheritance on questions to allow unique relationships
+
+### Refactor
+
+- **answer_serializer.py**: Removed serializer for raw answer as it is not necessary anymore
+- **epic_answers**: Split answers from questions
+
+## v0.13.0 (2022-04-15)
+
+### Feat
+
+- **epic_app/admin.py**: Added admin action to generate all linkages from available programs
+- **epic_app/admin.py**: Added admin views to import national framework and evolution questions
+- **question_csv_importer.py**: Added csv importers for NationalFrameworkQuestion and EvolutionQuestion
+
+### Refactor
+
+- **importers**: Extracted each importer in a separate file for better consistency
+- **importers**: Moved importers into a separate directory to allow better maintainance
+
+## v0.12.1 (2022-04-15)
+
+### Refactor
+
+- **views.py**: Improved EpicUserViewSet class definition; Extended related GET - detail test.
+
+## v0.12.0 (2022-04-15)
+
+### Feat
+
+- **epic_app/views.py;question_serializer.py**: We now expose a get to get (all/detail) a question category for a given program
+- **epic_app/urls.py;epic_app/serializers/question_serializer.py**: We now expose each question category individually
+- **epic_app/serializers/epic_user_serializer.py**: Now we expose the list of selected programs for a given user
+- **epic_app/models/epic_user.py**: Extended user definition to include list of selected programs
+
+## v0.11.0 (2022-04-11)
+
+### Feat
+
+- **epic_app/serializers/answer_serializer.py**: Extended answer serializer definition to match question types
+- **epic_app/models/epic_questions.py**: Now questions return a new (or existing) answer for the requested user. Added tests
+- **epic_app/models/epic_questions.py**: Added answer types
+
+## v0.10.0 (2022-04-08)
+
+### Feat
+
+- **epic_app/serializers/question_serializer.py**: Improved serializer so we have information of its subtypes directly
+- **epic_app/models/epic_questions.py**: Added one-to-one constraint for linkages question by overriding the default save method
+- **epic_app/models/epic_questions.py**: Added class for questions and created one model class per type from the mockups
+
+### Refactor
+
+- **epic_app/serializers**: Moved serializers into different directory to better maintain them
+- **epic_app/models**: Moved models into separate directory for better maintainability
+
 ## v0.9.0 (2022-04-06)
 
 ### Feat
