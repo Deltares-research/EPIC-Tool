@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 
 from epic_app.models.epic_answers import (
+    Answer,
     MultipleChoiceAnswer,
     SingleChoiceAnswer,
     YesNoAnswer,
@@ -583,7 +584,14 @@ class TestAnswerViewSet:
         "justify_answer": "Laboris proident enim dolore ullamco voluptate nisi labore laborum ut qui adipisicing occaecat exercitation culpa.",
     }
 
-    singlechoice_anakin = {"url": "http://testserver/api/singleanswer/2/", "id": 2, "user": 3, "question": 3, "selected_choice": "Effective", "justify_answer": "Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris."}
+    singlechoice_anakin = {
+        "url": "http://testserver/api/singleanswer/2/",
+        "id": 2,
+        "user": 3,
+        "question": 3,
+        "selected_choice": "Effective",
+        "justify_answer": "Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris.",
+    }
     multiplechoice_anakin = {
         "id": 3,
         "question": 5,
@@ -649,6 +657,57 @@ class TestAnswerViewSet:
         assert response.status_code == expected_code
         if response.status_code == 200:
             assert json.loads(response.content) == expected_data
+
+    @pytest.mark.parametrize(
+        "answer_url, json_data",
+        [
+            pytest.param(
+                yesno_url,
+                dict(
+                    question="1",
+                    short_answer="Y",
+                    justify_answer="Deserunt et velit ad occaecat qui.",
+                ),
+                id="YesNo answer",
+            ),
+            pytest.param(
+                singlechoice_url,
+                dict(question="3", selected_choice="ENGAGED"),
+                id="SingleChoice answer",
+            ),
+            pytest.param(
+                multiplechoice_url,
+                dict(question="5", selected_programs="[2,4]"),
+                id="MultipleChoice answer",
+            ),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "epic_username",
+        [pytest.param("Anakin", id="Non-admin"), pytest.param("admin", id="Admin")],
+    )
+    def test_POST_answer(
+        self,
+        answer_url: str,
+        epic_username: str,
+        json_data: dict,
+        api_client: APIClient,
+    ):
+        def get_user_id(epic_username: str) -> int:
+            epic_user: User = User.objects.filter(username=epic_username).first()
+            if epic_user.is_staff or epic_user.is_superuser:
+                return User.objects.filter(username="Anakin").first().pk
+            return epic_user.auth_token.key
+
+        # Set test data.
+        set_user_auth_token(api_client, epic_username)
+        assert len(Answer.objects.all()) == 0  # No responses yet.
+        json_data["user"] = get_user_id(epic_username)
+
+        # Run request.
+        response = api_client.post(answer_url, json_data, format="json")
+        assert response.status_code == 201
+        assert len(Answer.objects.all()) == 1
 
 
 @pytest.mark.django_db
