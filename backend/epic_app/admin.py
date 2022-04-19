@@ -12,7 +12,12 @@ from epic_app.importers import (
     EvolutionQuestionImporter,
     NationalFrameworkQuestionImporter,
 )
-from epic_app.models.epic_answers import Answer
+from epic_app.models.epic_answers import (
+    Answer,
+    MultipleChoiceAnswer,
+    SingleChoiceAnswer,
+    YesNoAnswer,
+)
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
     LinkagesQuestion,
@@ -163,4 +168,6 @@ admin.site.register(Program)
 admin.site.register(NationalFrameworkQuestion, NfqAdmin)
 admin.site.register(EvolutionQuestion, EvoAdmin)
 admin.site.register(LinkagesQuestion, LnkAdmin)
-# admin.site.register(Answer)
+admin.site.register(YesNoAnswer)
+admin.site.register(SingleChoiceAnswer)
+admin.site.register(MultipleChoiceAnswer)
