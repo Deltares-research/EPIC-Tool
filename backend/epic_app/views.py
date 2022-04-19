@@ -15,6 +15,7 @@ from epic_app.models.epic_answers import (
 )
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
+    KeyAgencyActionsQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
     Question,
@@ -36,6 +37,7 @@ from epic_app.serializers.answer_serializer import (
     SingleChoiceAnswerSerializer,
     YesNoAnswerSerializer,
 )
+from epic_app.serializers.question_serializer import KeyAgencyQuestionSerializer
 
 
 class EpicUserViewSet(viewsets.ModelViewSet):
@@ -184,6 +186,16 @@ class NationalFrameworkQuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = NationalFrameworkQuestion.objects.all()
     serializer_class = NationalFrameworkQuestionSerializer
+    permission_classes = [permissions.DjangoModelPermissions]
+
+
+class KeyAgencyActionsQuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Acess point for CRUD operations on `KeyAgencyActionsQuestion` table.
+    """
+
+    queryset = KeyAgencyActionsQuestion.objects.all()
+    serializer_class = KeyAgencyQuestionSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 

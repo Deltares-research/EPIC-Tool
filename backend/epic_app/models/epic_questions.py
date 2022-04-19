@@ -22,16 +22,29 @@ class Question(models.Model):
         return self.title[0:15]
 
 
-class NationalFrameworkQuestion(Question):
+class YesNoQuestion(Question):
+    description: str = models.TextField(null=False, blank=False)
+
+    class Meta:
+        abstract = True
+        # Override the unique_together clause.
+        unique_together = []
+
+
+class NationalFrameworkQuestion(YesNoQuestion):
     """
     Question of type Yes / No and Justify.
     """
 
-    description: str = models.TextField(null=False, blank=False)
+    pass
 
-    class Meta:
-        # Override the unique_together clause.
-        unique_together = []
+
+class KeyAgencyActionsQuestion(YesNoQuestion):
+    """
+    Question of type Yes / No and Justify.
+    """
+
+    pass
 
 
 class EvolutionChoiceType(models.TextChoices):

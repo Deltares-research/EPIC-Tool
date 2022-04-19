@@ -12,6 +12,7 @@ from epic_app.importers import (
     EvolutionQuestionImporter,
     NationalFrameworkQuestionImporter,
 )
+from epic_app.importers.question_csv_importer import KeyAgencyActionsQuestionImporter
 from epic_app.models.epic_answers import (
     Answer,
     MultipleChoiceAnswer,
@@ -20,6 +21,7 @@ from epic_app.models.epic_answers import (
 )
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
+    KeyAgencyActionsQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
 )
@@ -114,6 +116,12 @@ class NfqAdmin(ImportEntityAdmin):
     def get_importer(self) -> NationalFrameworkQuestionImporter:
         return NationalFrameworkQuestionImporter()
 
+class KaaAdmin(ImportEntityAdmin):
+    """
+    Key Agency Actions Question admin page to allow CSV import.
+    """
+    def get_importer(self) -> KeyAgencyActionsQuestionImporter:
+        return KeyAgencyActionsQuestionImporter()
 
 class EvoAdmin(ImportEntityAdmin):
     """
@@ -166,6 +174,7 @@ admin.site.register(Agency, AgencyAdmin)
 admin.site.register(Group)
 admin.site.register(Program)
 admin.site.register(NationalFrameworkQuestion, NfqAdmin)
+admin.site.register(KeyAgencyActionsQuestion, KaaAdmin)
 admin.site.register(EvolutionQuestion, EvoAdmin)
 admin.site.register(LinkagesQuestion, LnkAdmin)
 admin.site.register(YesNoAnswer)

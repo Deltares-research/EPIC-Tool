@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
+    KeyAgencyActionsQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
 )
@@ -14,6 +15,10 @@ class NationalFrameworkQuestionSerializer(serializers.ModelSerializer):
         model = NationalFrameworkQuestion
         fields = "__all__"
 
+class KeyAgencyQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = KeyAgencyActionsQuestion
+        fields = "__all__"
 
 class EvolutionQuestionSerializer(serializers.ModelSerializer):
     class Meta:

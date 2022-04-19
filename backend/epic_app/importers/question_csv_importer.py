@@ -5,11 +5,16 @@ from typing import List, Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from epic_app.importers.csv_base_importer import BaseEpicImporter
-from epic_app.models.epic_questions import EvolutionQuestion, NationalFrameworkQuestion
+from epic_app.models.epic_questions import (
+    EvolutionQuestion,
+    KeyAgencyActionsQuestion,
+    NationalFrameworkQuestion,
+    Question,
+)
 from epic_app.models.models import Program
 
 
-class NationalFrameworkQuestionImporter(BaseEpicImporter):
+class _YesNoJustifyQuestionImporter(BaseEpicImporter):
     class CsvLineObject:
         program: str
         question: str
@@ -36,8 +41,11 @@ class NationalFrameworkQuestionImporter(BaseEpicImporter):
         self._cleanup_questions()
         self._import_questions(line_objects)
 
+    def _get_type(self) -> Question:
+        pass
+
     def _cleanup_questions(self):
-        NationalFrameworkQuestion.objects.all().delete()
+        self._get_type().objects.all().delete()
 
     def _import_questions(self, imported_questions: List[CsvLineObject]):
         for q_question in imported_questions:
@@ -47,12 +55,22 @@ class NationalFrameworkQuestionImporter(BaseEpicImporter):
                     f"Program '{q_question.program}' not found, import can't go through."
                 )
             p_found = Program.objects.filter(name=q_question.program).first()
-            c_area = NationalFrameworkQuestion(
+            c_area = self._get_type()(
                 title=q_question.program,
                 description=q_question.description,
                 program=p_found,
             )
             c_area.save()
+
+
+class NationalFrameworkQuestionImporter(_YesNoJustifyQuestionImporter):
+    def _get_type(self) -> Question:
+        return NationalFrameworkQuestion
+
+
+class KeyAgencyActionsQuestionImporter(_YesNoJustifyQuestionImporter):
+    def _get_type(self) -> Question:
+        return KeyAgencyActionsQuestion
 
 
 class EvolutionQuestionImporter(BaseEpicImporter):
