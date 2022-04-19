@@ -104,7 +104,7 @@ class TestAreaAdmin:
         assert r_result.url == ".."
         assert len(Area.objects.all()) == 5
         assert len(Group.objects.all()) == 11
-        assert len(Program.objects.all()) == 43
+        assert len(Program.objects.all()) == 42
         # Verify the initial data has been removed.
         assert dummy_area not in Area.objects.all()
         assert dummy_group not in Group.objects.all()

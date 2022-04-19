@@ -2,14 +2,10 @@ import pytest
 from django.db import IntegrityError, transaction
 
 from epic_app.models.epic_questions import (
-    Answer,
     EvolutionQuestion,
     LinkagesQuestion,
-    MultipleChoiceAnswer,
     NationalFrameworkQuestion,
     Question,
-    SingleChoiceAnswer,
-    YesNoAnswer,
 )
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Program
@@ -42,8 +38,6 @@ class TestQuestion:
         # Verify final expectations
         assert Question.objects.filter(title=q_title, program=q_program).exists()
         assert str(q_created) == q_title[0:15]
-        with pytest.raises(NotImplementedError):
-            q_created.get_answer(q_user=None)
 
     def test_delete_question_program_deletes_in_cascade(self):
         # Define data
@@ -100,9 +94,6 @@ class TestNationalFrameworkQuestion:
         assert Question.objects.filter(title=nfq_title).exists()
         assert NationalFrameworkQuestion.objects.filter(title=nfq_title).exists()
         assert isinstance(nfq, Question)
-        answer: Answer = nfq.get_answer(EpicUser.objects.first())
-        assert isinstance(answer, YesNoAnswer)
-        assert isinstance(answer, Answer)
 
 
 @pytest.mark.django_db
@@ -135,9 +126,6 @@ class TestEvolutionQuestion:
         assert Question.objects.filter(title=evq_title).exists()
         assert EvolutionQuestion.objects.filter(title=evq_title).exists()
         assert isinstance(evq, Question)
-        answer: Answer = evq.get_answer(EpicUser.objects.first())
-        assert isinstance(answer, SingleChoiceAnswer)
-        assert isinstance(answer, Answer)
 
 
 @pytest.mark.django_db
@@ -161,9 +149,6 @@ class TestLinkagesQuestion:
             title=lq_title, program=lq_program
         ).exists()
         assert isinstance(lq_created, Question)
-        answer: Answer = lq_created.get_answer(EpicUser.objects.first())
-        assert isinstance(answer, MultipleChoiceAnswer)
-        assert isinstance(answer, Answer)
 
     def test_linkages_constrained_one_per_program(self):
         # Get one existing linkage question.
@@ -183,27 +168,3 @@ class TestLinkagesQuestion:
             str(e_info.value)
             == "UNIQUE constraint failed: epic_app_question.program_id"
         )
-
-
-@pytest.mark.django_db
-class TestAnswer:
-    @pytest.mark.parametrize(
-        "q_type",
-        [
-            pytest.param(NationalFrameworkQuestion, id="NationalFrameworkQuestion"),
-            pytest.param(EvolutionQuestion, id="EvolutionQuestion"),
-            pytest.param(LinkagesQuestion, id="LinkagesQuestion"),
-        ],
-    )
-    def test_get_answer_returns_new_instance_when_doesnot_exist(self, q_type: Question):
-        q_instance: Question = q_type.objects.all().last()
-        u_question: EpicUser = EpicUser.objects.all().last()
-        assert not Answer.objects.filter(user=u_question, question=q_instance).exists()
-
-        # Try to get the answer for the first time.
-        nf_answer: Answer = q_instance.get_answer(u_question)
-        assert Answer.objects.filter(user=u_question, question=q_instance).exists()
-
-        # Try to get it again
-        nf_answer_two: Answer = q_instance.get_answer(u_question)
-        assert nf_answer == nf_answer_two

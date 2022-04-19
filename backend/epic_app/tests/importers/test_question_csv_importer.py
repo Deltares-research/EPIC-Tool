@@ -25,7 +25,7 @@ class TestNationalFrameworkQuestionImporter:
 
         NationalFrameworkQuestionImporter().import_csv(test_file)
 
-        assert len(NationalFrameworkQuestion.objects.all()) == 5
+        assert len(NationalFrameworkQuestion.objects.all()) == 4
 
 
 @pytest.mark.django_db

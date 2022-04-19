@@ -4,6 +4,14 @@ import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 
+from epic_app.models.epic_answers import (
+    Answer,
+    MultipleChoiceAnswer,
+    SingleChoiceAnswer,
+    YesNoAnswer,
+    YesNoAnswerType,
+)
+from epic_app.models.epic_questions import EvolutionChoiceType, Question
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
@@ -474,7 +482,7 @@ class TestQuestionsViewSet:
             pytest.param(evo_url, 2, id="list Evolution question"),
             pytest.param(lnk_url, 1, id="list Linkages question"),
             pytest.param(nfq_url + "1/", 4, id="retrieve (NFQ 'a' with 7 fields)"),
-            pytest.param(evo_url + "3/", 4, id="retrieve (EVO 'a' with 7 fields)"),
+            pytest.param(evo_url + "3/", 7, id="retrieve (EVO 'a' with 7 fields)"),
             pytest.param(lnk_url + "5/", 3, id="retrieve (LNK 'a' with 7 fields)"),
         ],
     )
@@ -496,7 +504,209 @@ class TestQuestionsViewSet:
 
 @pytest.mark.django_db
 class TestAnswerViewSet:
-    url_root = "/api/answer/"
+    yesno_url = "/api/yesnoanswer/"
+    singlechoice_url = "/api/singleanswer/"
+    multiplechoice_url = "/api/multianswer/"
+
+    @pytest.fixture
+    def anakin_answers_fixture(self):
+        anakin = EpicUser.objects.filter(username="Anakin").first()
+        YesNoAnswer.objects.create(
+            user=anakin,
+            question=Question.objects.filter(pk=1).first(),
+            short_answer=YesNoAnswerType.NO,
+            justify_answer="Laboris proident enim dolore ullamco voluptate nisi labore laborum ut qui adipisicing occaecat exercitation culpa.",
+        )
+        SingleChoiceAnswer.objects.create(
+            user=anakin,
+            question=Question.objects.filter(pk=3).first(),
+            selected_choice=EvolutionChoiceType.EFFECTIVE,
+            justify_answer="Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris.",
+        )
+        mca = MultipleChoiceAnswer(
+            user=anakin,
+            question=Question.objects.filter(pk=5).first(),
+        )
+        mca.save()
+        mca.selected_programs.add(4, 2)
+
+    @pytest.mark.parametrize(
+        "answer_url",
+        [
+            pytest.param(yesno_url, id="Yes-No Answer"),
+            pytest.param(singlechoice_url, id="Singlechoice Answer"),
+            pytest.param(multiplechoice_url, id="Multiplechoice Answer"),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "epic_username, expected_response",
+        [
+            pytest.param(
+                "Palpatine",
+                dict(response=200, entries=0),
+                id="Non admin user cannot GET-LIST other user's answers.",
+            ),
+            pytest.param(
+                "Anakin",
+                dict(response=200, entries=1),
+                id="Non admin user can GET-LIST his answers.",
+            ),
+            pytest.param(
+                "admin",
+                dict(response=200, entries=1),
+                id="Admin user can GET-LIST all answers.",
+            ),
+        ],
+    )
+    def test_GET_LIST_answer(
+        self,
+        answer_url: str,
+        epic_username: str,
+        expected_response: dict,
+        anakin_answers_fixture,
+        api_client: APIClient,
+    ):
+        # Run request.
+        set_user_auth_token(api_client, epic_username)
+        response = api_client.get(answer_url)
+
+        # Verify final expectations
+        assert response.status_code == expected_response["response"]
+        if response.status_code == 200:
+            assert len(response.data) == expected_response["entries"]
+
+    yesno_anakin = {
+        "url": "http://testserver/api/yesnoanswer/1/",
+        "id": 1,
+        "user": 3,
+        "question": 1,
+        "short_answer": "N",
+        "justify_answer": "Laboris proident enim dolore ullamco voluptate nisi labore laborum ut qui adipisicing occaecat exercitation culpa.",
+    }
+
+    singlechoice_anakin = {
+        "url": "http://testserver/api/singleanswer/2/",
+        "id": 2,
+        "user": 3,
+        "question": 3,
+        "selected_choice": "Effective",
+        "justify_answer": "Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris.",
+    }
+    multiplechoice_anakin = {
+        "id": 3,
+        "question": 5,
+        "selected_programs": [2, 4],
+        "url": "http://testserver/api/multianswer/3/",
+        "user": 3,
+    }
+
+    @pytest.mark.parametrize(
+        "epic_username, expected_code",
+        [
+            pytest.param(
+                "Anakin",
+                200,
+                id="Non admin user can RETRIEVE his answer.",
+            ),
+            pytest.param(
+                "Palpatine",
+                404,
+                id="Non admin user cannot RETRIEVE other user's answer.",
+            ),
+            pytest.param(
+                "admin",
+                200,
+                id="Admin user can ANY answers.",
+            ),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "answer_url, expected_data",
+        [
+            pytest.param(
+                yesno_url + "1/",
+                yesno_anakin,
+                id="Yes-No Answer",
+            ),
+            pytest.param(
+                singlechoice_url + "2/",
+                singlechoice_anakin,
+                id="Singlechoice Answer",
+            ),
+            pytest.param(
+                multiplechoice_url + "3/",
+                multiplechoice_anakin,
+                id="Multiplechoice Answer",
+            ),
+        ],
+    )
+    def test_GET_DETAIL_answer(
+        self,
+        answer_url: str,
+        epic_username: str,
+        expected_code: int,
+        expected_data: dict,
+        anakin_answers_fixture,
+        api_client: APIClient,
+    ):
+        # Run request.
+        set_user_auth_token(api_client, epic_username)
+        response = api_client.get(answer_url)
+
+        # Verify final expectations
+        assert response.status_code == expected_code
+        if response.status_code == 200:
+            assert json.loads(response.content) == expected_data
+
+    @pytest.mark.parametrize(
+        "answer_url, json_data",
+        [
+            pytest.param(
+                yesno_url,
+                dict(
+                    question="1",
+                    short_answer="Y",
+                    justify_answer="Deserunt et velit ad occaecat qui.",
+                ),
+                id="YesNo answer",
+            ),
+            pytest.param(
+                singlechoice_url,
+                dict(question="3", selected_choice="ENGAGED"),
+                id="SingleChoice answer",
+            ),
+            pytest.param(
+                multiplechoice_url,
+                dict(question="5", selected_programs=[2, 4]),
+                id="MultipleChoice answer",
+            ),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "epic_username",
+        [pytest.param("Anakin", id="Non-admin"), pytest.param("admin", id="Admin")],
+    )
+    def test_POST_answer(
+        self,
+        answer_url: str,
+        epic_username: str,
+        json_data: dict,
+        api_client: APIClient,
+    ):
+        def set_user(epic_username: str) -> int:
+            epic_user: User = User.objects.filter(username=epic_username).first()
+            if epic_user.is_staff or epic_user.is_superuser:
+                json_data["user"] = User.objects.filter(username="Anakin").first().pk
+
+        # Set test data.
+        set_user_auth_token(api_client, epic_username)
+        assert len(Answer.objects.all()) == 0  # No responses yet.
+        set_user(epic_username)
+
+        # Run request.
+        response = api_client.post(answer_url, json_data, format="json")
+        assert response.status_code == 201
+        assert len(Answer.objects.all()) == 1
 
 
 @pytest.mark.django_db
@@ -513,7 +723,9 @@ class TestUrlUnavailableActions:
             pytest.param(TestQuestionsViewSet.nfq_url),
             pytest.param(TestQuestionsViewSet.evo_url),
             pytest.param(TestQuestionsViewSet.lnk_url),
-            pytest.param(TestAnswerViewSet.url_root),
+            pytest.param(TestAnswerViewSet.yesno_url),
+            pytest.param(TestAnswerViewSet.singlechoice_url),
+            pytest.param(TestAnswerViewSet.multiplechoice_url),
         ],
     )
     def test_GET_without_auth_returns_error(self, url_root: str, api_client: APIClient):
