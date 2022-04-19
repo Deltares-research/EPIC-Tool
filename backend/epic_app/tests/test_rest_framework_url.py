@@ -482,7 +482,7 @@ class TestQuestionsViewSet:
             pytest.param(evo_url, 2, id="list Evolution question"),
             pytest.param(lnk_url, 1, id="list Linkages question"),
             pytest.param(nfq_url + "1/", 4, id="retrieve (NFQ 'a' with 7 fields)"),
-            pytest.param(evo_url + "3/", 4, id="retrieve (EVO 'a' with 7 fields)"),
+            pytest.param(evo_url + "3/", 7, id="retrieve (EVO 'a' with 7 fields)"),
             pytest.param(lnk_url + "5/", 3, id="retrieve (LNK 'a' with 7 fields)"),
         ],
     )

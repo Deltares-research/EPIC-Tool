@@ -18,7 +18,6 @@ from epic_app.models.epic_questions import (
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Program
 from epic_app.serializers.answer_serializer import (
-    AnswerSerializer,
     MultipleChoiceAnswerSerializer,
     SingleChoiceAnswerSerializer,
     YesNoAnswerSerializer,
@@ -40,20 +39,23 @@ def answer_serializer_fixture(
     theonewhoasks = EpicUser.objects.create(
         username="TheOneWhoAsks", organization="TestCorp"
     )
-    nf_answer: YesNoAnswer = NationalFrameworkQuestion.objects.first().get_answer(
-        q_user=theonewhoasks
+    YesNoAnswer.objects.create(
+        user=theonewhoasks,
+        question=NationalFrameworkQuestion.objects.all().first(),
+        short_answer=YesNoAnswerType.YES,
+        justify_answer="Velit ex cupidatat do magna ipsum.",
     )
-    nf_answer.short_answer = YesNoAnswerType.YES
-    nf_answer.justify_answer = "Because reasons."
-    eq_answer: SingleChoiceAnswer = EvolutionQuestion.objects.first().get_answer(
-        q_user=theonewhoasks
+    SingleChoiceAnswer.objects.create(
+        user=theonewhoasks,
+        question=EvolutionQuestion.objects.all().first(),
+        selected_choice=EvolutionChoiceType.ENGAGED,
+        justify_answer="Ipsum anim fugiat sit nostrud enim.",
     )
-    eq_answer.selected_choice = EvolutionChoiceType.CAPABLE
-    eq_answer.justify_answer = "Because other reasons."
-    lq_answer: MultipleChoiceAnswer = LinkagesQuestion.objects.first().get_answer(
-        q_user=theonewhoasks
+    mca = MultipleChoiceAnswer.objects.create(
+        user=theonewhoasks,
+        question=LinkagesQuestion.objects.all().first(),
     )
-    [lq_answer.selected_programs.add(p.id) for p in Program.objects.all()[1:4]]
+    mca.selected_programs.add(Program.objects.all()[4], Program.objects.all()[2])
 
 
 def get_serializer():
@@ -70,88 +72,56 @@ serializer_context = get_serializer()
 
 @pytest.mark.django_db
 class TestAnswerSerializer:
-    def test_given_valid_instances_serializer_returns_expected_data(self):
-        # Define context
+    @pytest.mark.parametrize(
+        "serializer, answer_type, expected_data",
+        [
+            pytest.param(
+                YesNoAnswerSerializer,
+                YesNoAnswer,
+                {
+                    "url": "http://testserver/api/yesnoanswer/1/",
+                    "id": 1,
+                    "user": 4,
+                    "question": 1,
+                    "short_answer": "Y",
+                    "justify_answer": "Velit ex cupidatat do magna ipsum.",
+                },
+            ),
+            pytest.param(
+                SingleChoiceAnswerSerializer,
+                SingleChoiceAnswer,
+                {
+                    "id": 2,
+                    "justify_answer": "Ipsum anim fugiat sit nostrud enim.",
+                    "question": 3,
+                    "selected_choice": "Engaged",
+                    "url": "http://testserver/api/singleanswer/2/",
+                    "user": 4,
+                },
+            ),
+            pytest.param(
+                MultipleChoiceAnswerSerializer,
+                MultipleChoiceAnswer,
+                {
+                    "id": 3,
+                    "question": 5,
+                    "selected_programs": [3, 5],
+                    "url": "http://testserver/api/multianswer/3/",
+                    "user": 4,
+                },
+            ),
+        ],
+    )
+    def test_given_valid_instances_serializer_returns_type_expected_data(
+        self, serializer, answer_type: Answer, expected_data: dict
+    ):
         serialized_data = list(
-            AnswerSerializer(
-                Answer.objects.all(), many=True, context=serializer_context
-            ).data
-        )
-
-        assert len(serialized_data) == 3
-
-        def validate_concrete_questions(
-            serialized_dict, nf_answer: bool, ev_answer: bool, lk_answer: bool
-        ) -> bool:
-            assert serialized_dict["url"] is not None
-            assert serialized_dict["id"] is not None
-            assert (
-                serialized_dict["user"]
-                == EpicUser.objects.filter(username="TheOneWhoAsks").first().id
-            )
-            assert serialized_dict["question"] is not None
-            assert isinstance(serialized_dict["yesnoanswer"], dict) == nf_answer
-            assert isinstance(serialized_dict["singlechoiceanswer"], dict) == ev_answer
-            assert (
-                isinstance(serialized_dict["multiplechoiceanswer"], dict) == lk_answer
-            )
-
-        validate_concrete_questions(serialized_data[0], True, False, False)
-        validate_concrete_questions(serialized_data[1], False, True, False)
-        validate_concrete_questions(serialized_data[2], False, False, True)
-
-
-@pytest.mark.django_db
-class TestYesNoAnswerSerializer:
-    def test_given_valid_instances_serializer_returns_expected_data(self):
-        def validate_fields(dict_item: dict) -> bool:
-            v_fields = ["short_answer", "justify_answer"]
-            return [vf in list(dict_item.keys()) for vf in v_fields]
-
-        serialized_data = list(
-            YesNoAnswerSerializer(
-                YesNoAnswer.objects.all(),
+            serializer(
+                answer_type.objects.all(),
                 many=True,
                 context=serializer_context,
             ).data
         )
 
         assert len(serialized_data) == 1
-        assert all(map(validate_fields, serialized_data))
-
-
-@pytest.mark.django_db
-class TestSingleChoiceAnswerSerializer:
-    def test_given_valid_instances_serializer_returns_expected_data(self):
-        def validate_fields(dict_item: dict) -> bool:
-            v_fields = ["selected_choice", "justify_answer"]
-            return [vf in list(dict_item.keys()) for vf in v_fields]
-
-        serialized_data = list(
-            SingleChoiceAnswerSerializer(
-                SingleChoiceAnswer.objects.all(),
-                many=True,
-                context=serializer_context,
-            ).data
-        )
-
-        assert len(serialized_data) == 1
-        assert all(map(validate_fields, serialized_data))
-
-
-@pytest.mark.django_db
-class TestMultipleChoiceAnswerSerializer:
-    def test_given_valid_instances_serializer_returns_expected_data(self):
-        def validate_fields(dict_item: dict) -> bool:
-            return "selected_programs" in list(dict_item.keys())
-
-        serialized_data = list(
-            MultipleChoiceAnswerSerializer(
-                MultipleChoiceAnswer.objects.all(),
-                many=True,
-                context=serializer_context,
-            ).data
-        )
-
-        assert len(serialized_data) == 1
-        assert all(map(validate_fields, serialized_data))
+        assert serialized_data[0] == expected_data

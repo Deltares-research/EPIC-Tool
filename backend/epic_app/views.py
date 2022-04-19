@@ -23,7 +23,6 @@ from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 from epic_app.serializers import (
     AgencySerializer,
-    AnswerSerializer,
     AreaSerializer,
     EpicUserSerializer,
     EvolutionQuestionSerializer,
