@@ -18,12 +18,7 @@ class NationalFrameworkQuestionSerializer(serializers.ModelSerializer):
 class EvolutionQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = EvolutionQuestion
-        fields = (
-            "nascent_description",
-            "engaged_description",
-            "capable_description",
-            "effective_description",
-        )
+        fields = "__all__"
 
 
 class LinkagesQuestionSerializer(serializers.ModelSerializer):

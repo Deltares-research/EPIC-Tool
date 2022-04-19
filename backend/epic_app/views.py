@@ -208,16 +208,6 @@ class LinkagesQuestionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.DjangoModelPermissions]
 
 
-# class AnswerViewSet(viewsets.ModelViewSet):
-#     """
-#     Acess point for CRUD operations on `Answer` table.
-#     """
-
-#     queryset = Answer.objects.all().order_by("user")
-#     serializer_class = AnswerSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-
-
 def answer_get_permissions(request: Request) -> List[permissions.BasePermission]:
     """
     `EpicUser` can only be created, updated or deleted when the authorized user is an admin.
@@ -225,6 +215,8 @@ def answer_get_permissions(request: Request) -> List[permissions.BasePermission]
     Returns:
         List[permissions.BasePermission]: List of permissions for the request being done.
     """
+    if not request.data.get("user", None):
+        request.data["user"] = request.user.id
     if request.method in ["PUT", "DELETE"]:
         return [permissions.IsAdminUser()]
     return [permissions.IsAuthenticated()]

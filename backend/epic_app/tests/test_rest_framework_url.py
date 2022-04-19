@@ -693,16 +693,15 @@ class TestAnswerViewSet:
         json_data: dict,
         api_client: APIClient,
     ):
-        def get_user_id(epic_username: str) -> int:
+        def set_user(epic_username: str) -> int:
             epic_user: User = User.objects.filter(username=epic_username).first()
             if epic_user.is_staff or epic_user.is_superuser:
-                return User.objects.filter(username="Anakin").first().pk
-            return epic_user.auth_token.key
+                json_data["user"] = User.objects.filter(username="Anakin").first().pk
 
         # Set test data.
         set_user_auth_token(api_client, epic_username)
         assert len(Answer.objects.all()) == 0  # No responses yet.
-        json_data["user"] = get_user_id(epic_username)
+        set_user(epic_username)
 
         # Run request.
         response = api_client.post(answer_url, json_data, format="json")
