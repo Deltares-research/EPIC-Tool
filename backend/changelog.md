@@ -1,3 +1,20 @@
+## v0.14.0 (2022-04-19)
+
+### Feat
+
+- **epic_app/models/epic_questions.py**: Added Key Agency Actions table
+- **answer_serializer.py**: Fixed posting answers
+- **epic_app/views.py**: Changed views for answers so it's possible to post as an user or an admin
+
+### Fix
+
+- **epic_questions.py**: Fixed meta inheritance on questions to allow unique relationships
+
+### Refactor
+
+- **answer_serializer.py**: Removed serializer for raw answer as it is not necessary anymore
+- **epic_answers**: Split answers from questions
+
 ## v0.13.0 (2022-04-15)
 
 ### Feat
