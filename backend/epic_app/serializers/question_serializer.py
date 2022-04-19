@@ -15,10 +15,12 @@ class NationalFrameworkQuestionSerializer(serializers.ModelSerializer):
         model = NationalFrameworkQuestion
         fields = "__all__"
 
+
 class KeyAgencyQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = KeyAgencyActionsQuestion
         fields = "__all__"
+
 
 class EvolutionQuestionSerializer(serializers.ModelSerializer):
     class Meta:
