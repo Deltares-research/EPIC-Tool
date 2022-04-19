@@ -2,15 +2,17 @@ import pytest
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
-from epic_app.models.epic_questions import (
+from epic_app.models.epic_answers import (
     Answer,
+    MultipleChoiceAnswer,
+    SingleChoiceAnswer,
+    YesNoAnswer,
+)
+from epic_app.models.epic_questions import (
     EvolutionChoiceType,
     EvolutionQuestion,
     LinkagesQuestion,
-    MultipleChoiceAnswer,
     NationalFrameworkQuestion,
-    SingleChoiceAnswer,
-    YesNoAnswer,
     YesNoAnswerType,
 )
 from epic_app.models.epic_user import EpicUser

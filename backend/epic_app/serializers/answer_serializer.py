@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from epic_app.models.epic_questions import (
+from epic_app.models.epic_answers import (
     Answer,
     MultipleChoiceAnswer,
     SingleChoiceAnswer,

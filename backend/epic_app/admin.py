@@ -12,8 +12,8 @@ from epic_app.importers import (
     EvolutionQuestionImporter,
     NationalFrameworkQuestionImporter,
 )
+from epic_app.models.epic_answers import Answer
 from epic_app.models.epic_questions import (
-    Answer,
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,

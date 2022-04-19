@@ -1,15 +1,17 @@
 import pytest
 from django.db import IntegrityError, transaction
 
-from epic_app.models.epic_questions import (
+from epic_app.models.epic_answers import (
     Answer,
-    EvolutionQuestion,
-    LinkagesQuestion,
     MultipleChoiceAnswer,
-    NationalFrameworkQuestion,
-    Question,
     SingleChoiceAnswer,
     YesNoAnswer,
+)
+from epic_app.models.epic_questions import (
+    EvolutionQuestion,
+    LinkagesQuestion,
+    NationalFrameworkQuestion,
+    Question,
 )
 from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Program
@@ -183,27 +185,3 @@ class TestLinkagesQuestion:
             str(e_info.value)
             == "UNIQUE constraint failed: epic_app_question.program_id"
         )
-
-
-@pytest.mark.django_db
-class TestAnswer:
-    @pytest.mark.parametrize(
-        "q_type",
-        [
-            pytest.param(NationalFrameworkQuestion, id="NationalFrameworkQuestion"),
-            pytest.param(EvolutionQuestion, id="EvolutionQuestion"),
-            pytest.param(LinkagesQuestion, id="LinkagesQuestion"),
-        ],
-    )
-    def test_get_answer_returns_new_instance_when_doesnot_exist(self, q_type: Question):
-        q_instance: Question = q_type.objects.all().last()
-        u_question: EpicUser = EpicUser.objects.all().last()
-        assert not Answer.objects.filter(user=u_question, question=q_instance).exists()
-
-        # Try to get the answer for the first time.
-        nf_answer: Answer = q_instance.get_answer(u_question)
-        assert Answer.objects.filter(user=u_question, question=q_instance).exists()
-
-        # Try to get it again
-        nf_answer_two: Answer = q_instance.get_answer(u_question)
-        assert nf_answer == nf_answer_two

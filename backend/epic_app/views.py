@@ -7,8 +7,8 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from epic_app.models.epic_answers import Answer
 from epic_app.models.epic_questions import (
-    Answer,
     EvolutionQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
