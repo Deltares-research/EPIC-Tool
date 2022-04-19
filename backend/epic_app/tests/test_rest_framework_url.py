@@ -510,23 +510,24 @@ class TestAnswerViewSet:
     @pytest.fixture
     def anakin_answers_fixture(self):
         anakin = EpicUser.objects.filter(username="Anakin").first()
-        YesNoAnswer(
+        YesNoAnswer.objects.create(
             user=anakin,
             question=Question.objects.filter(pk=1).first(),
             short_answer=YesNoAnswerType.NO,
             justify_answer="Laboris proident enim dolore ullamco voluptate nisi labore laborum ut qui adipisicing occaecat exercitation culpa.",
-        ).save()
-        SingleChoiceAnswer(
+        )
+        SingleChoiceAnswer.objects.create(
             user=anakin,
             question=Question.objects.filter(pk=3).first(),
             selected_choice=EvolutionChoiceType.EFFECTIVE,
             justify_answer="Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris.",
-        ).save()
-        # MultipleChoiceAnswer(
-        #     user=anakin,
-        #     question=Question.objects.filter(pk=5).first(),
-        #     selected_programs=["4", "2"],
-        # ).save()
+        )
+        mca = MultipleChoiceAnswer(
+            user=anakin,
+            question=Question.objects.filter(pk=5).first(),
+        )
+        mca.save()
+        mca.selected_programs.add(4, 2)
 
     @pytest.mark.parametrize(
         "answer_url",
@@ -541,17 +542,17 @@ class TestAnswerViewSet:
         [
             pytest.param(
                 "Palpatine",
-                dict(response=403, entries=0),
+                dict(response=200, entries=0),
                 id="Non admin user cannot GET-LIST other user's answers.",
             ),
             pytest.param(
                 "Anakin",
-                dict(response=200, entries=0),
+                dict(response=200, entries=1),
                 id="Non admin user can GET-LIST his answers.",
             ),
             pytest.param(
                 "admin",
-                dict(response=200, entries=0),
+                dict(response=200, entries=1),
                 id="Admin user can GET-LIST all answers.",
             ),
         ],
@@ -570,41 +571,73 @@ class TestAnswerViewSet:
 
         # Verify final expectations
         assert response.status_code == expected_response["response"]
-        assert len(response.data) == expected_response["entries"]
+        if response.status_code == 200:
+            assert len(response.data) == expected_response["entries"]
+
+    yesno_anakin = {
+        "url": "http://testserver/api/yesnoanswer/1/",
+        "id": 1,
+        "user": 3,
+        "question": 1,
+        "short_answer": "N",
+        "justify_answer": "Laboris proident enim dolore ullamco voluptate nisi labore laborum ut qui adipisicing occaecat exercitation culpa.",
+    }
+
+    singlechoice_anakin = {"url": "http://testserver/api/singleanswer/2/", "id": 2, "user": 3, "question": 3, "selected_choice": "Effective", "justify_answer": "Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris."}
+    multiplechoice_anakin = {
+        "id": 3,
+        "question": 5,
+        "selected_programs": [2, 4],
+        "url": "http://testserver/api/multianswer/3/",
+        "user": 3,
+    }
 
     @pytest.mark.parametrize(
-        "epic_username, expected_response",
+        "epic_username, expected_code",
         [
             pytest.param(
                 "Anakin",
-                dict(response=200, data=0),
+                200,
                 id="Non admin user can RETRIEVE his answer.",
             ),
             pytest.param(
                 "Palpatine",
-                dict(response=403),
+                404,
                 id="Non admin user cannot RETRIEVE other user's answer.",
             ),
             pytest.param(
                 "admin",
-                dict(response=200, data=0),
+                200,
                 id="Admin user can ANY answers.",
             ),
         ],
     )
     @pytest.mark.parametrize(
-        "answer_url",
+        "answer_url, expected_data",
         [
-            pytest.param(yesno_url + "1/", id="Yes-No Answer"),
-            pytest.param(singlechoice_url + "2/", id="Singlechoice Answer"),
-            pytest.param(multiplechoice_url + "3/", id="Multiplechoice Answer"),
+            pytest.param(
+                yesno_url + "1/",
+                yesno_anakin,
+                id="Yes-No Answer",
+            ),
+            pytest.param(
+                singlechoice_url + "2/",
+                singlechoice_anakin,
+                id="Singlechoice Answer",
+            ),
+            pytest.param(
+                multiplechoice_url + "3/",
+                multiplechoice_anakin,
+                id="Multiplechoice Answer",
+            ),
         ],
     )
     def test_GET_DETAIL_answer(
         self,
         answer_url: str,
         epic_username: str,
-        expected_response: dict,
+        expected_code: int,
+        expected_data: dict,
         anakin_answers_fixture,
         api_client: APIClient,
     ):
@@ -613,8 +646,9 @@ class TestAnswerViewSet:
         response = api_client.get(answer_url)
 
         # Verify final expectations
-        assert response.status_code == expected_response["response"]
-        assert len(response.data) == expected_response["data"]
+        assert response.status_code == expected_code
+        if response.status_code == 200:
+            assert json.loads(response.content) == expected_data
 
 
 @pytest.mark.django_db

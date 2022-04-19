@@ -12,19 +12,25 @@ from epic_app.models.epic_user import EpicUser
 class YesNoAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = YesNoAnswer
-        fields = ("short_answer", "justify_answer")
+        fields = ("url", "id", "user", "question", "short_answer", "justify_answer")
 
 
 class SingleChoiceAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = SingleChoiceAnswer
-        fields = ("selected_choice", "justify_answer")
+        fields = ("url", "id", "user", "question", "selected_choice", "justify_answer")
 
 
 class MultipleChoiceAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = MultipleChoiceAnswer
-        fields = ("selected_programs",)
+        fields = (
+            "url",
+            "id",
+            "user",
+            "question",
+            "selected_programs",
+        )
 
 
 class AnswerSerializer(serializers.ModelSerializer):

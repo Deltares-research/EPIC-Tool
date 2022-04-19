@@ -17,7 +17,10 @@ router.register(r"program", views.ProgramViewSet)
 router.register(r"nationalframeworkquestion", views.NationalFrameworkQuestionViewSet)
 router.register(r"evolutionquestion", views.EvolutionQuestionViewSet)
 router.register(r"linkagesquestion", views.LinkagesQuestionViewSet)
-router.register(r"answer", views.AnswerViewSet)
+# router.register(r"answer", views.AnswerViewSet)
+router.register(r"yesnoanswer", views.YesNoAnswerViewSet)
+router.register(r"singleanswer", views.SingleChoiceAnswerViewSet)
+router.register(r"multianswer", views.MultipleChoiceAnswerViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

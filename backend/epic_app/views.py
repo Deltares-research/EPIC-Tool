@@ -7,7 +7,12 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from epic_app.models.epic_answers import Answer
+from epic_app.models.epic_answers import (
+    Answer,
+    MultipleChoiceAnswer,
+    SingleChoiceAnswer,
+    YesNoAnswer,
+)
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
     LinkagesQuestion,
@@ -26,6 +31,11 @@ from epic_app.serializers import (
     LinkagesQuestionSerializer,
     NationalFrameworkQuestionSerializer,
     ProgramSerializer,
+)
+from epic_app.serializers.answer_serializer import (
+    MultipleChoiceAnswerSerializer,
+    SingleChoiceAnswerSerializer,
+    YesNoAnswerSerializer,
 )
 
 
@@ -198,11 +208,80 @@ class LinkagesQuestionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.DjangoModelPermissions]
 
 
-class AnswerViewSet(viewsets.ModelViewSet):
-    """
-    Acess point for CRUD operations on `Answer` table.
-    """
+# class AnswerViewSet(viewsets.ModelViewSet):
+#     """
+#     Acess point for CRUD operations on `Answer` table.
+#     """
 
-    queryset = Answer.objects.all().order_by("user")
-    serializer_class = AnswerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+#     queryset = Answer.objects.all().order_by("user")
+#     serializer_class = AnswerSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+
+
+def answer_get_permissions(request: Request) -> List[permissions.BasePermission]:
+    """
+    `EpicUser` can only be created, updated or deleted when the authorized user is an admin.
+
+    Returns:
+        List[permissions.BasePermission]: List of permissions for the request being done.
+    """
+    if request.method in ["PUT", "DELETE"]:
+        return [permissions.IsAdminUser()]
+    return [permissions.IsAuthenticated()]
+
+
+class YesNoAnswerViewSet(viewsets.ModelViewSet):
+    queryset = YesNoAnswer.objects.all()
+    serializer_class = YesNoAnswerSerializer
+
+    def get_permissions(self):
+        return answer_get_permissions(self.request)
+
+    def get_queryset(self) -> QuerySet:
+        """
+        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
+
+        Returns:
+            QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
+        """
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return YesNoAnswer.objects.all()
+        return YesNoAnswer.objects.filter(user=self.request.user)
+
+
+class SingleChoiceAnswerViewSet(viewsets.ModelViewSet):
+    queryset = SingleChoiceAnswer.objects.all()
+    serializer_class = SingleChoiceAnswerSerializer
+
+    def get_permissions(self):
+        return answer_get_permissions(self.request)
+
+    def get_queryset(self) -> QuerySet:
+        """
+        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
+
+        Returns:
+            QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
+        """
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return SingleChoiceAnswer.objects.all()
+        return SingleChoiceAnswer.objects.filter(user=self.request.user)
+
+
+class MultipleChoiceAnswerViewSet(viewsets.ModelViewSet):
+    queryset = MultipleChoiceAnswer.objects.all()
+    serializer_class = MultipleChoiceAnswerSerializer
+
+    def get_permissions(self):
+        return answer_get_permissions(self.request)
+
+    def get_queryset(self) -> QuerySet:
+        """
+        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
+
+        Returns:
+            QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
+        """
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return MultipleChoiceAnswer.objects.all()
+        return MultipleChoiceAnswer.objects.filter(user=self.request.user)
