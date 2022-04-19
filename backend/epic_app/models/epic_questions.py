@@ -15,8 +15,8 @@ class Question(models.Model):
         to=base_models.Program, on_delete=models.CASCADE, related_name="questions"
     )
 
-    # class Meta:
-    #     unique_together = ["title", "program"]
+    class Meta:
+        unique_together = ["title", "program"]
 
     def __str__(self) -> str:
         return self.title[0:15]
@@ -28,6 +28,10 @@ class NationalFrameworkQuestion(Question):
     """
 
     description: str = models.TextField(null=False, blank=False)
+
+    class Meta:
+        # Override the unique_together clause.
+        unique_together = []
 
 
 class EvolutionChoiceType(models.TextChoices):
