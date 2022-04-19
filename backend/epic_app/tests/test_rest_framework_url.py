@@ -677,7 +677,7 @@ class TestAnswerViewSet:
             ),
             pytest.param(
                 multiplechoice_url,
-                dict(question="5", selected_programs="[2,4]"),
+                dict(question="5", selected_programs=[2, 4]),
                 id="MultipleChoice answer",
             ),
         ],
