@@ -4,6 +4,7 @@ from rest_framework.authtoken.models import Token
 
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
+    KeyAgencyActionsQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
 )
@@ -116,4 +117,9 @@ def epic_test_db():
     )
     LinkagesQuestion.objects.create(
         title="Finally a linkage question?", program=a_program
+    )
+    KeyAgencyActionsQuestion.objects.create(
+        title="Is this the new Key Agency Action question?",
+        program=a_program,
+        description="In ut ea ex labore in proident cupidatat elit laboris veniam.",
     )

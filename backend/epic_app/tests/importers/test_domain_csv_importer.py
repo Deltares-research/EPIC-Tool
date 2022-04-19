@@ -4,7 +4,7 @@ import pytest
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from epic_app.importers import BaseEpicImporter, EpicDomainImporter
-from epic_app.importers.csv_base_importer import ProtocoEpicImporter
+from epic_app.importers.csv_base_importer import ProtocolEpicImporter
 from epic_app.models.models import Area, Group, Program
 from epic_app.tests import test_data_dir
 
@@ -14,7 +14,7 @@ class TestEpicDomainImporter:
     def test_epic_domain_importer(self):
         domain_importer = EpicDomainImporter()
         assert isinstance(domain_importer, BaseEpicImporter)
-        assert isinstance(domain_importer, ProtocoEpicImporter)
+        assert isinstance(domain_importer, ProtocolEpicImporter)
 
     def test_import_csv_from_filepath(self):
         # Define test data

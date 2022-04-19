@@ -117,6 +117,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
             NationalFrameworkQuestion: NationalFrameworkQuestionSerializer,
             EvolutionQuestion: EvolutionQuestionSerializer,
             LinkagesQuestion: LinkagesQuestionSerializer,
+            KeyAgencyActionsQuestion: KeyAgencyQuestionSerializer,
         }
         queryset: Question = question_type.objects.filter(program=pk)
         serializer: serializers.ModelSerializer = question_serializers[question_type](
@@ -131,7 +132,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     )
     def get_nationalframework_question(self, request: Request, pk: str = None):
         """
-        GET List `NationalFrameworkQuestions` related to the program (`pk`).
+        GET List `NationalFrameworkQuestion` related to the program (`pk`).
 
         Args:
             request (Request): API Request.
@@ -141,6 +142,24 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
             Response: Result of the queryset.
         """
         return self._get_question(request, NationalFrameworkQuestion, pk)
+
+    @action(
+        detail=True,
+        url_path="question-keyagencyactions",
+        url_name="question_keyagencyactions",
+    )
+    def get_keyagencyactions_question(self, request: Request, pk: str = None):
+        """
+        GET List `KeyAgencyActionsQuestion` related to the program (`pk`).
+
+        Args:
+            request (Request): API Request.
+            pk (str, optional): Id of the selected program. Defaults to None.
+
+        Returns:
+            Response: Result of the queryset.
+        """
+        return self._get_question(request, KeyAgencyActionsQuestion, pk)
 
     @action(
         detail=True,

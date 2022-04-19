@@ -3,6 +3,7 @@ from django.db import IntegrityError, transaction
 
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
+    KeyAgencyActionsQuestion,
     LinkagesQuestion,
     NationalFrameworkQuestion,
     Question,
@@ -94,6 +95,30 @@ class TestNationalFrameworkQuestion:
         assert Question.objects.filter(title=nfq_title).exists()
         assert NationalFrameworkQuestion.objects.filter(title=nfq_title).exists()
         assert isinstance(nfq, Question)
+
+
+@pytest.mark.django_db
+class TestKeyAgencyActionsQuestion:
+    def test_nationalframeworkquestion_data(self):
+        kaaq_title = "Cupidatat nisi nisi esse exercitation dolor laborum cillum."
+        kaaq_description = "Dolore esse labore duis commodo aliquip."
+
+        # Verify initial expectations
+        assert not Question.objects.filter(title=kaaq_title).exists()
+        assert not KeyAgencyActionsQuestion.objects.filter(title=kaaq_title).exists()
+
+        # Create new question.
+        kaaq = KeyAgencyActionsQuestion(
+            title=kaaq_title,
+            program=Program.objects.all().first(),
+            description=kaaq_description,
+        )
+        kaaq.save()
+
+        # Verify final expectations.
+        assert Question.objects.filter(title=kaaq_title).exists()
+        assert KeyAgencyActionsQuestion.objects.filter(title=kaaq_title).exists()
+        assert isinstance(kaaq, Question)
 
 
 @pytest.mark.django_db

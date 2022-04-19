@@ -71,6 +71,9 @@ class Command(BaseCommand):
         import_and_log(
             "nationalframeworkquestions.csv", NationalFrameworkQuestionImporter
         )
+        import_and_log(
+            "keyagencyactionsquestions.csv", NationalFrameworkQuestionImporter
+        )
         import_and_log("evolutionquestions.csv", EvolutionQuestionImporter)
         LinkagesQuestion.generate_linkages()
         self.stdout.write(
