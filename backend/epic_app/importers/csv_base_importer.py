@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 @runtime_checkable
-class ProtocoEpicImporter(Protocol):
+class ProtocolEpicImporter(Protocol):
     class CsvLineObject:
         pass
 

@@ -435,6 +435,9 @@ class TestProgramViewSet:
             ),
             pytest.param("question-evolution/", 2, id="LIST Evolution Questions"),
             pytest.param("question-linkages/", 1, id="LIST Linkages Questions"),
+            pytest.param(
+                "question-keyagencyactions/", 1, id="LIST KeyAgencyActions Questions"
+            ),
         ],
     )
     def test_GET_list_program_questions(
@@ -458,6 +461,7 @@ class TestProgramViewSet:
 @pytest.mark.django_db
 class TestQuestionsViewSet:
     nfq_url = "/api/nationalframeworkquestion/"
+    kaa_url = "/api/keyagencyactionsquestion/"
     evo_url = "/api/evolutionquestion/"
     lnk_url = "/api/linkagesquestion/"
 
@@ -480,10 +484,12 @@ class TestQuestionsViewSet:
         [
             pytest.param(nfq_url, 2, id="list Nationalframework question"),
             pytest.param(evo_url, 2, id="list Evolution question"),
+            pytest.param(kaa_url, 1, id="list KeyAgencyActions question"),
             pytest.param(lnk_url, 1, id="list Linkages question"),
-            pytest.param(nfq_url + "1/", 4, id="retrieve (NFQ 'a' with 7 fields)"),
+            pytest.param(nfq_url + "1/", 4, id="retrieve (NFQ 'a' with 4 fields)"),
             pytest.param(evo_url + "3/", 7, id="retrieve (EVO 'a' with 7 fields)"),
-            pytest.param(lnk_url + "5/", 3, id="retrieve (LNK 'a' with 7 fields)"),
+            pytest.param(lnk_url + "5/", 3, id="retrieve (LNK 'a' with 3 fields)"),
+            pytest.param(kaa_url + "6/", 4, id="retrieve (KAA 'a' with 4 fields)"),
         ],
     )
     def test_GET_question(
@@ -668,7 +674,16 @@ class TestAnswerViewSet:
                     short_answer="Y",
                     justify_answer="Deserunt et velit ad occaecat qui.",
                 ),
-                id="YesNo answer",
+                id="YesNo [National Framework] answer",
+            ),
+            pytest.param(
+                yesno_url,
+                dict(
+                    question="6",
+                    short_answer="N",
+                    justify_answer="Deserunt et velit ad occaecat qui.",
+                ),
+                id="YesNo [Key Agency Actions] answer",
             ),
             pytest.param(
                 singlechoice_url,
@@ -721,6 +736,7 @@ class TestUrlUnavailableActions:
             pytest.param(TestGroupViewSet.url_root),
             pytest.param(TestProgramViewSet.url_root),
             pytest.param(TestQuestionsViewSet.nfq_url),
+            pytest.param(TestQuestionsViewSet.kaa_url),
             pytest.param(TestQuestionsViewSet.evo_url),
             pytest.param(TestQuestionsViewSet.lnk_url),
             pytest.param(TestAnswerViewSet.yesno_url),
