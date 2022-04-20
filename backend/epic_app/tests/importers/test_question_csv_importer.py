@@ -31,6 +31,10 @@ class TestNationalFrameworkQuestionImporter:
         NationalFrameworkQuestionImporter().import_csv(test_file)
 
         assert len(NationalFrameworkQuestion.objects.all()) == 4
+        assert (
+            NationalFrameworkQuestion.objects.last().title
+            == "You will be adding more, won't you?"
+        )
 
 
 @pytest.mark.django_db
