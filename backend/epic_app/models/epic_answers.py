@@ -44,17 +44,28 @@ class Answer(models.Model):
     def __str__(self) -> str:
         return f"[{self.user}] {self.question}"
 
+    def _check_question_integrity(self) -> bool:
+        """
+        Auxiliar method to be defined in concrete classes which verify the assigned `question` is suitable for this `answer`.
+        Base class `Answer` should not support any `Question`.
+        Returns:
+            bool: Whether the given `Question` type can be assigned to this `Answer` type.
+        """
+        return any(
+            [
+                self.question in sq.objects.all()
+                for sq in self._get_supported_questions()
+            ]
+        )
+
     def _get_supported_questions(self) -> List[Question]:
         """
-        Auxiliar method to be defined in concrete classes which will return the list of supported `questions` for this `answer`.
-
-        Raises:
-            NotImplementedError: When concrete class does not specify this method.
+        Method to be overriden in concrete classes. Base `Answer` does not support any `Question`.
 
         Returns:
-            List[Question]: Supported `questions`.
+            List[Question]: List of supported `Questions`.
         """
-        raise NotImplementedError("Needs to be implemented by concrete class")
+        return []
 
     def save(self, *args, **kwargs) -> None:
         """
@@ -64,11 +75,14 @@ class Answer(models.Model):
         Raises:
             IntegrityError: When the `question` field is not supported for this `answer` subtype.
         """
-        supported_questions: List[Question] = self._get_supported_questions()
-        if not type(self.question) in supported_questions:
-            sq_str = ", ".join([sq.__name__ for sq in supported_questions])
+        if not self._check_question_integrity():
             raise IntegrityError(
-                f"Answer type {type(self.question).__name__} not allowed. Supported types: {sq_str}"
+                "Question type `{}` not allowed. Supported types: [{}].".format(
+                    type(self.question).__name__,
+                    ", ".join(
+                        [f"`{sq.__name__}`" for sq in self._get_supported_questions()]
+                    ),
+                )
             )
         return super(Answer, self).save(*args, **kwargs)
 

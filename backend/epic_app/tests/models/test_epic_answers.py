@@ -63,9 +63,14 @@ class TestEpicAnswers:
         # Verify final expectations.
         assert str(epic_question) in str(base_answer)
         assert str(epic_user) in str(base_answer)
-        with pytest.raises(NotImplementedError) as err_info:
-            base_answer._get_supported_questions()
-        assert str(err_info.value) == "Needs to be implemented by concrete class"
+        assert not base_answer._get_supported_questions()
+        assert not base_answer._check_question_integrity()
+        with pytest.raises(IntegrityError) as err_info:
+            base_answer.save()
+        assert (
+            str(err_info.value)
+            == "Question type `Question` not allowed. Supported types: []."
+        )
 
     @pytest.mark.parametrize(
         "question_subtype",
@@ -99,9 +104,12 @@ class TestEpicAnswers:
 
             # Verify final expectations.
             supported_answers: str = ", ".join(
-                [sq.__name__ for sq in answer_instance._get_supported_questions()]
+                [
+                    f"`{sq.__name__}`"
+                    for sq in answer_instance._get_supported_questions()
+                ]
             )
             assert (
                 str(ie_exc.value)
-                == f"Answer type {question_subtype.__name__} not allowed. Supported types: {supported_answers}"
+                == f"Question type `{question_subtype.__name__}` not allowed. Supported types: [{supported_answers}]."
             )
