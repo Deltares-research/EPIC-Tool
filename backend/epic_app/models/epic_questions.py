@@ -96,7 +96,7 @@ class LinkagesQuestion(Question):
             raise IntegrityError(
                 "UNIQUE constraint failed: epic_app_question.program_id"
             )
-        return super().save(*args, **kwargs)
+        return super(LinkagesQuestion, self).save(*args, **kwargs)
 
     @staticmethod
     def generate_linkages():
