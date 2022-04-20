@@ -45,9 +45,25 @@ class Answer(models.Model):
         return f"[{self.user}] {self.question}"
 
     def _get_supported_questions(self) -> List[Question]:
-        pass
+        """
+        Auxiliar method to be defined in concrete classes which will return the list of supported `questions` for this `answer`.
+
+        Raises:
+            NotImplementedError: When concrete class does not specify this method.
+
+        Returns:
+            List[Question]: Supported `questions`.
+        """
+        raise NotImplementedError("Needs to be implemented by concrete class")
 
     def save(self, *args, **kwargs) -> None:
+        """
+        Overriding of the save method to ensure only supported questions are assigned to related answers.
+        This is just a way to preserve the question as a base field property to answer without explicitely defining its concrete question.
+
+        Raises:
+            IntegrityError: When the `question` field is not supported for this `answer` subtype.
+        """
         supported_questions: List[Question] = self._get_supported_questions()
         if not type(self.question) in supported_questions:
             sq_str = ", ".join([sq.__name__ for sq in supported_questions])

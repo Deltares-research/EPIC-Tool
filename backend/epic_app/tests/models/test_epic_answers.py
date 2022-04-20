@@ -52,6 +52,21 @@ class TestEpicAnswers:
         ),
     }
 
+    def test_answer_ctor(self):
+        # Define input data.
+        epic_question = Question.objects.all().first()
+        epic_user = EpicUser.objects.all().first()
+
+        # Instantiate answer.
+        base_answer = Answer(question=epic_question, user=epic_user)
+
+        # Verify final expectations.
+        assert str(epic_question) in str(base_answer)
+        assert str(epic_user) in str(base_answer)
+        with pytest.raises(NotImplementedError) as err_info:
+            base_answer._get_supported_questions()
+        assert str(err_info.value) == "Needs to be implemented by concrete class"
+
     @pytest.mark.parametrize(
         "question_subtype",
         get_subtypes(Question),
