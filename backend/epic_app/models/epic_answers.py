@@ -53,7 +53,7 @@ class Answer(models.Model):
         """
         return any(
             [
-                self.question in sq.objects.all()
+                sq.objects.filter(id=self.question.id).exists()
                 for sq in self._get_supported_questions()
             ]
         )
