@@ -1,3 +1,13 @@
+## v0.15.0 (2022-04-20)
+
+### Fix
+
+- **epic_answers.py**: fixed integrity check for base question after end-to-end testing.
+
+### Feat
+
+- **epic_answers.py;epic_questions.py**: Added constraints to answers so only specified question types can be added
+
 ## v0.14.0 (2022-04-19)
 
 ### Feat
