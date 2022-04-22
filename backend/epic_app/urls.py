@@ -9,6 +9,7 @@ from rest_framework.schemas import get_schema_view
 from epic_app import apps, views
 
 router = routers.DefaultRouter()
+router.register(r"epicorganization", views.EpicOrganizationViewSet)
 router.register(r"epicuser", views.EpicUserViewSet)
 router.register(r"area", views.AreaViewSet)
 router.register(r"agency", views.AgencyViewSet)

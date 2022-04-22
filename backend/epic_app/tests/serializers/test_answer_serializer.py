@@ -15,7 +15,7 @@ from epic_app.models.epic_questions import (
     LinkagesQuestion,
     NationalFrameworkQuestion,
 )
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
 from epic_app.serializers.answer_serializer import (
     MultipleChoiceAnswerSerializer,
@@ -37,7 +37,8 @@ def answer_serializer_fixture(
         epic_test_db (pytest.fixture): Fixture to load for the whole file tests.
     """
     theonewhoasks = EpicUser.objects.create(
-        username="TheOneWhoAsks", organization="TestCorp"
+        username="TheOneWhoAsks",
+        organization=EpicOrganization.objects.create(name="TestCorp"),
     )
     YesNoAnswer.objects.create(
         user=theonewhoasks,

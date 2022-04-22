@@ -12,7 +12,7 @@ from epic_app.models.epic_answers import (
     YesNoAnswerType,
 )
 from epic_app.models.epic_questions import EvolutionChoiceType, Question
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
 
@@ -162,7 +162,7 @@ class TestEpicUserViewSet:
         "url": "http://testserver/api/epicuser/3/",
         "id": 3,
         "username": "Anakin",
-        "organization": "Gallactic Empire",
+        "organization": 1,
         "selected_programs": [2, 4],
     }
 
@@ -249,7 +249,7 @@ class TestEpicUserViewSet:
         data_dict = {
             "username": ck_username,
             "password": "IamSup3rm4n!",
-            "organization": "Daily Planet",
+            "organization": EpicOrganization.objects.last().id,
         }
         assert not EpicUser.objects.filter(username=ck_username).exists()
 

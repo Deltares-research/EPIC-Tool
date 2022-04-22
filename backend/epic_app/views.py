@@ -20,11 +20,12 @@ from epic_app.models.epic_questions import (
     NationalFrameworkQuestion,
     Question,
 )
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 from epic_app.serializers import (
     AgencySerializer,
     AreaSerializer,
+    EpicOrganizationSerializer,
     EpicUserSerializer,
     EvolutionQuestionSerializer,
     GroupSerializer,
@@ -69,6 +70,16 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff or self.request.user.is_superuser:
             return EpicUser.objects.all()
         return EpicUser.objects.filter(id=self.request.user.id)
+
+
+class EpicOrganizationViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Acess point for CRUD operations on `EpicOrganization` table.
+    """
+
+    queryset = EpicOrganization.objects.all()
+    serializer_class = EpicOrganizationSerializer
+    permission_classes = [permissions.DjangoModelPermissions]
 
 
 class AreaViewSet(viewsets.ReadOnlyModelViewSet):
