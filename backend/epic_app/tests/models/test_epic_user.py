@@ -6,7 +6,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.response import Response as RfResponse
 from rest_framework.test import APIRequestFactory
 
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.tests.epic_db_fixture import epic_test_db
 from epic_app.views import EpicUserViewSet
 
@@ -20,7 +20,8 @@ def epic_user_fixture(epic_test_db: pytest.fixture):
         epic_test_db (pytest.fixture): Fixture to load for the whole file tests.
     """
     # Create a dummy user that we can safely invoke from the rest of this test file.
-    waldo = EpicUser(username="Waldo", organization="World Bank")
+    world_bank = EpicOrganization.objects.create(name="World Bank")
+    waldo = EpicUser(username="Waldo", organization=world_bank)
     waldo.set_password("iamwaldo")
     waldo.save()
 
@@ -39,15 +40,36 @@ def get_waldo() -> EpicUser:
 
 
 @pytest.mark.django_db
+class TestEpicOrganization:
+    def test_init_epicorganization(self):
+        created_org = EpicOrganization.objects.create(name="random")
+        assert isinstance(created_org, EpicOrganization)
+        assert (
+            len(created_org.organization_users.all()) == 0
+        )  # Related field from EpicUser foreign key.
+
+    def test_generate_users(self):
+        last_org: EpicOrganization = EpicOrganization.objects.last()
+        previous_users = len(EpicUser.objects.all())
+        new_users = last_org.generate_users(24)
+        assert all(isinstance(nu, EpicUser) for nu in new_users)
+        assert all(nu.organization == last_org for nu in new_users)
+        assert all(last_org.organization_users.contains(n_user) for n_user in new_users)
+        assert len(EpicUser.objects.all()) - len(new_users) == previous_users
+
+
+@pytest.mark.django_db
 class TestEpicUser:
     def test_init_epicuser(self):
+        epic_organization = EpicOrganization.objects.last()
         created_user = EpicUser.objects.create(
-            username="Luke", organization="Rebel Alliance"
+            username="Luke", organization=epic_organization
         )
         assert isinstance(created_user, EpicUser)
         assert isinstance(created_user, User)
         assert created_user.is_superuser is False
         assert not any(created_user.selected_programs.all())
+        assert created_user in epic_organization.organization_users.all()
 
 
 @pytest.mark.django_db
