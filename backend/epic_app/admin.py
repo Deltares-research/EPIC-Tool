@@ -25,7 +25,7 @@ from epic_app.models.epic_questions import (
     LinkagesQuestion,
     NationalFrameworkQuestion,
 )
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 
 
@@ -136,12 +136,12 @@ class EvoAdmin(ImportEntityAdmin):
 
 
 class LnkAdmin(admin.ModelAdmin):
-    # Admin pages.
+# Admin pages.
     change_list_template = "generate_changelist.html"
 
     def get_urls(self):
         """
-        Extends the default get_urls so we can inject the import-csv on
+        Extends the default get_urls so we can inject the generate 'x' logic.
 
         Returns:
             List[str]: A list of the urls to load from the admin page.
@@ -154,7 +154,7 @@ class LnkAdmin(admin.ModelAdmin):
 
     def generate_links(self, request):
         """
-        Imports a csv file into the EPIC database structure.
+        Generates all `LinkagesQuestion` entries based on the existing `Programs`.
 
         Args:
             request (HTTPRequest): HTML request.
@@ -172,6 +172,7 @@ class LnkAdmin(admin.ModelAdmin):
 
 # Models exposed to the admin page .
 admin.site.register(EpicUser)
+admin.site.register(EpicOrganization)
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Agency, AgencyAdmin)
 admin.site.register(Group)
