@@ -136,7 +136,7 @@ class EvoAdmin(ImportEntityAdmin):
 
 
 class LnkAdmin(admin.ModelAdmin):
-# Admin pages.
+    # Admin pages.
     change_list_template = "generate_changelist.html"
 
     def get_urls(self):
