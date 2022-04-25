@@ -37,6 +37,7 @@ def epic_test_db():
         u_created.save()
         Token.objects.get_or_create(user=u_created)
         return u_created
+
     organization = EpicOrganization.objects.create(name="Gallactic Empire")
     u_palpatine: EpicUser = set_epic_user("Palpatine", organization)
     u_anakin: EpicUser = set_epic_user("Anakin", organization)
