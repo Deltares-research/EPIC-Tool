@@ -263,6 +263,53 @@ class TestEpicUserViewSet:
             username=ck_username
         ).exists(), "User was not created despite succesful response."
 
+    @pytest.mark.parametrize(
+        "epic_username, find_username, expected_response",
+        [
+            pytest.param(
+                "Palpatine",
+                "Anakin",
+                dict(status_code=403, content={"detail": "Not found."}),
+                id="Non admins cannot update other users' password.",
+            ),
+            pytest.param(
+                "Anakin",
+                "Anakin",
+                dict(status_code=200, content=anakin_json_data),
+                id="Non admins can update their own password.",
+            ),
+            pytest.param(
+                "admin",
+                "Anakin",
+                dict(status_code=200, content=anakin_json_data),
+                id="Admins can update other users' password.",
+            ),
+        ],
+    )
+    def test_PUT_epic_user_password(
+        self,
+        epic_username: str,
+        find_username: str,
+        expected_response: dict,
+        api_client: APIClient,
+    ):
+        user_found = get_epic_user(find_username)
+        previous_pass = user_found.password
+        changepass_url = "change-password/"
+        url = f"{self.url_root}{user_found.pk}/" + changepass_url
+        data_dict = {
+            "password": "IamSup3rm4n!",
+        }
+
+        # Run request.
+        set_user_auth_token(api_client, epic_username)
+        response = api_client.put(url, data_dict, format="json")
+
+        # Verify final exepctations.
+        assert response.status_code == expected_response["status_code"]
+        if response.status_code == 200:
+            assert previous_pass != get_epic_user(find_username).password
+
 
 @pytest.mark.django_db
 class TestAreaViewSet:

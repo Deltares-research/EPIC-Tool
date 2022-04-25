@@ -60,6 +60,21 @@ class EpicUserSerializer(serializers.ModelSerializer):
 
         return super(EpicUserSerializer, self).validate(attrs)
 
+    def update(self, instance: EpicUser, validated_data: dict) -> EpicUser:
+        """
+        Partial update of the `EpicUser` fields. At this moment only available to update `password`.
+
+        Args:
+            instance (EpicUser): `EpicUser` to update.
+            validated_data (dict): Dictionary of values valid to be updated.
+
+        Returns:
+            EpicUser: Updated instance.
+        """
+        instance.set_password(validated_data["password"])
+        instance.save()
+        return instance
+
 
 class EpicOrganizationSerializer(serializers.ModelSerializer):
     """
