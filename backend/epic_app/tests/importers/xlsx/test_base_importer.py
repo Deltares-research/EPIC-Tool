@@ -1,5 +1,3 @@
-from io import BytesIO
-
 import pytest
 
 from epic_app.importers.xlsx import BaseEpicImporter

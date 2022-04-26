@@ -1,6 +1,6 @@
 import pytest
 
-from epic_app.importers.xlsx.domain_importer import EpicDomainImporter
+from epic_app.importers.xlsx import EpicDomainImporter
 from epic_app.tests import test_data_dir
 
 

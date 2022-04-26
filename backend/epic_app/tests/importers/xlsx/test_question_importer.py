@@ -17,9 +17,7 @@ from epic_app.models.epic_questions import (
     Question,
 )
 from epic_app.tests import test_data_dir
-from epic_app.tests.importers.xlsx.epic_domain_import_fixture import (
-    default_epic_domain_data,
-)
+from epic_app.tests.importers import default_epic_domain_data
 
 
 @pytest.mark.django_db
