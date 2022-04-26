@@ -4,7 +4,7 @@ from typing import List, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from epic_app.importers.csv_base_importer import BaseEpicImporter
+from epic_app.importers.xlsx_base_importer import BaseEpicImporter
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
     KeyAgencyActionsQuestion,
@@ -15,30 +15,24 @@ from epic_app.models.models import Program
 
 
 class _YesNoJustifyQuestionImporter(BaseEpicImporter):
-    class CsvLineObject:
+    class XlsxLineObject(BaseEpicImporter.XlsxLineObject):
         program: str
         title: str
         description: str
 
         @classmethod
-        def from_reader_row(cls, row: List[str]):
-            new_line = cls()
-            new_line.program = row[0]
-            new_line.description = row[1]
-            new_line.title = row[2]
-            return new_line
+        def from_xlsx_row(cls, xlsx_row):
+            new_obj = cls()
+            # We skip the first column as they are the program areas.
+            new_obj.program = cls.get_valid_cell(xlsx_row, 1)
+            new_obj.description = cls.get_valid_cell(xlsx_row, 2)
+            new_obj.title = cls.get_valid_cell(xlsx_row, 3)
+            return new_obj
 
-    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
-        read_lines: csv.DictReader = csv.reader(
-            self.get_valid_csv_text(input_csv_file),
-            quotechar='"',
-            delimiter=",",
-            skipinitialspace=True,
-        )
-
+    def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
+        line_objects = self._get_xlsx_line_objects(input_file)
         # Skip the first line as it's the columns names
-        read_lines.__next__()
-        line_objects = list(map(self.CsvLineObject.from_reader_row, read_lines))
+        _headers = line_objects.pop(0)
         self._cleanup_questions()
         self._import_questions(line_objects)
 
@@ -48,7 +42,7 @@ class _YesNoJustifyQuestionImporter(BaseEpicImporter):
     def _cleanup_questions(self):
         self._get_type().objects.all().delete()
 
-    def _import_questions(self, imported_questions: List[CsvLineObject]):
+    def _import_questions(self, imported_questions: List[XlsxLineObject]):
         for q_question in imported_questions:
             # Create new question
             if not Program.objects.filter(name=q_question.program).exists():
@@ -75,53 +69,38 @@ class KeyAgencyActionsQuestionImporter(_YesNoJustifyQuestionImporter):
 
 
 class EvolutionQuestionImporter(BaseEpicImporter):
-    class CsvLineObject:
+    class XlsxLineObject(BaseEpicImporter.XlsxLineObject):
         program: str
-        question: str
+        dimension: str
         nascent_description: str
         engaged_description: str
         capable_description: str
         effective_description: str
 
         @classmethod
-        def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
+        def from_xlsx_row(cls, xlsx_row):
             new_line = cls()
-            new_line.program = dict_row.get(dict_keys["program"]).strip()
-            new_line.question = dict_row.get(dict_keys["question"]).strip()
-            new_line.nascent_description = dict_row.get(
-                dict_keys["nascent_description"]
-            ).strip()
-            new_line.engaged_description = dict_row.get(
-                dict_keys["engaged_description"]
-            ).strip()
-            new_line.capable_description = dict_row.get(
-                dict_keys["capable_description"]
-            ).strip()
-            new_line.effective_description = dict_row.get(
-                dict_keys["effective_description"]
-            ).strip()
+            new_line.program = cls.get_valid_cell(xlsx_row, 1)
+            dimension = cls.get_valid_cell(xlsx_row, 2)
+            if not dimension:
+                dimension = "Default dimension"
+            new_line.dimension = dimension
+            new_line.nascent_description = cls.get_valid_cell(xlsx_row, 3)
+            new_line.engaged_description = cls.get_valid_cell(xlsx_row, 4)
+            new_line.capable_description = cls.get_valid_cell(xlsx_row, 5)
+            new_line.effective_description = cls.get_valid_cell(xlsx_row, 6)
             return new_line
 
-    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
-        reader = csv.DictReader(self.get_valid_csv_text(input_csv_file))
-        keys = dict(
-            program=reader.fieldnames[0],
-            question=reader.fieldnames[1],
-            nascent_description=reader.fieldnames[2],
-            engaged_description=reader.fieldnames[3],
-            capable_description=reader.fieldnames[4],
-            effective_description=reader.fieldnames[5],
-        )
-        line_objects = []
-        for row in reader:
-            line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
+    def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
+        line_objects = self._get_xlsx_line_objects(input_file)
         self._cleanup_questions()
+        _headers = line_objects.pop(0)
         self._import_questions(line_objects)
 
     def _cleanup_questions(self):
         EvolutionQuestion.objects.all().delete()
 
-    def _import_questions(self, imported_questions: List[CsvLineObject]):
+    def _import_questions(self, imported_questions: List[XlsxLineObject]):
         for q_question in imported_questions:
             # Create new question
             if not Program.objects.filter(name=q_question.program).exists():
@@ -129,12 +108,12 @@ class EvolutionQuestionImporter(BaseEpicImporter):
                     f"Program '{q_question.program}' not found, import can't go through."
                 )
             p_found = Program.objects.filter(name=q_question.program).first()
-            c_area = EvolutionQuestion(
-                title=q_question.question,
+            c_question = EvolutionQuestion(
+                title=q_question.dimension,
                 nascent_description=q_question.nascent_description,
                 engaged_description=q_question.engaged_description,
                 capable_description=q_question.capable_description,
                 effective_description=q_question.effective_description,
                 program=p_found,
             )
-            c_area.save()
+            c_question.save()

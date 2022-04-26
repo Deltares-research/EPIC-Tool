@@ -4,22 +4,23 @@ import pytest
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from epic_app.importers import BaseEpicImporter, EpicDomainImporter
-from epic_app.importers.csv_base_importer import ProtocolEpicImporter
+from epic_app.importers.xlsx_base_importer import ProtocolEpicImporter
 from epic_app.models.models import Area, Group, Program
 from epic_app.tests import test_data_dir
 
 
 @pytest.mark.django_db
 class TestEpicDomainImporter:
+    domain_xlsx_file = test_data_dir / "xlsx" / "initial_epic_data.xlsx"
+
     def test_epic_domain_importer(self):
         domain_importer = EpicDomainImporter()
         assert isinstance(domain_importer, BaseEpicImporter)
         assert isinstance(domain_importer, ProtocolEpicImporter)
 
-    def test_import_csv_from_filepath(self):
+    def test_import_file_from_filepath(self):
         # Define test data
-        test_file = test_data_dir / "initial_epic_data.csv"
-        assert test_file.is_file()
+        assert self.domain_xlsx_file.is_file()
 
         # Verify initial expectations
         dummy_area = Area(name="dummyArea")
@@ -33,27 +34,19 @@ class TestEpicDomainImporter:
         assert len(Program.objects.all()) == 1
 
         # Run test
-        EpicDomainImporter().import_csv(test_file)
+        EpicDomainImporter().import_file(self.domain_xlsx_file)
 
         # Verify final expectations
-        assert len(Area.objects.all()) == 5
-        assert len(Group.objects.all()) == 11
-        assert len(Program.objects.all()) == 42
-        assert any(
-            [p.description != "" for p in Program.objects.all()]
-        ), "No descriptions were imported."
-        # Verify the initial data has been removed.
-        assert dummy_area not in Area.objects.all()
-        assert dummy_group not in Group.objects.all()
-        assert dummy_program not in Program.objects.all()
+        self._verify_default_import_final_expectations(
+            dict(area=dummy_area, group=dummy_group, program=dummy_program)
+        )
 
-    def test_import_csv_from_inmemoryuploaddedfile(self):
+    def test_import_file_from_inmemoryuploaddedfile(self):
         # Define request.
-        test_file = test_data_dir / "initial_epic_data.csv"
-        assert test_file.is_file()
-        with test_file.open("rb") as csv_file:
+        assert self.domain_xlsx_file.is_file()
+        with self.domain_xlsx_file.open("rb") as csv_file:
             file_io = BytesIO(csv_file.read())
-            file_io.name = test_file.name
+            file_io.name = self.domain_xlsx_file.name
             file_io.seek(0)
         csv_inmemoryfile = InMemoryUploadedFile(
             file_io,
@@ -76,17 +69,22 @@ class TestEpicDomainImporter:
         assert len(Program.objects.all()) == 1
 
         # Run test
-        EpicDomainImporter().import_csv(csv_inmemoryfile)
+        EpicDomainImporter().import_file(csv_inmemoryfile)
 
         # Verify final expectations
-        assert len(Area.objects.all()) == 5
-        assert len(Group.objects.all()) == 11
-        assert len(Program.objects.all()) == 42
+        self._verify_default_import_final_expectations(
+            dict(area=dummy_area, group=dummy_group, program=dummy_program)
+        )
+
+    def _verify_default_import_final_expectations(self, dummy_set: dict):
+        # Verify final expectations
+        assert len(Area.objects.all()) == 6
+        assert len(Group.objects.all()) == 12
+        assert len(Program.objects.all()) == 43
         assert any(
             [p.description != "" for p in Program.objects.all()]
         ), "No descriptions were imported."
-
         # Verify the initial data has been removed.
-        assert dummy_area not in Area.objects.all()
-        assert dummy_group not in Group.objects.all()
-        assert dummy_program not in Program.objects.all()
+        assert dummy_set["area"] not in Area.objects.all()
+        assert dummy_set["group"] not in Group.objects.all()
+        assert dummy_set["program"] not in Program.objects.all()

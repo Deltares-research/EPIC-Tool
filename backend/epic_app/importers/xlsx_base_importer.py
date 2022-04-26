@@ -2,26 +2,56 @@ import io
 from pathlib import Path
 from typing import Any, Dict, List, Protocol, Tuple, Union, runtime_checkable
 
+import openpyxl
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 @runtime_checkable
 class ProtocolEpicImporter(Protocol):
-    class CsvLineObject:
+    class XlsxLineObject:
         pass
 
-    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
+    def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
         pass
 
 
 class BaseEpicImporter:
-    class CsvLineObject:
-        @classmethod
-        def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
-            pass
+    class XlsxLineObject:
+        @staticmethod
+        def get_valid_cell(xlsx_row, cell_pos: int) -> str:
+            try:
+                return xlsx_row[cell_pos].value.strip()
+            except:
+                return ""
 
-    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
-        pass
+        @classmethod
+        def from_xlsx_row(cls, xlsx_row: Any):
+            raise NotImplementedError("Implement in concrete class.")
+
+    def _get_xlsx_line_objects(
+        self, input_file: Union[InMemoryUploadedFile, Path]
+    ) -> List[XlsxLineObject]:
+        """
+        Gets all the Xlsx lines into our custom `XlsxLineObject`.
+
+        Args:
+            input_file (Union[InMemoryUploadedFile, Path]): File to parse.
+
+        Returns:
+            List[XlsxLineObject]: Resulting list of parsed objects.
+        """
+        loaded_workbook: openpyxl.Workbook = openpyxl.load_workbook(input_file)
+        loaded_sheet = loaded_workbook.active
+        return list(map(self.XlsxLineObject.from_xlsx_row, loaded_sheet.rows))
+
+    def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
+        """
+        Imports an xlsx file saved in memory or as a path into the EPIC domain data.
+
+        Args:
+            input_file (Union[InMemoryUploadedFile, Path]): File containing EPIC data.
+        """
+        raise NotImplementedError("Implement in concrete class.")
 
     def tuple_to_dict(
         self, tup_lines: List[Tuple[str, List[Any]]]
@@ -55,19 +85,3 @@ class BaseEpicImporter:
         """
         tuple_list = [(x.__dict__[group_key], x) for x in data_read]
         return self.tuple_to_dict(tuple_list)
-
-    def get_valid_csv_text(
-        self, input_csv_file: Union[InMemoryUploadedFile, Path]
-    ) -> io.StringIO:
-        """
-        Gets a valid csv StringIo text from either source.
-
-        Args:
-            input_csv_file (Union[InMemoryUploadedFile, Path]): Different IO source.
-
-        Returns:
-            io.StringIO: Stream of decoded CSV text.
-        """
-        if not isinstance(input_csv_file, Path):
-            return io.StringIO(input_csv_file.read().decode("utf-8"))
-        return io.StringIO(input_csv_file.read_text(encoding="utf-8"))

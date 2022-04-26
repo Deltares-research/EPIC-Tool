@@ -5,27 +5,23 @@ from typing import Dict, List, Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.forms import ValidationError
 
-from epic_app.importers.csv_base_importer import BaseEpicImporter
+from epic_app.importers.xlsx_base_importer import BaseEpicImporter
 from epic_app.models.models import Agency, Program
 
 
 class EpicAgencyImporter(BaseEpicImporter):
-    class CsvLineObject:
-        """
-        Maps a CSV row into a data object that we can better manipulate.
-        """
-
+    class XlsxLineObject(BaseEpicImporter.XlsxLineObject):
         agency: str
         program: str
 
         @classmethod
-        def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
+        def from_xlsx_row(cls, xlsx_row):
             new_line = cls()
-            new_line.agency = dict_row.get(dict_keys["agency"]).strip()
-            new_line.program = dict_row.get(dict_keys["program"]).strip()
+            new_line.agency = cls.get_valid_cell(xlsx_row, 0)
+            new_line.program = cls.get_valid_cell(xlsx_row, 1)
             return new_line
 
-    def _import_agencies(self, agencies_dictionary: Dict[str, List[CsvLineObject]]):
+    def _import_agencies(self, agencies_dictionary: Dict[str, List[XlsxLineObject]]):
         missing_programs = []
         for agency_csvobjs in agencies_dictionary.values():
             for csv_obj in agency_csvobjs:
@@ -46,20 +42,14 @@ class EpicAgencyImporter(BaseEpicImporter):
                 existing_program: Program = Program.get_program_by_name(csvobj.program)
                 existing_program.agencies.add(c_agency)
 
-    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
+    def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
         """
         Imports saved Agencies into the database and adds the relationships to existent Programs.
 
         Args:
-            input_csv_file (Union[InMemoryUploadedFile, Path]): File containing EPIC Agencies.
+            input_file (Union[InMemoryUploadedFile, Path]): File containing EPIC Agencies.
         """
-        reader = csv.DictReader(self.get_valid_csv_text(input_csv_file))
-        keys = dict(
-            agency=reader.fieldnames[0],
-            program=reader.fieldnames[1],
-        )
-        line_objects = []
-        for row in reader:
-            line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
-
+        Agency.objects.all().delete()
+        line_objects = self._get_xlsx_line_objects(input_file)
+        _headers = line_objects.pop(0)
         self._import_agencies(self.group_entity("agency", line_objects))

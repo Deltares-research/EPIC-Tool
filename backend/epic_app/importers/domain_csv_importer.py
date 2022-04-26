@@ -1,10 +1,11 @@
 import csv
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from openpyxl import Workbook
 
-from epic_app.importers.csv_base_importer import BaseEpicImporter
+from epic_app.importers.xlsx_base_importer import BaseEpicImporter
 from epic_app.models.models import Area, Group, Program
 
 
@@ -13,9 +14,9 @@ class EpicDomainImporter(BaseEpicImporter):
     Class that contains an importer for all the Epic elements.
     """
 
-    class CsvLineObject:
+    class XlsxLineObject(BaseEpicImporter.XlsxLineObject):
         """
-        Maps a CSV row into a data object that we can better manipulate.
+        Maps a XLSX row into a data object that we can better manipulate.
         """
 
         area: str
@@ -24,13 +25,13 @@ class EpicDomainImporter(BaseEpicImporter):
         description: Optional[str]
 
         @classmethod
-        def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
-            new_line = cls()
-            new_line.area = dict_row.get(dict_keys["area"]).strip()
-            new_line.group = dict_row.get(dict_keys["group"]).strip()
-            new_line.program = dict_row.get(dict_keys["program"]).strip()
-            new_line.description = dict_row.get(dict_keys["description"]).strip()
-            return new_line
+        def from_xlsx_row(cls, xlsx_row: Any):
+            new_obj = cls()
+            new_obj.area = cls.get_valid_cell(xlsx_row, 0)
+            new_obj.group = cls.get_valid_cell(xlsx_row, 1)
+            new_obj.program = cls.get_valid_cell(xlsx_row, 2)
+            new_obj.description = cls.get_valid_cell(xlsx_row, 3)
+            return new_obj
 
     def _cleanup_epic_domain(self):
         """
@@ -40,7 +41,7 @@ class EpicDomainImporter(BaseEpicImporter):
         Group.objects.all().delete()
         Program.objects.all().delete()
 
-    def _import_epic_domain(self, areas_dictionary: Dict[str, List[CsvLineObject]]):
+    def _import_epic_domain(self, areas_dictionary: Dict[str, List[XlsxLineObject]]):
         """
         Imports all the read objects from the csv into the database.
 
@@ -65,22 +66,8 @@ class EpicDomainImporter(BaseEpicImporter):
                     )
                     c_program.save()
 
-    def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
-        """
-        Imports a csv file saved in memory into the EPIC domain data.
-
-        Args:
-            input_csv_file (Union[InMemoryUploadedFile, Path]): File containing EPIC data.
-        """
-        reader = csv.DictReader(self.get_valid_csv_text(input_csv_file))
-        keys = dict(
-            area=reader.fieldnames[0],
-            group=reader.fieldnames[1],
-            program=reader.fieldnames[2],
-            description=reader.fieldnames[3],
-        )
-        line_objects = []
-        for row in reader:
-            line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
+    def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
         self._cleanup_epic_domain()
+        line_objects = self._get_xlsx_line_objects(input_file)
+        _headers = line_objects.pop(0)
         self._import_epic_domain(self.group_entity("area", line_objects))

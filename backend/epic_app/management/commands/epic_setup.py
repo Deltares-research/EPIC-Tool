@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from epic_app.importers import EpicAgencyImporter, EpicDomainImporter
-from epic_app.importers.csv_base_importer import BaseEpicImporter
+from epic_app.importers.xlsx_base_importer import BaseEpicImporter
 from epic_app.importers.question_csv_importer import (
     EvolutionQuestionImporter,
     NationalFrameworkQuestionImporter,
