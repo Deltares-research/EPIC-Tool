@@ -5,7 +5,7 @@ from typing import Dict, List, Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.forms import ValidationError
 
-from epic_app.importers.xlsx_base_importer import BaseEpicImporter
+from epic_app.importers.xlsx.base_importer import BaseEpicImporter
 from epic_app.models.models import Agency, Program
 
 

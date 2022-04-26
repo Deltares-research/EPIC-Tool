@@ -5,14 +5,14 @@ from django.contrib import admin
 from django.shortcuts import redirect, render
 from django.urls import path
 
-from epic_app.importers import (
+from epic_app.importers.xlsx import (
     BaseEpicImporter,
     EpicAgencyImporter,
     EpicDomainImporter,
     EvolutionQuestionImporter,
+    KeyAgencyActionsQuestionImporter,
     NationalFrameworkQuestionImporter,
 )
-from epic_app.importers.question_csv_importer import KeyAgencyActionsQuestionImporter
 from epic_app.models.epic_answers import (
     Answer,
     MultipleChoiceAnswer,

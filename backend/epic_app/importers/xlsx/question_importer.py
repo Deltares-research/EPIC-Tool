@@ -4,7 +4,7 @@ from typing import List, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from epic_app.importers.xlsx_base_importer import BaseEpicImporter
+from epic_app.importers.xlsx.base_importer import BaseEpicImporter
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
     KeyAgencyActionsQuestion,

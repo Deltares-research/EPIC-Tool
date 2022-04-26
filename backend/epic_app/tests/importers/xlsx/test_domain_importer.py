@@ -3,8 +3,8 @@ from io import BytesIO
 import pytest
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from epic_app.importers import BaseEpicImporter, EpicDomainImporter
-from epic_app.importers.xlsx_base_importer import ProtocolEpicImporter
+from epic_app.importers.xlsx import BaseEpicImporter, EpicDomainImporter
+from epic_app.importers.xlsx.base_importer import ProtocolEpicImporter
 from epic_app.models.models import Area, Group, Program
 from epic_app.tests import test_data_dir
 

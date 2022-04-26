@@ -2,8 +2,8 @@ from io import BytesIO
 
 import pytest
 
-from epic_app.importers import BaseEpicImporter
-from epic_app.importers.xlsx_base_importer import ProtocolEpicImporter
+from epic_app.importers.xlsx import BaseEpicImporter
+from epic_app.importers.xlsx.base_importer import ProtocolEpicImporter
 
 
 class TestBaseEpicImporter:

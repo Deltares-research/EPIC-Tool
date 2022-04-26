@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from openpyxl import Workbook
 
-from epic_app.importers.xlsx_base_importer import BaseEpicImporter
+from epic_app.importers.xlsx.base_importer import BaseEpicImporter
 from epic_app.models.models import Area, Group, Program
 
 

@@ -3,13 +3,13 @@ from typing import Tuple
 
 import pytest
 
-from epic_app.importers.question_csv_importer import (
+from epic_app.importers.xlsx.base_importer import BaseEpicImporter, ProtocolEpicImporter
+from epic_app.importers.xlsx.question_importer import (
     EvolutionQuestionImporter,
     KeyAgencyActionsQuestionImporter,
     NationalFrameworkQuestionImporter,
     _YesNoJustifyQuestionImporter,
 )
-from epic_app.importers.xlsx_base_importer import BaseEpicImporter, ProtocolEpicImporter
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
     KeyAgencyActionsQuestion,
@@ -17,7 +17,9 @@ from epic_app.models.epic_questions import (
     Question,
 )
 from epic_app.tests import test_data_dir
-from epic_app.tests.importers.epic_domain_import_fixture import default_epic_domain_data
+from epic_app.tests.importers.xlsx.epic_domain_import_fixture import (
+    default_epic_domain_data,
+)
 
 
 @pytest.mark.django_db

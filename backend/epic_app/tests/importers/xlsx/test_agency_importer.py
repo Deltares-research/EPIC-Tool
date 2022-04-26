@@ -1,10 +1,12 @@
 import pytest
 
-from epic_app.importers import BaseEpicImporter, EpicAgencyImporter
-from epic_app.importers.xlsx_base_importer import ProtocolEpicImporter
+from epic_app.importers.xlsx import BaseEpicImporter, EpicAgencyImporter
+from epic_app.importers.xlsx.base_importer import ProtocolEpicImporter
 from epic_app.models.models import Agency
 from epic_app.tests import test_data_dir
-from epic_app.tests.importers.epic_domain_import_fixture import default_epic_domain_data
+from epic_app.tests.importers.xlsx.epic_domain_import_fixture import (
+    default_epic_domain_data,
+)
 
 
 class TestEpicAgencyImporter:
