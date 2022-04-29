@@ -17,27 +17,28 @@ from epic_app.models.models import Program
 class _YesNoJustifyQuestionImporter(BaseEpicImporter):
     class CsvLineObject:
         program: str
-        question: str
+        title: str
         description: str
 
         @classmethod
-        def from_dictreader_row(cls, dict_keys: dict, dict_row: dict):
+        def from_reader_row(cls, row: List[str]):
             new_line = cls()
-            new_line.program = dict_row.get(dict_keys["program"]).strip()
-            new_line.question = dict_row.get(dict_keys["question"]).strip()
-            new_line.description = dict_row.get(dict_keys["description"]).strip()
+            new_line.program = row[0]
+            new_line.description = row[1]
+            new_line.title = row[2]
             return new_line
 
     def import_csv(self, input_csv_file: Union[InMemoryUploadedFile, Path]):
-        reader = csv.DictReader(self.get_valid_csv_text(input_csv_file))
-        keys = dict(
-            program=reader.fieldnames[0],
-            question=reader.fieldnames[1],
-            description=reader.fieldnames[2],
+        read_lines: csv.DictReader = csv.reader(
+            self.get_valid_csv_text(input_csv_file),
+            quotechar='"',
+            delimiter=",",
+            skipinitialspace=True,
         )
-        line_objects = []
-        for row in reader:
-            line_objects.append(self.CsvLineObject.from_dictreader_row(keys, row))
+
+        # Skip the first line as it's the columns names
+        read_lines.__next__()
+        line_objects = list(map(self.CsvLineObject.from_reader_row, read_lines))
         self._cleanup_questions()
         self._import_questions(line_objects)
 
@@ -56,7 +57,7 @@ class _YesNoJustifyQuestionImporter(BaseEpicImporter):
                 )
             p_found = Program.objects.filter(name=q_question.program).first()
             c_area = self._get_type()(
-                title=q_question.program,
+                title=q_question.title,
                 description=q_question.description,
                 program=p_found,
             )
