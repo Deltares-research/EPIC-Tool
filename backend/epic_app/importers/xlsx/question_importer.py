@@ -1,8 +1,9 @@
 import csv
 from pathlib import Path
-from typing import List, Union
+from typing import List, Type, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from openpyxl.cell import Cell
 
 from epic_app.importers.xlsx.base_importer import BaseEpicImporter
 from epic_app.models.epic_questions import (
@@ -16,27 +17,34 @@ from epic_app.models.models import Program
 
 class _YesNoJustifyQuestionImporter(BaseEpicImporter):
     class XlsxLineObject(BaseEpicImporter.XlsxLineObject):
+        group: str
         program: str
         title: str
         description: str
 
         @classmethod
-        def from_xlsx_row(cls, xlsx_row):
+        def from_xlsx_row(cls, xlsx_row: List[Cell]):
             new_obj = cls()
-            # We skip the first column as they are the program areas.
+            new_obj.group = cls.get_valid_cell(xlsx_row, 0)
             new_obj.program = cls.get_valid_cell(xlsx_row, 1)
             new_obj.description = cls.get_valid_cell(xlsx_row, 2)
             new_obj.title = cls.get_valid_cell(xlsx_row, 3)
             return new_obj
 
     def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
+        """
+        Imports a 'XLSX file', because we only support one importer we can embed it here.
+
+        Args:
+            input_file (Union[InMemoryUploadedFile, Path]): File to be imported as a YNJustify question.
+        """
         line_objects = self._get_xlsx_line_objects(input_file)
         # Skip the first line as it's the columns names
         _headers = line_objects.pop(0)
         self._cleanup_questions()
         self._import_questions(line_objects)
 
-    def _get_type(self) -> Question:
+    def _get_type(self) -> Type[Question]:
         pass
 
     def _cleanup_questions(self):
@@ -45,17 +53,19 @@ class _YesNoJustifyQuestionImporter(BaseEpicImporter):
     def _import_questions(self, imported_questions: List[XlsxLineObject]):
         for q_question in imported_questions:
             # Create new question
-            if not Program.objects.filter(name=q_question.program).exists():
+            f_program_query = Program.objects.filter(
+                name=q_question.program, group__name=q_question.group
+            )
+            if not f_program_query.exists():
                 raise ValueError(
-                    f"Program '{q_question.program}' not found, import can't go through."
+                    f"Program '{q_question.program}' for group '{q_question.group} not found, import can't go through."
                 )
-            p_found = Program.objects.filter(name=q_question.program).first()
-            c_area = self._get_type()(
+            c_question: Question = self._get_type()(
                 title=q_question.title,
                 description=q_question.description,
-                program=p_found,
+                program=f_program_query.first(),
             )
-            c_area.save()
+            c_question.save()
 
 
 class NationalFrameworkQuestionImporter(_YesNoJustifyQuestionImporter):

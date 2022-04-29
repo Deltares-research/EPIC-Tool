@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Type
 
 import pytest
 
@@ -26,12 +26,13 @@ class TestYesNoJustifyQuestionImporter:
         KeyAgencyActionsQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "keyagencyactionsquestions.xlsx",
             question_type=KeyAgencyActionsQuestion,
-            expected_entries=0,
+            expected_entries=42,
+            first_entry_title="Is this an example question?",
         ),
         NationalFrameworkQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "nationalframeworkquestions.xlsx",
             question_type=NationalFrameworkQuestion,
-            expected_entries=43,
+            expected_entries=42,
             first_entry_title="Is there a national strategic water resources management plan in place?",
         ),
     }
@@ -52,7 +53,7 @@ class TestYesNoJustifyQuestionImporter:
     )
     def test_import_file_from_filepath(
         self,
-        question_type_fixture: Tuple[_YesNoJustifyQuestionImporter, dict],
+        question_type_fixture: Tuple[Type[_YesNoJustifyQuestionImporter], dict],
         default_epic_domain_data,
     ):
         importer_type, dict_values = question_type_fixture
@@ -61,8 +62,12 @@ class TestYesNoJustifyQuestionImporter:
         assert test_file.is_file(), f"Test file not found at {test_file}"
 
         assert len(question_type.objects.all()) == 0
-
+        # Run test.
         importer_type().import_file(test_file)
+
+        # Verify final expectations
+        # Note, these tests assume the questions are stored in order of creation.
+        # This means they will strictly follow the order from the provided file.
         assert len(question_type.objects.all()) == dict_values["expected_entries"]
         assert question_type.objects.first().title == dict_values["first_entry_title"]
 

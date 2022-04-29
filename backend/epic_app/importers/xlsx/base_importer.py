@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Protocol, Tuple, Union, runtime_checkable
 
 import openpyxl
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from openpyxl.cell import Cell
 
 
 @runtime_checkable
@@ -18,7 +19,7 @@ class ProtocolEpicImporter(Protocol):
 class BaseEpicImporter:
     class XlsxLineObject:
         @staticmethod
-        def get_valid_cell(xlsx_row, cell_pos: int) -> str:
+        def get_valid_cell(xlsx_row: List[Cell], cell_pos: int) -> str:
             try:
                 return xlsx_row[cell_pos].value.strip()
             except:

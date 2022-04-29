@@ -104,16 +104,17 @@ class TestAreaAdmin:
         # Status code is redirected.
         assert r_result.status_code == 302
         assert r_result.url == ".."
+        # Note, these results could change with 'newer' test data versions.
         assert len(Area.objects.all()) == 5
         assert len(Group.objects.all()) == 11
-        assert len(Program.objects.all()) == 42
+        assert len(Program.objects.all()) == 43
         # Verify the initial data has been removed.
         assert dummy_area not in Area.objects.all()
         assert dummy_group not in Group.objects.all()
         assert dummy_program not in Program.objects.all()
 
     @pytest.mark.django_db
-    def test_post_import_xlsx_with_empty_data_imports_and_redirects(
+    def test_post_import_xlsx_with_empty_data_cleans_db_and_redirects(
         self, area_admin_site: AreaAdmin
     ):
         # Define request.
@@ -126,6 +127,8 @@ class TestAreaAdmin:
         dummy_group.save()
         dummy_program = Program(name="dummyProgram", group=dummy_group)
         dummy_program.save()
+
+        # When performing an import we will clean the previous entries whether or not it fails
         assert len(Area.objects.all()) == 1
         assert len(Group.objects.all()) == 1
         assert len(Program.objects.all()) == 1
@@ -139,13 +142,13 @@ class TestAreaAdmin:
         assert r_result.status_code == 302
         assert r_result.url == ".."
         # Status has not changed.
-        assert len(Area.objects.all()) == 1
-        assert len(Group.objects.all()) == 1
-        assert len(Program.objects.all()) == 1
+        assert len(Area.objects.all()) == 0
+        assert len(Group.objects.all()) == 0
+        assert len(Program.objects.all()) == 0
         # Verify the initial data has been not removed.
-        assert dummy_area in Area.objects.all()
-        assert dummy_group in Group.objects.all()
-        assert dummy_program in Program.objects.all()
+        assert not dummy_area in Area.objects.all()
+        assert not dummy_group in Group.objects.all()
+        assert not dummy_program in Program.objects.all()
 
 
 class TestAgencyAdmin:
