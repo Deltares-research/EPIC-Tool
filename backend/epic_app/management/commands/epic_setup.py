@@ -10,6 +10,7 @@ from epic_app.importers.xlsx import (
     EpicAgencyImporter,
     EpicDomainImporter,
     EvolutionQuestionImporter,
+    KeyAgencyActionsQuestionImporter,
     NationalFrameworkQuestionImporter,
 )
 from epic_app.models.epic_questions import LinkagesQuestion
@@ -80,7 +81,7 @@ class Command(BaseCommand):
             "nationalframeworkquestions.xlsx", NationalFrameworkQuestionImporter
         )
         import_and_log(
-            "keyagencyactionsquestions.xlsx", NationalFrameworkQuestionImporter
+            "keyagencyactionsquestions.xlsx", KeyAgencyActionsQuestionImporter
         )
         import_and_log("evolutionquestions.xlsx", EvolutionQuestionImporter)
         LinkagesQuestion.generate_linkages()

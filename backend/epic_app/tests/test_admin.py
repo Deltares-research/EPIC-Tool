@@ -151,7 +151,10 @@ class TestImportEntityAdmin:
         self._validate_fixture_data_before_import()
 
         # Run test
-        r_result = admin_site.import_xlsx(post_request)
+        from django.db import transaction
+
+        with transaction.atomic():
+            r_result = admin_site.import_xlsx(post_request)
 
         # Verify final expectations
         assert r_result is not None
