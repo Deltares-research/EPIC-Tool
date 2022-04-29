@@ -78,8 +78,8 @@ class TestEpicDomainImporter:
 
     def _verify_default_import_final_expectations(self, dummy_set: dict):
         # Verify final expectations
-        assert len(Area.objects.all()) == 6
-        assert len(Group.objects.all()) == 12
+        assert len(Area.objects.all()) == 5
+        assert len(Group.objects.all()) == 11
         assert len(Program.objects.all()) == 43
         assert any(
             [p.description != "" for p in Program.objects.all()]
