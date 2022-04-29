@@ -1,3 +1,14 @@
+## v0.16.0 (2022-04-29)
+
+### Feat
+
+- **epic_app/importers/xlsx_question_importer.py**: Fixed question importer to include the group as a filtering condition
+- **epic_app/importers**: We now import xlsx files instead of csv to make it more straightforward for end users
+
+### Refactor
+
+- **importers/xlsx**: Moved xlsx importers to its own module for better maintainance.
+
 ## v0.15.0 (2022-04-20)
 
 ### Fix

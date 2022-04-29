@@ -61,16 +61,16 @@ class EvolutionQuestion(Question):
 
     # Single choice among four options
     nascent_description: str = models.TextField(
-        null=False, blank=False, verbose_name=str(EvolutionChoiceType.NASCENT)
+        null=True, blank=True, verbose_name=str(EvolutionChoiceType.NASCENT)
     )
     engaged_description: str = models.TextField(
-        null=False, blank=False, verbose_name=str(EvolutionChoiceType.ENGAGED)
+        null=True, blank=True, verbose_name=str(EvolutionChoiceType.ENGAGED)
     )
     capable_description: str = models.TextField(
-        null=False, blank=False, verbose_name=str(EvolutionChoiceType.CAPABLE)
+        null=True, blank=True, verbose_name=str(EvolutionChoiceType.CAPABLE)
     )
     effective_description: str = models.TextField(
-        null=False, blank=False, verbose_name=str(EvolutionChoiceType.EFFECTIVE)
+        null=True, blank=True, verbose_name=str(EvolutionChoiceType.EFFECTIVE)
     )
 
 
