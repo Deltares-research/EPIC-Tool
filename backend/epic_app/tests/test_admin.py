@@ -1,11 +1,9 @@
 from io import BytesIO
-from msilib import type_localizable
 from pathlib import Path
-from typing import Optional, Tuple, Type
+from typing import Tuple
 from wsgiref.simple_server import WSGIRequestHandler
 
 import pytest
-from coreapi import Link
 from django.contrib import admin
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
