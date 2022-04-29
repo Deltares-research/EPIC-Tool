@@ -162,7 +162,7 @@ class LnkAdmin(admin.ModelAdmin):
         Returns:
             HTTPRequest: HTML response.
         """
-        if request.method == 'GET':
+        if request.method == "GET":
             LinkagesQuestion.objects.all().delete()
             LinkagesQuestion.generate_linkages()
             self.message_user(
