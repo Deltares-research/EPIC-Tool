@@ -29,15 +29,15 @@ from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 
 
-class CsvImportForm(forms.Form):
+class XlsxImportForm(forms.Form):
     """
-    Simple form to allow importing a 'csv' file.
+    Simple form to allow importing a 'xlsx' file.
 
     Args:
         forms (forms.Form): Default Django form.
     """
 
-    csv_file = forms.FileField()
+    xlsx_file = forms.FileField()
 
 
 class ImportEntityAdmin(admin.ModelAdmin):
@@ -81,7 +81,7 @@ class ImportEntityAdmin(admin.ModelAdmin):
                 )
             return redirect("..")
 
-        form = CsvImportForm()
+        form = XlsxImportForm()
         payload = {"form": form}
         return render(request, "admin/xlsx_form.html", payload)
 
@@ -162,11 +162,12 @@ class LnkAdmin(admin.ModelAdmin):
         Returns:
             HTTPRequest: HTML response.
         """
-        LinkagesQuestion.objects.all().delete()
-        LinkagesQuestion.generate_linkages()
-        self.message_user(
-            request, "Generated one linkage question per existent program"
-        )
+        if request.method == 'GET':
+            LinkagesQuestion.objects.all().delete()
+            LinkagesQuestion.generate_linkages()
+            self.message_user(
+                request, "Generated one linkage question per existent program"
+            )
         return redirect("..")
 
 

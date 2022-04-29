@@ -1,32 +1,60 @@
 from io import BytesIO
+from msilib import type_localizable
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple, Type
 from wsgiref.simple_server import WSGIRequestHandler
 
 import pytest
+from coreapi import Link
 from django.contrib import admin
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import models
 from django.test import RequestFactory
 
-from epic_app.admin import AgencyAdmin, AreaAdmin, ImportEntityAdmin
+from epic_app.admin import (
+    AgencyAdmin,
+    AreaAdmin,
+    EvoAdmin,
+    ImportEntityAdmin,
+    KaaAdmin,
+    LnkAdmin,
+    NfqAdmin,
+)
+from epic_app.models.epic_questions import (
+    EvolutionQuestion,
+    KeyAgencyActionsQuestion,
+    LinkagesQuestion,
+    NationalFrameworkQuestion,
+)
 from epic_app.models.models import Agency, Area, Group, Program
+from epic_app.tests.importers import default_epic_domain_data, full_epic_domain_data
 
 
-class TestAreaAdmin:
-    @pytest.fixture(autouse=False)
-    def area_admin_site(self) -> AreaAdmin:
-        reg_area = next(
-            (r_model for r_model in admin.site._registry if r_model is Area), None
-        )
-        return admin.site._registry[reg_area]
+def _fill_in_request(request: WSGIRequestHandler) -> WSGIRequestHandler:
+    # adding session
+    middleware = SessionMiddleware(request)
+    middleware.process_request(request)
+    request.session.save()
 
-    @pytest.fixture(autouse=False)
-    def xlsx_inmemoryfile(self) -> InMemoryUploadedFile:
-        test_file = (
-            Path(__file__).parent / "test_data" / "xlsx" / "initial_epic_data.xlsx"
-        )
+    # adding messages
+    messages = FallbackStorage(request)
+    setattr(request, "_messages", messages)
+    return request
+
+
+def _create_get_request(get_url: str) -> WSGIRequestHandler:
+    return _fill_in_request(RequestFactory().get(get_url))
+
+
+def _create_post_request(post_url: str) -> WSGIRequestHandler:
+    return _fill_in_request(RequestFactory().post(post_url))
+
+
+class TestImportEntityAdmin:
+    def _get_xlsx_inmemoryfile(self, filename: str) -> InMemoryUploadedFile:
+        test_file = Path(__file__).parent / "test_data" / "xlsx" / filename
         assert test_file.is_file()
         with test_file.open("rb") as csv_file:
             file_io = BytesIO(csv_file.read())
@@ -42,124 +70,165 @@ class TestAreaAdmin:
         )
         return in_memory_file
 
-    def test_area_admin_is_initialized(self):
-        assert admin.site.is_registered(Area)
-        reg_area = next(
-            (r_model for r_model in admin.site._registry if r_model is Area), None
+    def _get_model_admin_site(self, model_type: models.Model) -> ImportEntityAdmin:
+        reg_model = next(
+            (r_model for r_model in admin.site._registry if r_model is model_type), None
         )
-        assert reg_area is not None, "No Area was registered as a model."
-        area_admin = admin.site._registry[reg_area]
-        assert isinstance(area_admin, AreaAdmin)
-        assert isinstance(area_admin, ImportEntityAdmin)
-        assert area_admin.change_list_template == "import_changelist.html"
-        assert any("import-xlsx/" in str(t_url) for t_url in area_admin.urls)
+        assert (
+            reg_model is not None
+        ), f"No {str(model_type)} was registered an admin model."
 
-    def test_get_import_xlsx_returns_success_code(self, area_admin_site: AreaAdmin):
+        return admin.site._registry[reg_model]
+
+    def _validate_fixture_data_before_import(self):
+        # Verify initial expectations
+        assert len(Area.objects.all()) > 1, "Is the data fixture invoked?"
+        assert len(Agency.objects.all()) > 1, "Is the data fixture invoked?"
+        assert len(Group.objects.all()) > 1, "Is the data fixture invoked?"
+        assert len(Program.objects.all()) > 1, "Is the data fixture invoked?"
+
+    import_model_cases = {
+        Area: dict(
+            admin_site=AreaAdmin,
+            filename="initial_epic_data.xlsx",
+        ),
+        Agency: dict(admin_site=AgencyAdmin, filename="agency_data.xlsx"),
+        NationalFrameworkQuestion: dict(
+            admin_site=NfqAdmin, filename="nationalframeworkquestions.xlsx"
+        ),
+        KeyAgencyActionsQuestion: dict(
+            admin_site=KaaAdmin, filename="keyagencyactionsquestions.xlsx"
+        ),
+        EvolutionQuestion: dict(
+            admin_site=EvoAdmin, filename="evolutionquestions.xlsx"
+        ),
+    }
+
+    @pytest.mark.parametrize(
+        "model_admin_testcase",
+        import_model_cases.items(),
+        ids=import_model_cases.keys(),
+    )
+    def test_importentitymodel_is_initialized(
+        self, model_admin_testcase: Tuple[models.Model, dict]
+    ):
+        model_type, dict_values = model_admin_testcase
+        assert admin.site.is_registered(model_type)
+        model_admin = self._get_model_admin_site(model_type)
+
+        assert isinstance(model_admin, dict_values["admin_site"])
+        assert isinstance(model_admin, ImportEntityAdmin)
+        assert model_admin.change_list_template == "import_changelist.html"
+        assert any("import-xlsx/" in str(t_url) for t_url in model_admin.urls)
+
+    @pytest.mark.parametrize("model_type", import_model_cases.keys())
+    def test_get_import_xlsx_returns_success_code(self, model_type: models.Model):
+        # This test only verifies we got a different page where the import will take place.
         rf = RequestFactory()
         request = rf.get("import-xlsx/")
-        r_result = area_admin_site.import_xlsx(request)
+        admin_site: ImportEntityAdmin = self._get_model_admin_site(model_type)
+        r_result = admin_site.import_xlsx(request)
         assert r_result is not None
         assert r_result.status_code == 200
 
-    def _post_import_xlsx_request(
-        self, xlsx_input_file: Optional[InMemoryUploadedFile]
-    ) -> WSGIRequestHandler:
-        request_factory = RequestFactory()
-        post_request = request_factory.post("import-xlsx/")
-        post_request.FILES["xlsx_file"] = xlsx_input_file
-
-        # adding session
-        middleware = SessionMiddleware(post_request)
-        middleware.process_request(post_request)
-        post_request.session.save()
-
-        # adding messages
-        messages = FallbackStorage(post_request)
-        setattr(post_request, "_messages", messages)
-        return post_request
-
     @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        "model_admin_testcase",
+        import_model_cases.items(),
+        ids=import_model_cases.keys(),
+    )
     def test_post_import_xlsx_with_valid_data_imports_and_redirects(
-        self, xlsx_inmemoryfile: InMemoryUploadedFile, area_admin_site: AreaAdmin
+        self, model_admin_testcase: Tuple[models.Model, dict], full_epic_domain_data
     ):
         # Define request.
-        post_request = self._post_import_xlsx_request(xlsx_inmemoryfile)
+        model_type, dict_values = model_admin_testcase
+        xlsx_file = self._get_xlsx_inmemoryfile(dict_values["filename"])
+        admin_site = self._get_model_admin_site(model_type)
+        post_request = _create_post_request("import_xlsx/")
+        post_request.FILES["xlsx_file"] = xlsx_file
 
         # Verify initial expectations
-        dummy_area = Area(name="dummyArea")
-        dummy_area.save()
-        dummy_group = Group(name="dummyGroup", area=dummy_area)
-        dummy_group.save()
-        dummy_program = Program(name="dummyProgram", group=dummy_group)
-        dummy_program.save()
-        assert len(Area.objects.all()) == 1
-        assert len(Group.objects.all()) == 1
-        assert len(Program.objects.all()) == 1
+        self._validate_fixture_data_before_import()
 
         # Run test
-        r_result = area_admin_site.import_xlsx(post_request)
+        r_result = admin_site.import_xlsx(post_request)
 
         # Verify final expectations
         assert r_result is not None
         # Status code is redirected.
         assert r_result.status_code == 302
         assert r_result.url == ".."
+
         # Note, these results could change with 'newer' test data versions.
-        assert len(Area.objects.all()) == 5
-        assert len(Group.objects.all()) == 11
-        assert len(Program.objects.all()) == 43
-        # Verify the initial data has been removed.
-        assert dummy_area not in Area.objects.all()
-        assert dummy_group not in Group.objects.all()
-        assert dummy_program not in Program.objects.all()
+        assert len(model_type.objects.all()) > 0
 
     @pytest.mark.django_db
+    @pytest.mark.parametrize(
+        "model_admin_testcase",
+        import_model_cases.items(),
+        ids=import_model_cases.keys(),
+    )
     def test_post_import_xlsx_with_empty_data_cleans_db_and_redirects(
-        self, area_admin_site: AreaAdmin
+        self, model_admin_testcase, full_epic_domain_data
     ):
         # Define request.
-        post_request = self._post_import_xlsx_request(None)
+        model_type, _ = model_admin_testcase
+        admin_site = self._get_model_admin_site(model_type)
+        post_request = _create_post_request("import-xlsx/")
+        post_request.FILES["xlsx_file"] = None
 
         # Verify initial expectations
-        dummy_area = Area(name="dummyArea")
-        dummy_area.save()
-        dummy_group = Group(name="dummyGroup", area=dummy_area)
-        dummy_group.save()
-        dummy_program = Program(name="dummyProgram", group=dummy_group)
-        dummy_program.save()
-
-        # When performing an import we will clean the previous entries whether or not it fails
-        assert len(Area.objects.all()) == 1
-        assert len(Group.objects.all()) == 1
-        assert len(Program.objects.all()) == 1
+        self._validate_fixture_data_before_import()
 
         # Run test
-        r_result = area_admin_site.import_xlsx(post_request)
+        r_result = admin_site.import_xlsx(post_request)
 
         # Verify final expectations
         assert r_result is not None
         # Status code is redirected.
         assert r_result.status_code == 302
         assert r_result.url == ".."
-        # Status has not changed.
-        assert len(Area.objects.all()) == 0
-        assert len(Group.objects.all()) == 0
-        assert len(Program.objects.all()) == 0
-        # Verify the initial data has been not removed.
-        assert not dummy_area in Area.objects.all()
-        assert not dummy_group in Group.objects.all()
-        assert not dummy_program in Program.objects.all()
 
 
-class TestAgencyAdmin:
-    def test_agency_admin_is_initialized(self):
-        assert admin.site.is_registered(Agency)
-        reg_agency = next(
-            (r_model for r_model in admin.site._registry if r_model is Agency), None
+class TestLinkagesQuestionAdmin:
+    def test_linkages_admin_is_initialized(self):
+        assert admin.site.is_registered(LinkagesQuestion)
+        reg_lquestion = next(
+            (
+                r_model
+                for r_model in admin.site._registry
+                if r_model is LinkagesQuestion
+            ),
+            None,
         )
-        assert reg_agency is not None, "No Agency was registered as a model."
-        agency_admin = admin.site._registry[reg_agency]
-        assert isinstance(agency_admin, AgencyAdmin)
-        assert isinstance(agency_admin, ImportEntityAdmin)
-        assert agency_admin.change_list_template == "import_changelist.html"
-        assert any("import-xlsx/" in str(t_url) for t_url in agency_admin.urls)
+        assert reg_lquestion is not None, "No Agency was registered as a model."
+        agency_admin = admin.site._registry[reg_lquestion]
+        assert isinstance(agency_admin, LnkAdmin)
+        assert agency_admin.change_list_template == "generate_changelist.html"
+        assert any("generate/" in str(t_url) for t_url in agency_admin.urls)
+
+    @pytest.mark.django_db
+    def test_get_generate_links(self, default_epic_domain_data):
+        # Define test data
+        lq_admin: LnkAdmin = admin.site._registry[
+            next(
+                r_model
+                for r_model in admin.site._registry
+                if r_model is LinkagesQuestion
+            )
+        ]
+        get_request = _create_get_request("generate/")
+
+        # Verify initial expectations
+        LinkagesQuestion.objects.all().delete()
+        assert len(Program.objects.all()) > 0
+
+        # Run test
+        r_result = lq_admin.generate_links(get_request)
+
+        # Verify expectations
+        assert r_result is not None
+        # Status code is redirected.
+        assert r_result.status_code == 302  # Redirection
+        assert r_result.url == ".."
+        assert len(LinkagesQuestion.objects.all()) > 0
