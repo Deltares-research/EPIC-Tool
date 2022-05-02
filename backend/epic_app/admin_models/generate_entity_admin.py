@@ -1,3 +1,5 @@
+import abc
+
 from django.contrib import admin
 from django.shortcuts import redirect, render
 from django.urls import path
@@ -5,7 +7,7 @@ from django.urls import path
 from epic_app.models.epic_questions import LinkagesQuestion
 
 
-class LnkAdmin(admin.ModelAdmin):
+class GenerateEntityAdmin(admin.ModelAdmin):
     # Admin pages.
     change_list_template = "generate_changelist.html"
 
@@ -18,11 +20,17 @@ class LnkAdmin(admin.ModelAdmin):
         """
         urls = super().get_urls()
         my_urls = [
-            path("generate/", self.generate_links),
+            path("generate/", self.generate_entities),
         ]
         return my_urls + urls
 
-    def generate_links(self, request):
+    @abc.abstractmethod
+    def generate_entities(self, request):
+        raise NotImplementedError("Implement in concrete classes.")
+
+
+class LnkAdmin(GenerateEntityAdmin):
+    def generate_entities(self, request):
         """
         Generates all `LinkagesQuestion` entries based on the existing `Programs`.
 
@@ -39,3 +47,8 @@ class LnkAdmin(admin.ModelAdmin):
                 request, "Generated one linkage question per existent program"
             )
         return redirect("..")
+
+
+class EpicOrganizationAdmin(GenerateEntityAdmin):
+    def generate_entities(self, request):
+        pass
