@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from epic_app.admin_models.generate_entity_admin import LnkAdmin
+from epic_app.admin_models.generate_entity_admin import EpicOrganizationAdmin, LnkAdmin
 from epic_app.admin_models.import_entity_admin import (
     AgencyAdmin,
     AreaAdmin,
@@ -24,7 +24,7 @@ from epic_app.models.models import Agency, Area, Group, Program
 
 # Models exposed to the admin page .
 admin.site.register(EpicUser)
-admin.site.register(EpicOrganization)
+admin.site.register(EpicOrganization, EpicOrganizationAdmin)
 admin.site.register(Area, AreaAdmin)
 admin.site.register(Agency, AgencyAdmin)
 admin.site.register(Group)
