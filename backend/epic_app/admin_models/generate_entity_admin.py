@@ -53,7 +53,16 @@ class LnkAdmin(GenerateEntityAdmin):
         return redirect("..")
 
 
+class EpicUserInline(admin.StackedInline):
+    model = EpicUser
+    fields = ("username",)
+
+
 class EpicOrganizationAdmin(GenerateEntityAdmin):
+    inlines = [
+        EpicUserInline,
+    ]
+
     class EpicUserGenerateForm(forms.Form):
         selected_org = forms.ModelChoiceField(queryset=EpicOrganization.objects.all())
         n_epic_users = forms.IntegerField(required=True, label="Number of users")
