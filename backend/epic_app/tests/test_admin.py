@@ -11,13 +11,13 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.test import RequestFactory
 
-from epic_app.admin import (
+from epic_app.admin_models.generate_entity_admin import LnkAdmin
+from epic_app.admin_models.import_entity_admin import (
     AgencyAdmin,
     AreaAdmin,
     EvoAdmin,
     ImportEntityAdmin,
     KaaAdmin,
-    LnkAdmin,
     NfqAdmin,
 )
 from epic_app.models.epic_questions import (
