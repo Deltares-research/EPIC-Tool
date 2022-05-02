@@ -5,14 +5,14 @@ from django.contrib import admin
 from django.shortcuts import redirect, render
 from django.urls import path
 
-from epic_app.importers import (
+from epic_app.importers.xlsx import (
     BaseEpicImporter,
     EpicAgencyImporter,
     EpicDomainImporter,
     EvolutionQuestionImporter,
+    KeyAgencyActionsQuestionImporter,
     NationalFrameworkQuestionImporter,
 )
-from epic_app.importers.question_csv_importer import KeyAgencyActionsQuestionImporter
 from epic_app.models.epic_answers import (
     Answer,
     MultipleChoiceAnswer,
@@ -29,15 +29,15 @@ from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 
 
-class CsvImportForm(forms.Form):
+class XlsxImportForm(forms.Form):
     """
-    Simple form to allow importing a 'csv' file.
+    Simple form to allow importing a 'xlsx' file.
 
     Args:
         forms (forms.Form): Default Django form.
     """
 
-    csv_file = forms.FileField()
+    xlsx_file = forms.FileField()
 
 
 class ImportEntityAdmin(admin.ModelAdmin):
@@ -57,11 +57,11 @@ class ImportEntityAdmin(admin.ModelAdmin):
         """
         urls = super().get_urls()
         my_urls = [
-            path("import-csv/", self.import_csv),
+            path("import-xlsx/", self.import_xlsx),
         ]
         return my_urls + urls
 
-    def import_csv(self, request):
+    def import_xlsx(self, request):
         """
         Imports a csv file into the EPIC database structure.
 
@@ -73,17 +73,17 @@ class ImportEntityAdmin(admin.ModelAdmin):
         """
         if request.method == "POST":
             try:
-                self.get_importer().import_csv(request.FILES["csv_file"])
-                self.message_user(request, "Your csv file has been imported")
+                self.get_importer().import_file(request.FILES["xlsx_file"])
+                self.message_user(request, "Your xlsx file has been imported")
             except:
                 self.message_user(
-                    request, "It was not possible to import the requested csv file."
+                    request, "It was not possible to import the requested xlsx file."
                 )
             return redirect("..")
 
-        form = CsvImportForm()
+        form = XlsxImportForm()
         payload = {"form": form}
-        return render(request, "admin/csv_form.html", payload)
+        return render(request, "admin/xlsx_form.html", payload)
 
     @abc.abstractmethod
     def get_importer(self) -> BaseEpicImporter:
@@ -162,11 +162,12 @@ class LnkAdmin(admin.ModelAdmin):
         Returns:
             HTTPRequest: HTML response.
         """
-        LinkagesQuestion.objects.all().delete()
-        LinkagesQuestion.generate_linkages()
-        self.message_user(
-            request, "Generated one linkage question per existent program"
-        )
+        if request.method == "GET":
+            LinkagesQuestion.objects.all().delete()
+            LinkagesQuestion.generate_linkages()
+            self.message_user(
+                request, "Generated one linkage question per existent program"
+            )
         return redirect("..")
 
 

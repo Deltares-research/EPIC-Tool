@@ -1,14 +1,16 @@
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Type
 
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-from epic_app.importers import EpicAgencyImporter, EpicDomainImporter
-from epic_app.importers.csv_base_importer import BaseEpicImporter
-from epic_app.importers.question_csv_importer import (
+from epic_app.importers.xlsx import (
+    BaseEpicImporter,
+    EpicAgencyImporter,
+    EpicDomainImporter,
     EvolutionQuestionImporter,
+    KeyAgencyActionsQuestionImporter,
     NationalFrameworkQuestionImporter,
 )
 from epic_app.models.epic_questions import LinkagesQuestion
@@ -57,24 +59,31 @@ class Command(BaseCommand):
             test_data_dir (Path): Path to the test directory.
         """
 
-        def import_and_log(filepath: Path, epic_importer: BaseEpicImporter):
-            test_file = test_data_dir / filepath
+        def import_and_log(filepath: Path, epic_importer: Type[BaseEpicImporter]):
+            test_file = test_data_dir / "xlsx" / filepath
             if test_file.is_file():
                 self.stdout.write(
                     self.style.MIGRATE_HEADING(f"Importing main data from {test_file}.")
                 )
-                epic_importer().import_csv(test_file)
-                self.stdout.write(self.style.SUCCESS("Import successful."))
+                try:
+                    epic_importer().import_file(test_file)
+                    self.stdout.write(self.style.SUCCESS("Import successful."))
+                except Exception:
+                    self.stdout.write(self.style.ERROR(f"Failed to import {filepath}."))
+            else:
+                self.stdout.write(
+                    self.style.ERROR(f"File to import not found at {filepath}")
+                )
 
-        import_and_log("initial_epic_data.csv", EpicDomainImporter)
-        import_and_log("agency_data.csv", EpicAgencyImporter)
+        import_and_log("initial_epic_data.xlsx", EpicDomainImporter)
+        import_and_log("agency_data.xlsx", EpicAgencyImporter)
         import_and_log(
-            "nationalframeworkquestions.csv", NationalFrameworkQuestionImporter
+            "nationalframeworkquestions.xlsx", NationalFrameworkQuestionImporter
         )
         import_and_log(
-            "keyagencyactionsquestions.csv", NationalFrameworkQuestionImporter
+            "keyagencyactionsquestions.xlsx", KeyAgencyActionsQuestionImporter
         )
-        import_and_log("evolutionquestions.csv", EvolutionQuestionImporter)
+        import_and_log("evolutionquestions.xlsx", EvolutionQuestionImporter)
         LinkagesQuestion.generate_linkages()
         self.stdout.write(
             self.style.SUCCESS("Generated one linkage question per loaded program.")
