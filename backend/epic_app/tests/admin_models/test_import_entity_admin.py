@@ -26,44 +26,47 @@ from epic_app.models.epic_questions import (
     NationalFrameworkQuestion,
 )
 from epic_app.models.models import Agency, Area, Group, Program
+from epic_app.tests import test_data_dir
 from epic_app.tests.importers import default_epic_domain_data, full_epic_domain_data
 from epic_app.tests.request_helper import _create_get_request, _create_post_request
 
 
+def _get_xlsx_inmemoryfile(filename: str) -> InMemoryUploadedFile:
+    test_file: Path = test_data_dir / "xlsx" / filename
+    assert test_file.is_file()
+    with test_file.open("rb") as csv_file:
+        file_io = BytesIO(csv_file.read())
+        file_io.name = test_file.name
+        file_io.seek(0)
+    in_memory_file = InMemoryUploadedFile(
+        file_io,
+        None,
+        file_io.name,
+        "application/vnd.ms-excel",
+        len(file_io.getvalue()),
+        None,
+    )
+    return in_memory_file
+
+
+def _get_model_admin_site(model_type: models.Model) -> ImportEntityAdmin:
+    reg_model = next(
+        (r_model for r_model in admin.site._registry if r_model is model_type), None
+    )
+    assert reg_model is not None, f"No {str(model_type)} was registered an admin model."
+
+    return admin.site._registry[reg_model]
+
+
+def _validate_fixture_data_before_import():
+    # Verify initial expectations
+    assert len(Area.objects.all()) > 1, "Is the data fixture invoked?"
+    assert len(Agency.objects.all()) > 1, "Is the data fixture invoked?"
+    assert len(Group.objects.all()) > 1, "Is the data fixture invoked?"
+    assert len(Program.objects.all()) > 1, "Is the data fixture invoked?"
+
+
 class TestImportEntityAdmin:
-    def _get_xlsx_inmemoryfile(self, filename: str) -> InMemoryUploadedFile:
-        test_file = Path(__file__).parent / "test_data" / "xlsx" / filename
-        assert test_file.is_file()
-        with test_file.open("rb") as csv_file:
-            file_io = BytesIO(csv_file.read())
-            file_io.name = test_file.name
-            file_io.seek(0)
-        in_memory_file = InMemoryUploadedFile(
-            file_io,
-            None,
-            file_io.name,
-            "application/vnd.ms-excel",
-            len(file_io.getvalue()),
-            None,
-        )
-        return in_memory_file
-
-    def _get_model_admin_site(self, model_type: models.Model) -> ImportEntityAdmin:
-        reg_model = next(
-            (r_model for r_model in admin.site._registry if r_model is model_type), None
-        )
-        assert (
-            reg_model is not None
-        ), f"No {str(model_type)} was registered an admin model."
-
-        return admin.site._registry[reg_model]
-
-    def _validate_fixture_data_before_import(self):
-        # Verify initial expectations
-        assert len(Area.objects.all()) > 1, "Is the data fixture invoked?"
-        assert len(Agency.objects.all()) > 1, "Is the data fixture invoked?"
-        assert len(Group.objects.all()) > 1, "Is the data fixture invoked?"
-        assert len(Program.objects.all()) > 1, "Is the data fixture invoked?"
 
     import_model_cases = {
         Area: dict(
@@ -92,7 +95,7 @@ class TestImportEntityAdmin:
     ):
         model_type, dict_values = model_admin_testcase
         assert admin.site.is_registered(model_type)
-        model_admin = self._get_model_admin_site(model_type)
+        model_admin = _get_model_admin_site(model_type)
 
         assert isinstance(model_admin, dict_values["admin_site"])
         assert isinstance(model_admin, ImportEntityAdmin)
@@ -104,7 +107,7 @@ class TestImportEntityAdmin:
         # This test only verifies we got a different page where the import will take place.
         rf = RequestFactory()
         request = rf.get("import-xlsx/")
-        admin_site: ImportEntityAdmin = self._get_model_admin_site(model_type)
+        admin_site: ImportEntityAdmin = _get_model_admin_site(model_type)
         r_result = admin_site.import_xlsx(request)
         assert r_result is not None
         assert r_result.status_code == 200
@@ -120,13 +123,13 @@ class TestImportEntityAdmin:
     ):
         # Define request.
         model_type, dict_values = model_admin_testcase
-        xlsx_file = self._get_xlsx_inmemoryfile(dict_values["filename"])
-        admin_site = self._get_model_admin_site(model_type)
+        xlsx_file = _get_xlsx_inmemoryfile(dict_values["filename"])
+        admin_site = _get_model_admin_site(model_type)
         post_request = _create_post_request("import_xlsx/")
         post_request.FILES["xlsx_file"] = xlsx_file
 
         # Verify initial expectations
-        self._validate_fixture_data_before_import()
+        _validate_fixture_data_before_import()
 
         # Run test
         r_result = admin_site.import_xlsx(post_request)
@@ -151,12 +154,12 @@ class TestImportEntityAdmin:
     ):
         # Define request.
         model_type, _ = model_admin_testcase
-        admin_site = self._get_model_admin_site(model_type)
+        admin_site = _get_model_admin_site(model_type)
         post_request = _create_post_request("import-xlsx/")
         post_request.FILES["xlsx_file"] = None
 
         # Verify initial expectations
-        self._validate_fixture_data_before_import()
+        _validate_fixture_data_before_import()
 
         # Run test
         r_result = admin_site.import_xlsx(post_request)
