@@ -642,7 +642,7 @@ class TestAnswerViewSet:
         "id": 2,
         "user": 3,
         "question": 3,
-        "selected_choice": "Effective",
+        "selected_choice": str(EvolutionChoiceType.EFFECTIVE),
         "justify_answer": "Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris.",
     }
     multiplechoice_anakin = {
@@ -734,7 +734,7 @@ class TestAnswerViewSet:
             ),
             pytest.param(
                 singlechoice_url,
-                dict(question="3", selected_choice="ENGAGED"),
+                dict(question="3", selected_choice=str(EvolutionChoiceType.ENGAGED)),
                 id="SingleChoice answer",
             ),
             pytest.param(
