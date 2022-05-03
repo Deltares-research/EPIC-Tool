@@ -504,6 +504,20 @@ class TestProgramViewSet:
         assert response.status_code == 200
         assert len(response.data) == expected_entries
 
+    def test_POST_answer_to_program_question(self, api_client: APIClient):
+        a_program: Program = Program.objects.filter(name="a").first()
+        a_nf_question_id = 1
+        full_url = (
+            self.url_root
+            + f"{a_program.pk}/"
+            + "question-nationalframework/"
+            + f"{str(a_nf_question_id)}/"
+        )
+        # Run request
+        set_user_auth_token(api_client, "Palpatine")
+        response = api_client.post(full_url)
+        assert response.status_code == 200
+
 
 @pytest.mark.django_db
 class TestQuestionsViewSet:
