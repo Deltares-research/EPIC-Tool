@@ -18,8 +18,8 @@ from epic_app.models.epic_user import EpicUser
 
 
 class YesNoAnswerType(models.TextChoices):
-    YES = "Y"
-    NO = "N"
+    YES = "Y", ("Yes")
+    NO = "N", ("No")
 
 
 # region Cross-Reference Tables

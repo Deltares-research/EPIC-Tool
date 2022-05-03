@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import abc
-
 from django.db import IntegrityError, models
+from django.utils.translation import gettext_lazy as _
 
 from epic_app.models import models as base_models
 from epic_app.models.epic_user import EpicUser
@@ -48,10 +47,10 @@ class KeyAgencyActionsQuestion(YesNoQuestion):
 
 
 class EvolutionChoiceType(models.TextChoices):
-    NASCENT = "Nascent"
-    ENGAGED = "Engaged"
-    CAPABLE = "Capable"
-    EFFECTIVE = "Effective"
+    NASCENT = "NASCENT", _("Nascent")
+    ENGAGED = "ENGAGED", _("Engaged")
+    CAPABLE = "CAPABLE", _("Capable")
+    EFFECTIVE = "EFFECTIVE", _("Effective")
 
 
 class EvolutionQuestion(Question):

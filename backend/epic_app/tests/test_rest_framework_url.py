@@ -734,7 +734,7 @@ class TestAnswerViewSet:
             ),
             pytest.param(
                 singlechoice_url,
-                dict(question="3", selected_choice=EvolutionChoiceType.ENGAGED),
+                dict(question="3", selected_choice="ENGAGED"),
                 id="SingleChoice answer",
             ),
             pytest.param(
