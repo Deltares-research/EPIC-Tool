@@ -53,9 +53,9 @@ class LnkAdmin(GenerateEntityAdmin):
         return redirect("..")
 
 
-class EpicUserInline(admin.StackedInline):
+class EpicUserInline(admin.TabularInline):
     model = EpicUser
-    fields = ("username",)
+    fields = ("username", "email", "is_superuser")
 
 
 class EpicOrganizationAdmin(GenerateEntityAdmin):
