@@ -78,13 +78,6 @@ class EpicOrganizationAdmin(GenerateEntityAdmin):
             HTTPRequest: HTML response.
         """
         if request.method == "POST":
-            # try:
-            #     self.get_importer().import_file(request.FILES["xlsx_file"])
-            #     self.message_user(request, "Your xlsx file has been imported")
-            # except:
-            #     self.message_user(
-            #         request, "It was not possible to import the requested xlsx file."
-            #     )
             epic_org: EpicOrganization = EpicOrganization.objects.filter(
                 pk=request.POST["selected_org"]
             ).first()

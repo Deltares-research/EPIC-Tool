@@ -1,3 +1,4 @@
+from typing import Optional
 from wsgiref.simple_server import WSGIRequestHandler
 
 from django.contrib.messages.storage.fallback import FallbackStorage
@@ -21,5 +22,5 @@ def _create_get_request(get_url: str) -> WSGIRequestHandler:
     return _fill_in_request(RequestFactory().get(get_url))
 
 
-def _create_post_request(post_url: str) -> WSGIRequestHandler:
-    return _fill_in_request(RequestFactory().post(post_url))
+def _create_post_request(post_url: str, additional_data: Optional[dict]) -> WSGIRequestHandler:
+    return _fill_in_request(RequestFactory().post(post_url, additional_data))
