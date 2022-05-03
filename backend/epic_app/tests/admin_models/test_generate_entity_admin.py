@@ -7,10 +7,7 @@ from epic_app.models.epic_questions import LinkagesQuestion
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
-from epic_app.tests.request_helper import (
-    _create_get_request,
-    _create_post_request,
-)
+from epic_app.tests.request_helper import _create_get_request, _create_post_request
 
 
 class TestLinkagesQuestionAdmin:
