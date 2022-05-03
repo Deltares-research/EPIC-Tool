@@ -100,14 +100,14 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         return Response(data=serializer.data)
 
 
-class EpicOrganizationViewSet(viewsets.ReadOnlyModelViewSet):
+class EpicOrganizationViewSet(viewsets.ModelViewSet):
     """
     Acess point for CRUD operations on `EpicOrganization` table.
     """
 
     queryset = EpicOrganization.objects.all()
     serializer_class = EpicOrganizationSerializer
-    permission_classes = [permissions.DjangoModelPermissions]
+    permission_classes = [permissions.IsAdminUser]
 
 
 class AreaViewSet(viewsets.ReadOnlyModelViewSet):

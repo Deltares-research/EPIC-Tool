@@ -23,6 +23,8 @@ def _create_get_request(get_url: str) -> WSGIRequestHandler:
 
 
 def _create_post_request(
-    post_url: str, additional_data: Optional[dict] = None
+    post_url: str, additional_data: Optional[dict] = {}
 ) -> WSGIRequestHandler:
-    return _fill_in_request(RequestFactory().post(post_url, additional_data))
+    return _fill_in_request(
+        RequestFactory(enforce_csrf_checks=True).post(post_url, additional_data)
+    )

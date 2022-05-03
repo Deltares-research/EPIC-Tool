@@ -1,5 +1,6 @@
 import pytest
 from django.contrib import admin
+from rest_framework.test import APIClient
 
 from epic_app.admin_models.generate_entity_admin import EpicOrganizationAdmin, LnkAdmin
 from epic_app.models.epic_questions import LinkagesQuestion
@@ -23,34 +24,40 @@ class TestLinkagesQuestionAdmin:
         assert reg_lquestion is not None, "No Agency was registered as a model."
         agency_admin = admin.site._registry[reg_lquestion]
         assert isinstance(agency_admin, LnkAdmin)
-        assert agency_admin.change_list_template == "generate_changelist.html"
-        assert any("generate/" in str(t_url) for t_url in agency_admin.urls)
+        assert agency_admin.actions == ["generate_entities"]
+
+    @pytest.fixture(autouse=False)
+    @pytest.mark.django_db
+    def api_client(self, epic_test_db) -> APIClient:
+        api_client = APIClient()
+        api_client.login(username="admin", password="admin")
+        return api_client
 
     @pytest.mark.django_db
-    def test_GET_generate_entities(self, epic_test_db):
+    def test_POST_generate_entities(self, api_client: APIClient):
         # Define test data
-        lq_admin: LnkAdmin = admin.site._registry[
-            next(
-                r_model
-                for r_model in admin.site._registry
-                if r_model is LinkagesQuestion
-            )
-        ]
-        get_request = _create_get_request("generate/")
+        data = {"action": "generate_entities"}
+        req_url = "/admin/epic_app/linkagesquestion/"
 
         # Verify initial expectations
-        LinkagesQuestion.objects.all().delete()
         assert len(Program.objects.all()) > 0
+        previous_lq_ids = [lq.pk for lq in LinkagesQuestion.objects.all()]
 
         # Run test
-        r_result = lq_admin.generate_entities(get_request)
+        r_result = api_client.post(
+            req_url,
+            data,
+        )
 
         # Verify expectations
         assert r_result is not None
         # Status code is redirected.
         assert r_result.status_code == 302  # Redirection
-        assert r_result.url == ".."
+        assert r_result.url == req_url
         assert len(LinkagesQuestion.objects.all()) > 0
+        assert not any(
+            lq.pk in previous_lq_ids for lq in LinkagesQuestion.objects.all()
+        )
 
 
 class TestEpicOrganizationAdmin:

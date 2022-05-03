@@ -1,9 +1,12 @@
 import abc
-from typing import List
+from typing import List, Union
 from wsgiref.simple_server import WSGIRequestHandler
 
 from django import forms
 from django.contrib import admin
+from django.contrib.admin.helpers import ACTION_CHECKBOX_NAME
+from django.db.models import QuerySet
+from django.http import HttpRequest
 from django.shortcuts import redirect, render
 from django.urls import path
 
@@ -33,29 +36,33 @@ class GenerateEntityAdmin(admin.ModelAdmin):
         raise NotImplementedError("Implement in concrete classes.")
 
 
-class LnkAdmin(GenerateEntityAdmin):
-    def generate_entities(self, request):
-        """
-        Generates all `LinkagesQuestion` entries based on the existing `Programs`.
+class LnkAdmin(admin.ModelAdmin):
+    actions = ["generate_entities"]
 
-        Args:
-            request (HTTPRequest): HTML request.
+    @admin.action(description="Regenerate all Linkages Questions")
+    def generate_entities(
+        self, request: HttpRequest, queryset: Union[QuerySet, List[LinkagesQuestion]]
+    ):
+        queryset.all().delete()
+        LinkagesQuestion.generate_linkages()
+        self.message_user(
+            request,
+            f"Generated one linkage question per existent program, total: {len(LinkagesQuestion.objects.all())}",
+        )
 
-        Returns:
-            HTTPRequest: HTML response.
-        """
-        if request.method == "GET":
-            LinkagesQuestion.objects.all().delete()
-            LinkagesQuestion.generate_linkages()
-            self.message_user(
-                request, "Generated one linkage question per existent program"
-            )
-        return redirect("..")
+    def changelist_view(self, request: HttpRequest, extra_context=None):
+        if "action" in request.POST and request.POST["action"] == "generate_entities":
+            # We will automatically select all the entries for deletion.
+            post = request.POST.copy()
+            for u in LinkagesQuestion.objects.all():
+                post.update({ACTION_CHECKBOX_NAME: str(u.id)})
+            request._set_post(post)
+        return super(LnkAdmin, self).changelist_view(request, extra_context)
 
 
-class EpicUserInline(admin.StackedInline):
+class EpicUserInline(admin.TabularInline):
     model = EpicUser
-    fields = ("username",)
+    fields = ("username", "email", "is_superuser")
 
 
 class EpicOrganizationAdmin(GenerateEntityAdmin):
