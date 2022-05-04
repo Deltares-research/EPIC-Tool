@@ -1,4 +1,5 @@
 import json
+from typing import Type
 
 import pytest
 from django.contrib.auth.models import User
@@ -15,6 +16,7 @@ from epic_app.models.epic_questions import EvolutionChoiceType, Question
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
+from epic_app.utils import get_model_subtypes
 
 
 @pytest.fixture(autouse=True)
@@ -504,20 +506,6 @@ class TestProgramViewSet:
         assert response.status_code == 200
         assert len(response.data) == expected_entries
 
-    def test_POST_answer_to_program_question(self, api_client: APIClient):
-        a_program: Program = Program.objects.filter(name="a").first()
-        a_nf_question_id = 1
-        full_url = (
-            self.url_root
-            + f"{a_program.pk}/"
-            + "question-nationalframework/"
-            + f"{str(a_nf_question_id)}/"
-        )
-        # Run request
-        set_user_auth_token(api_client, "Palpatine")
-        response = api_client.post(full_url)
-        assert response.status_code == 200
-
 
 @pytest.mark.django_db
 class TestQuestionsViewSet:
@@ -567,6 +555,72 @@ class TestQuestionsViewSet:
         # Verify final exepctations.
         assert response.status_code == 200
         assert len(response.data) == expected_entries
+
+    @pytest.mark.parametrize(
+        "epic_username",
+        [
+            pytest.param(
+                "Palpatine",
+                id="Non admins user.",
+            ),
+            pytest.param(
+                "admin",
+                id="Admins user.",
+            ),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "url_suffix, expected_entries",
+        [
+            pytest.param("", 5, id="get-list"),
+            pytest.param("1/", 7, id="get-retrieve (Question '1')"),
+        ],
+    )
+    def test_GET_answer(
+        self,
+        epic_username: str,
+        url_suffix: str,
+        expected_entries: int,
+        api_client: APIClient,
+    ):
+        # Given a question, get its answer for the requested user
+        full_url = self.nfq_url + "1/" + "answers/"
+        # Run request.
+        set_user_auth_token(api_client, epic_username)
+        response = api_client.get(full_url)
+
+        # Verify final exepctations.
+        assert response.status_code == 200
+        assert len(response.data) == expected_entries
+
+
+@pytest.mark.django_db
+class TestQuestionViewSet:
+    url_root = "/api/question/"
+    q_subtypes = get_model_subtypes(Question)
+
+    @pytest.mark.parametrize("username", [("Palpatine"), ("admin")])
+    @pytest.mark.parametrize("q_type", q_subtypes)
+    def test_RETRIEVE_question(
+        self, username: str, q_type: Type[Question], api_client: APIClient
+    ):
+        q_pk = q_type.objects.all().first().pk
+        full_url = self.url_root + str(q_pk) + "/"
+        set_user_auth_token(api_client, "admin")
+        response = api_client.get(full_url)
+
+        # Verify final expectations.
+        assert response.status_code == 200
+        assert len(response.data) == 1
+
+    @pytest.mark.parametrize("username", [("Palpatine"), ("admin")])
+    def test_GET_question(self, username: str, api_client: APIClient):
+        set_user_auth_token(api_client, username)
+        response = api_client.get(self.url_root)
+
+        # Verify final expectations.
+        assert response.status_code == 200
+        assert len(response.data) == 6
 
 
 @pytest.mark.django_db

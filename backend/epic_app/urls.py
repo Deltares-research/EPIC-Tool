@@ -15,10 +15,14 @@ router.register(r"area", views.AreaViewSet)
 router.register(r"agency", views.AgencyViewSet)
 router.register(r"group", views.GroupViewSet)
 router.register(r"program", views.ProgramViewSet)
+
+router.register(r"question", views.QuestionViewSet)
+
 router.register(r"nationalframeworkquestion", views.NationalFrameworkQuestionViewSet)
 router.register(r"keyagencyactionsquestion", views.KeyAgencyActionsQuestionViewSet)
 router.register(r"evolutionquestion", views.EvolutionQuestionViewSet)
 router.register(r"linkagesquestion", views.LinkagesQuestionViewSet)
+
 router.register(r"yesnoanswer", views.YesNoAnswerViewSet)
 router.register(r"singleanswer", views.SingleChoiceAnswerViewSet)
 router.register(r"multianswer", views.MultipleChoiceAnswerViewSet)

@@ -39,7 +39,11 @@ from epic_app.serializers.answer_serializer import (
     SingleChoiceAnswerSerializer,
     YesNoAnswerSerializer,
 )
-from epic_app.serializers.question_serializer import KeyAgencyQuestionSerializer
+from epic_app.serializers.question_serializer import (
+    KeyAgencyQuestionSerializer,
+    QuestionSerializer,
+)
+from epic_app.utils import get_model_subtypes
 
 
 class EpicUserViewSet(viewsets.ModelViewSet):
@@ -182,7 +186,6 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         """
         return self._get_question(request, NationalFrameworkQuestion, pk)
 
-
     @action(
         detail=True,
         url_path="question-keyagencyactions",
@@ -238,6 +241,35 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         return self._get_question(request, LinkagesQuestion, pk)
 
 
+def get_or_create_answer(request: Request, answer_type: Answer, pk: str = None):
+    raise NotImplementedError
+
+
+class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    permissiion_classes = [permissions.DjangoModelPermissions]
+
+    def _get_question_type(self, pk: str) -> Question:
+        question_subtypes = get_model_subtypes(Question)
+        q_type = next(
+            (q_t for q_t in question_subtypes if q_t.objects.filter(pk=pk).exists()),
+            None,
+        )
+        return q_type
+
+    def retrieve(self, request, pk: str, *args, **kwargs):
+        # Find to which question subtype it belongs.
+        q_type = self._get_question_type(pk)
+        q_serializer_type = QuestionSerializer.get_concrete_serializer(q_type)
+        queryset = q_type.objects.filter(pk=pk)
+        q_serializer = q_serializer_type(
+            queryset, many=True, context={"request": request}
+        )
+
+        return Response(q_serializer.data)
+
+
 class NationalFrameworkQuestionViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Acess point for CRUD operations on `NationalFrameworkQuestion` table.
@@ -246,6 +278,18 @@ class NationalFrameworkQuestionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = NationalFrameworkQuestion.objects.all()
     serializer_class = NationalFrameworkQuestionSerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
+    @action(
+        detail=True,
+        url_path="answers",
+        url_name="answers",
+    )
+    def get_answer(self, request: Request, pk: str = None):
+        queryset: Answer = YesNoAnswer.objects.filter(question=pk, user=request.user)
+        serializer: serializers.ModelSerializer = YesNoAnswerSerializer(
+            queryset, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
 
 
 class KeyAgencyActionsQuestionViewSet(viewsets.ReadOnlyModelViewSet):
