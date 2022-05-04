@@ -10,10 +10,6 @@ from epic_app.models.epic_answers import (
     YesNoAnswerType,
 )
 from epic_app.models.epic_questions import EvolutionChoiceType
-from epic_app.serializers.program_serializer import (
-    ProgramSerializer,
-    SimpleProgramSerializer,
-)
 from epic_app.utils import get_instance_as_submodel_type
 
 
