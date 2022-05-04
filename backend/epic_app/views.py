@@ -257,7 +257,8 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = QuestionSerializer
     permissiion_classes = [permissions.DjangoModelPermissions]
 
-    def _get_related_answer_type(self, question_pk: str) -> Type[Answer]:
+    @staticmethod
+    def _get_related_answer_type(question_pk: str) -> Type[Answer]:
         q_type = _get_submodel_type(Question, question_pk)
         answer_subtypes: List[Type[Answer]] = get_model_subtypes(Answer)
         a_type = next(
@@ -381,3 +382,11 @@ class AnswerViewSet(viewsets.ModelViewSet):
         UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
         """
         return super().update(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        """
+        CREATE a new `Answer` using the subtype associated serializer.
+        """
+        a_subtype = QuestionViewSet._get_related_answer_type(request.data["question"])
+        self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
+        return super().create(request, *args, **kwargs)
