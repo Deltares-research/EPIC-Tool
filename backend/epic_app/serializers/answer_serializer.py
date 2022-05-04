@@ -9,11 +9,7 @@ from epic_app.models.epic_answers import (
     YesNoAnswer,
     YesNoAnswerType,
 )
-from epic_app.models.epic_questions import (
-    EvolutionChoiceType,
-    KeyAgencyActionsQuestion,
-    NationalFrameworkQuestion,
-)
+from epic_app.models.epic_questions import EvolutionChoiceType
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -39,7 +35,7 @@ class YesNoAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = YesNoAnswer
-        fields = ("url", "id", "user", "question", "short_answer", "justify_answer")
+        fields = "__all__"
 
 
 class SingleChoiceAnswerSerializer(serializers.ModelSerializer):
@@ -47,16 +43,10 @@ class SingleChoiceAnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SingleChoiceAnswer
-        fields = ("url", "id", "user", "question", "selected_choice", "justify_answer")
+        fields = "__all__"
 
 
 class MultipleChoiceAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = MultipleChoiceAnswer
-        fields = (
-            "url",
-            "id",
-            "user",
-            "question",
-            "selected_programs",
-        )
+        fields = "__all__"

@@ -17,9 +17,7 @@ router.register(r"group", views.GroupViewSet)
 router.register(r"program", views.ProgramViewSet)
 
 router.register(r"question", views.QuestionViewSet)
-router.register(r"yesnoanswer", views.YesNoAnswerViewSet)
-router.register(r"singleanswer", views.SingleChoiceAnswerViewSet)
-router.register(r"multianswer", views.MultipleChoiceAnswerViewSet)
+router.register(r"answer", views.AnswerViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

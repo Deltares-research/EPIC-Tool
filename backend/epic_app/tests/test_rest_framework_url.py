@@ -513,6 +513,15 @@ class TestQuestionViewSet:
     q_subtypes = get_model_subtypes(Question)
 
     @pytest.mark.parametrize("username", [("Palpatine"), ("admin")])
+    def test_GET_question(self, username: str, api_client: APIClient):
+        set_user_auth_token(api_client, username)
+        response = api_client.get(self.url_root)
+
+        # Verify final expectations.
+        assert response.status_code == 200
+        assert len(response.data) == 6
+
+    @pytest.mark.parametrize("username", [("Palpatine"), ("admin")])
     @pytest.mark.parametrize("q_type", q_subtypes)
     def test_RETRIEVE_question(
         self, username: str, q_type: Type[Question], api_client: APIClient
@@ -525,15 +534,6 @@ class TestQuestionViewSet:
         # Verify final expectations.
         assert response.status_code == 200
         assert len(response.data) == 1
-
-    @pytest.mark.parametrize("username", [("Palpatine"), ("admin")])
-    def test_GET_question(self, username: str, api_client: APIClient):
-        set_user_auth_token(api_client, username)
-        response = api_client.get(self.url_root)
-
-        # Verify final expectations.
-        assert response.status_code == 200
-        assert len(response.data) == 6
 
     @pytest.mark.parametrize("q_type", q_subtypes)
     def test_RETRIEVE_answers_for_epic_user(
@@ -573,6 +573,43 @@ class TestQuestionViewSet:
 
 @pytest.mark.django_db
 class TestAnswerViewSet:
+    url_root = "/api/answer/"
+    a_subtypes = get_model_subtypes(Answer)
+
+    @pytest.fixture
+    def _answers_fixture(self):
+        self.anakin = EpicUser.objects.filter(username="Anakin").first()
+        self.yna = YesNoAnswer.objects.create(
+            user=self.anakin,
+            question=Question.objects.filter(pk=1).first(),
+            short_answer=YesNoAnswerType.NO,
+            justify_answer="Laboris proident enim dolore ullamco voluptate nisi labore laborum ut qui adipisicing occaecat exercitation culpa.",
+        )
+        self.sca = SingleChoiceAnswer.objects.create(
+            user=self.anakin,
+            question=Question.objects.filter(pk=3).first(),
+            selected_choice=EvolutionChoiceType.EFFECTIVE,
+            justify_answer="Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris.",
+        )
+        self.mca = MultipleChoiceAnswer(
+            user=self.anakin,
+            question=Question.objects.filter(pk=5).first(),
+        )
+        self.mca.save()
+        self.mca.selected_programs.add(4, 2)
+
+    @pytest.mark.parametrize("username", [("Anakin"), ("admin")])
+    def test_GET_answer(self, username: str, api_client: APIClient, _answers_fixture):
+        set_user_auth_token(api_client, username)
+        response = api_client.get(self.url_root)
+
+        # Verify final expectations.
+        assert response.status_code == 200
+        assert len(response.data) == 3
+
+
+@pytest.mark.django_db
+class TestAnswersViewSet:
     yesno_url = "/api/yesnoanswer/"
     singlechoice_url = "/api/singleanswer/"
     multiplechoice_url = "/api/multianswer/"
@@ -798,9 +835,8 @@ class TestUrlUnavailableActions:
             pytest.param(TestAgencyViewSet.url_root),
             pytest.param(TestGroupViewSet.url_root),
             pytest.param(TestProgramViewSet.url_root),
-            pytest.param(TestAnswerViewSet.yesno_url),
-            pytest.param(TestAnswerViewSet.singlechoice_url),
-            pytest.param(TestAnswerViewSet.multiplechoice_url),
+            pytest.param(TestQuestionViewSet.url_root),
+            pytest.param(TestAnswerViewSet.url_root),
         ],
     )
     def test_GET_without_auth_returns_error(self, url_root: str, api_client: APIClient):

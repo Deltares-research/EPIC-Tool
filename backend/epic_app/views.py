@@ -338,6 +338,37 @@ def answer_get_permissions(request: Request) -> List[permissions.BasePermission]
     return [permissions.IsAuthenticated()]
 
 
+class AnswerViewSet(viewsets.ModelViewSet):
+    queryset = Answer.objects.all()
+    serializer_class = AnswerSerializer
+
+    def get_permissions(self):
+        return answer_get_permissions(self.request)
+
+    def get_queryset(self) -> Union[QuerySet, List[Answer]]:
+        """
+        GET list of `Answers` based on the user doing the request.  When `superuser` or `staff` all entries will be retrieved, otherwise only entries where `epic_user.pk` matches `request.user.pk`.
+
+        Returns:
+            Union[QuerySet, List[Answer]]: `Answer` subset depending on the requesting `EpicUser` permissions.
+        """
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return Answer.objects.all()
+        return Answer.objects.filter(user=self.request.user)
+
+    def retrieve(self, request, pk: str, *args, **kwargs):
+        """
+        RETRIEVE a single `Answer` which is serialized based on its subtype.
+        """
+        return super().retrieve(request, *args, **kwargs)
+
+    def update(self, request, pk: str, *args, **kwargs):
+        """
+        UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
+        """
+        return super().update(request, *args, **kwargs)
+
+
 class YesNoAnswerViewSet(viewsets.ModelViewSet):
     queryset = YesNoAnswer.objects.all()
     serializer_class = YesNoAnswerSerializer
