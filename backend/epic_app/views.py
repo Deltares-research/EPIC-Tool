@@ -1,7 +1,7 @@
 # Create your views here.
 from typing import List, Type, Union
 
-from django.db.models import QuerySet
+from django.db import models
 from django.http import HttpRequest
 from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import action
@@ -69,12 +69,12 @@ class EpicUserViewSet(viewsets.ModelViewSet):
             return [IsAdminOrSelfUser()]
         return [permissions.IsAuthenticated()]
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> models.QuerySet:
         """
         GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
 
         Returns:
-            QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
+            models.QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
         """
         if self.request.user.is_staff or self.request.user.is_superuser:
             return EpicUser.objects.all()
@@ -243,21 +243,22 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         return self._get_question(request, LinkagesQuestion, pk)
 
 
+def _get_submodel_type(model_type: Type[models.Model], pk: str) -> models.Model:
+    l_subtypes = get_model_subtypes(model_type)
+    sm_type = next(
+        (q_t for q_t in l_subtypes if q_t.objects.filter(pk=pk).exists()),
+        None,
+    )
+    return sm_type
+
+
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permissiion_classes = [permissions.DjangoModelPermissions]
 
-    def _get_question_type(self, pk: str) -> Question:
-        question_subtypes = get_model_subtypes(Question)
-        q_type = next(
-            (q_t for q_t in question_subtypes if q_t.objects.filter(pk=pk).exists()),
-            None,
-        )
-        return q_type
-
-    def _get_answer_type(self, question_pk: str) -> Type[Answer]:
-        q_type = self._get_question_type(question_pk)
+    def _get_related_answer_type(self, question_pk: str) -> Type[Answer]:
+        q_type = _get_submodel_type(Question, question_pk)
         answer_subtypes: List[Type[Answer]] = get_model_subtypes(Answer)
         a_type = next(
             (
@@ -271,7 +272,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
     def _get_epic_users_queryset(
         self, request: HttpRequest
-    ) -> Union[QuerySet, List[EpicUser]]:
+    ) -> Union[models.QuerySet, List[EpicUser]]:
         """
         Gets the query needed to retrieve data for all involved users.
         """
@@ -288,7 +289,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         Retrieves a `Question` serialized as its subtype definition.
         """
         # Find to which question subtype it belongs.
-        q_type = self._get_question_type(pk)
+        q_type = _get_submodel_type(Question, pk)
         q_serializer_type = QuestionSerializer.get_concrete_serializer(q_type)
         queryset = q_type.objects.filter(pk=pk)
         q_serializer = q_serializer_type(
@@ -298,7 +299,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(q_serializer.data)
 
     @action(detail=True, url_path="answers", url_name="answers")
-    def retrieve_answers(self, request: HttpRequest, pk: str = None) -> QuerySet:
+    def retrieve_answers(self, request: HttpRequest, pk: str = None) -> models.QuerySet:
         """
         Retrieves the `answers` for the given `question`.
         ASSUMPTION: The request is done with an `EpicUser`.
@@ -315,7 +316,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
             return a_instance
 
         e_users = self._get_epic_users_queryset(request)
-        a_type = self._get_answer_type(question_pk=pk)
+        a_type = self._get_related_answer_type(question_pk=pk)
         a_serializer_type = AnswerSerializer.get_concrete_serializer(a_type)
         a_instances = [get_user_answer(e_user) for e_user in e_users]
         a_serializer = a_serializer_type(
@@ -345,82 +346,38 @@ class AnswerViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         return answer_get_permissions(self.request)
 
-    def get_queryset(self) -> Union[QuerySet, List[Answer]]:
+    def get_queryset(self) -> Union[models.QuerySet, List[Answer]]:
         """
         GET list of `Answers` based on the user doing the request.  When `superuser` or `staff` all entries will be retrieved, otherwise only entries where `epic_user.pk` matches `request.user.pk`.
 
         Returns:
-            Union[QuerySet, List[Answer]]: `Answer` subset depending on the requesting `EpicUser` permissions.
+            Union[models.QuerySet, List[Answer]]: `Answer` subset depending on the requesting `EpicUser` permissions.
+        """
+        return self._filter_queryset(Answer)
+
+    def _filter_queryset(
+        self, answer_type: Type[Answer]
+    ) -> Union[models.QuerySet, List[Answer]]:
+        """
+        Filter querysets to prevent unauthorized `EpicUsers` from retrieving `Answers` from others.
         """
         if self.request.user.is_staff or self.request.user.is_superuser:
-            return Answer.objects.all()
-        return Answer.objects.filter(user=self.request.user)
+            return answer_type.objects.all()
+        return answer_type.objects.filter(user=self.request.user)
 
     def retrieve(self, request, pk: str, *args, **kwargs):
         """
         RETRIEVE a single `Answer` which is serialized based on its subtype.
         """
-        return super().retrieve(request, *args, **kwargs)
+        a_subtype = _get_submodel_type(Answer, pk)
+        a_serializer_type = AnswerSerializer.get_concrete_serializer(a_subtype)
+        a_serializer = a_serializer_type(
+            self._filter_queryset(a_subtype).get(pk=pk), context={"request": request}
+        )
+        return Response(data=a_serializer.data)
 
     def update(self, request, pk: str, *args, **kwargs):
         """
         UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
         """
         return super().update(request, *args, **kwargs)
-
-
-class YesNoAnswerViewSet(viewsets.ModelViewSet):
-    queryset = YesNoAnswer.objects.all()
-    serializer_class = YesNoAnswerSerializer
-
-    def get_permissions(self):
-        return answer_get_permissions(self.request)
-
-    def get_queryset(self) -> QuerySet:
-        """
-        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
-
-        Returns:
-            QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
-        """
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            return YesNoAnswer.objects.all()
-        return YesNoAnswer.objects.filter(user=self.request.user)
-
-
-class SingleChoiceAnswerViewSet(viewsets.ModelViewSet):
-    queryset = SingleChoiceAnswer.objects.all()
-    serializer_class = SingleChoiceAnswerSerializer
-
-    def get_permissions(self):
-        return answer_get_permissions(self.request)
-
-    def get_queryset(self) -> QuerySet:
-        """
-        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
-
-        Returns:
-            QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
-        """
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            return SingleChoiceAnswer.objects.all()
-        return SingleChoiceAnswer.objects.filter(user=self.request.user)
-
-
-class MultipleChoiceAnswerViewSet(viewsets.ModelViewSet):
-    queryset = MultipleChoiceAnswer.objects.all()
-    serializer_class = MultipleChoiceAnswerSerializer
-
-    def get_permissions(self):
-        return answer_get_permissions(self.request)
-
-    def get_queryset(self) -> QuerySet:
-        """
-        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
-
-        Returns:
-            QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
-        """
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            return MultipleChoiceAnswer.objects.all()
-        return MultipleChoiceAnswer.objects.filter(user=self.request.user)
