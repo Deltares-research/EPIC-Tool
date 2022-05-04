@@ -745,6 +745,43 @@ class TestAnswerViewSet:
         assert response.status_code == 201
         assert len(Answer.objects.all()) == 1
 
+    @pytest.mark.parametrize(
+        "epic_username",
+        [pytest.param("Anakin", id="Non-admin"), pytest.param("admin", id="Admin")],
+    )
+    @pytest.mark.parametrize("answer_type", get_model_subtypes(Answer))
+    def test_PATCH_answer(
+        self,
+        epic_username: str,
+        answer_type: Type[Answer],
+        api_client: APIClient,
+        _answers_fixture: dict,
+    ):
+        # Define test data
+        expected_values = _answers_fixture[answer_type]
+        full_url = self.url_root + str(expected_values["id"]) + "/"
+        json_update_dict = {
+            YesNoAnswer: dict(
+                short_answer=str(YesNoAnswerType.YES),
+                justify_answer="For my own reasons",
+            ),
+            SingleChoiceAnswer: dict(
+                selected_choice=str(EvolutionChoiceType.ENGAGED),
+                justify_answer="For the lulz",
+            ),
+            MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
+        }
+        json_data = json_update_dict[answer_type]
+
+        # Verify initial expectations.
+
+        # Run test
+        set_user_auth_token(api_client, epic_username)
+        response = api_client.patch(full_url, json_data, format="json")
+
+        # Verify final expectations.
+        assert response.status_code == 201
+
 
 @pytest.mark.django_db
 class TestUrlUnavailableActions:

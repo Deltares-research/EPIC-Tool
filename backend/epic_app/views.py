@@ -381,7 +381,17 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
         """
-        return super().update(request, *args, **kwargs)
+        a_subtype = _get_submodel_type(Answer, pk)
+        self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
+        return super().update(request, pk, *args, **kwargs)
+
+    def partial_update(self, request, pk: str, *args, **kwargs):
+        """
+        PATCH a single `Answer`. It assumes the given data matches the expected subtype.
+        """
+        a_subtype = _get_submodel_type(Answer, pk)
+        self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
+        return super().partial_update(request, pk, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         """
