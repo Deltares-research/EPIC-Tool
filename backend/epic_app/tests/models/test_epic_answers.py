@@ -127,13 +127,14 @@ class TestEpicAnswers:
             pytest.param(NationalFrameworkQuestion, YesNoAnswer),
             pytest.param(KeyAgencyActionsQuestion, YesNoAnswer),
             pytest.param(EvolutionQuestion, SingleChoiceAnswer),
-            pytest.param(LinkagesQuestion, MultipleChoiceAnswer)
-        ]
+            pytest.param(LinkagesQuestion, MultipleChoiceAnswer),
+        ],
     )
-    def test_SAVE_twice_answer_will_raise_integrity_error(self, question_subtype: Question, answer_subtype: Answer):
+    def test_SAVE_twice_answer_will_raise_integrity_error(
+        self, question_subtype: Question, answer_subtype: Answer
+    ):
         with pytest.raises(IntegrityError):
             # Create it once, there should be no problem
             self.test_SAVE_answer(question_subtype, answer_subtype)
             # Create it twice, it should trigger an update instead of create.
             self.test_SAVE_answer(question_subtype, answer_subtype)
-        
