@@ -1,5 +1,5 @@
 import json
-from typing import Type
+from typing import Callable, Type
 
 import pytest
 from django.contrib.auth.models import User
@@ -576,6 +576,26 @@ class TestAnswerViewSet:
     url_root = "/api/answer/"
     a_subtypes = get_submodel_type_list(Answer)
 
+    def _compare_answer_fields(
+        self,
+        a_instance: Answer,
+        json_data: dict,
+        compare_expression: Callable[[Answer, dict], bool],
+    ):
+        if isinstance(a_instance, MultipleChoiceAnswer):
+            a_instance_selected_programs = [
+                p.id for p in a_instance.selected_programs.all()
+            ]
+            assert compare_expression(
+                a_instance_selected_programs, json_data["selected_programs"]
+            )
+            # We don't need to compare the rest as there are no more fields to compare.
+            return
+        for answer_field, answer_value in json_data.items():
+            assert compare_expression(
+                str(a_instance.__dict__[answer_field]), str(answer_value)
+            )
+
     @pytest.fixture
     def _answers_fixture(self) -> dict:
         self.anakin = EpicUser.objects.filter(username="Anakin").first()
@@ -621,6 +641,23 @@ class TestAnswerViewSet:
                 "selected_programs": [2, 4],
                 "user": 3,
             },
+        }
+
+    @pytest.fixture(autouse=False)
+    def _answers_update_fixture(self) -> dict:
+        """
+        Returns a dictionary of values that can be used to return the values generated at the `_answer_fixture` method.
+        """
+        return {
+            YesNoAnswer: dict(
+                short_answer=str(YesNoAnswerType.YES),
+                justify_answer="For my own reasons",
+            ),
+            SingleChoiceAnswer: dict(
+                selected_choice=str(EvolutionChoiceType.ENGAGED),
+                justify_answer="For the lulz",
+            ),
+            MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
         }
 
     @pytest.mark.parametrize("username", [("Anakin"), ("admin")])
@@ -756,29 +793,19 @@ class TestAnswerViewSet:
         answer_type: Type[Answer],
         api_client: APIClient,
         _answers_fixture: dict,
+        _answers_update_fixture: dict,
     ):
         # Define test data
         expected_values = _answers_fixture[answer_type]
         answer_pk = str(expected_values["id"])
         full_url = self.url_root + answer_pk + "/"
-        json_update_dict = {
-            YesNoAnswer: dict(
-                short_answer=str(YesNoAnswerType.YES),
-                justify_answer="For my own reasons",
-            ),
-            SingleChoiceAnswer: dict(
-                selected_choice=str(EvolutionChoiceType.ENGAGED),
-                justify_answer="For the lulz",
-            ),
-            MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
-        }
-        json_data = json_update_dict[answer_type]
+        json_data = _answers_update_fixture[answer_type]
 
         # Verify initial expectations.
         answer_to_change = answer_type.objects.get(pk=answer_pk)
         assert answer_to_change is not None
-        for answer_field, answer_value in json_data.items():
-            assert str(answer_to_change.__dict__[answer_field]) != str(answer_value)
+        self._compare_answer_fields(answer_to_change, json_data, lambda x, y: x != y)
+
         # Run test
         set_user_auth_token(api_client, epic_username)
         response = api_client.patch(full_url, json_data, format="json")
@@ -786,8 +813,8 @@ class TestAnswerViewSet:
         # Verify final expectations.
         assert response.status_code == 200
         changed_answer = answer_type.objects.get(pk=answer_pk)
-        for answer_field, answer_value in json_data.items():
-            assert str(changed_answer.__dict__[answer_field]) == str(answer_value)
+        assert changed_answer is not None
+        self._compare_answer_fields(changed_answer, json_data, lambda x, y: x == y)
 
 
 @pytest.mark.django_db

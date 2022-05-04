@@ -348,24 +348,30 @@ class AnswerViewSet(viewsets.ModelViewSet):
         )
         return Response(data=a_serializer.data)
 
-    # def update(self, request, pk: str, *args, **kwargs):
-    #     """
-    #     UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
-    #     """
-    #     a_subtype = get_submodel_type(Answer, pk)
-    #     self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
-    #     return super().update(request, pk, *args, **kwargs)
-
-    def partial_update(self, request, pk: str, *args, **kwargs):
-        """
-        PATCH a single `Answer`. It assumes the given data matches the expected subtype.
-        """
+    def _get_update_request(self, request: HttpRequest, pk: str) -> HttpRequest:
         a_subtype = get_submodel_type(Answer, pk)
         self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
         self.queryset = self._filter_queryset(a_subtype).get(pk=pk)
         # Prevent admins from replacing the user in the partial_update
         request.data["user"] = self.queryset.user_id
-        return super().partial_update(request, pk, *args, **kwargs)
+        return request
+
+    def update(self, request, pk: str, *args, **kwargs):
+        """
+        UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
+        """
+        return super().update(
+            self._get_update_request(request, pk), pk, *args, **kwargs
+        )
+
+    def partial_update(self, request, pk: str, *args, **kwargs):
+        """
+        PATCH a single `Answer`. It assumes the given data matches the expected subtype.
+        """
+
+        return super().partial_update(
+            self._get_update_request(request, pk), pk, *args, **kwargs
+        )
 
     def create(self, request, *args, **kwargs):
         """
