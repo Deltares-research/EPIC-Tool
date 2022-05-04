@@ -269,17 +269,6 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         )
         return a_type
 
-    def retrieve(self, request, pk: str, *args, **kwargs):
-        # Find to which question subtype it belongs.
-        q_type = self._get_question_type(pk)
-        q_serializer_type = QuestionSerializer.get_concrete_serializer(q_type)
-        queryset = q_type.objects.filter(pk=pk)
-        q_serializer = q_serializer_type(
-            queryset, many=True, context={"request": request}
-        )
-
-        return Response(q_serializer.data)
-
     def _get_epic_users_queryset(
         self, request: HttpRequest
     ) -> Union[QuerySet, List[EpicUser]]:
@@ -293,6 +282,20 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
                 )
             return EpicUser.objects.all()
         return EpicUser.objects.filter(pk=request.user.pk)
+
+    def retrieve(self, request, pk: str, *args, **kwargs):
+        """
+        Retrieves a `Question` serialized as its subtype definition.
+        """
+        # Find to which question subtype it belongs.
+        q_type = self._get_question_type(pk)
+        q_serializer_type = QuestionSerializer.get_concrete_serializer(q_type)
+        queryset = q_type.objects.filter(pk=pk)
+        q_serializer = q_serializer_type(
+            queryset, many=True, context={"request": request}
+        )
+
+        return Response(q_serializer.data)
 
     @action(detail=True, url_path="answers", url_name="answers")
     def retrieve_answers(self, request: HttpRequest, pk: str = None) -> QuerySet:
@@ -319,58 +322,6 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
             a_instances, many=True, context={"request": request}
         )
         return Response(a_serializer.data)
-
-
-class NationalFrameworkQuestionViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Acess point for CRUD operations on `NationalFrameworkQuestion` table.
-    """
-
-    queryset = NationalFrameworkQuestion.objects.all()
-    serializer_class = NationalFrameworkQuestionSerializer
-    permission_classes = [permissions.DjangoModelPermissions]
-
-    @action(
-        detail=True,
-        url_path="answers",
-        url_name="answers",
-    )
-    def get_answer(self, request: Request, pk: str = None):
-        queryset: Answer = YesNoAnswer.objects.filter(question=pk, user=request.user)
-        serializer: serializers.ModelSerializer = YesNoAnswerSerializer(
-            queryset, many=True, context={"request": request}
-        )
-        return Response(serializer.data)
-
-
-class KeyAgencyActionsQuestionViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Acess point for CRUD operations on `KeyAgencyActionsQuestion` table.
-    """
-
-    queryset = KeyAgencyActionsQuestion.objects.all()
-    serializer_class = KeyAgencyQuestionSerializer
-    permission_classes = [permissions.DjangoModelPermissions]
-
-
-class EvolutionQuestionViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Acess point for CRUD operations on `EvolutionQuestion` table.
-    """
-
-    queryset = EvolutionQuestion.objects.all()
-    serializer_class = EvolutionQuestionSerializer
-    permission_classes = [permissions.DjangoModelPermissions]
-
-
-class LinkagesQuestionViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Acess point for CRUD operations on `LinkagesQuestion` table.
-    """
-
-    queryset = LinkagesQuestion.objects.all()
-    serializer_class = LinkagesQuestionSerializer
-    permission_classes = [permissions.DjangoModelPermissions]
 
 
 def answer_get_permissions(request: Request) -> List[permissions.BasePermission]:
