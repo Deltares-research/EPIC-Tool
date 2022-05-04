@@ -1,3 +1,5 @@
+from typing import Type
+
 from rest_framework import serializers
 
 from epic_app.models.epic_answers import (
@@ -7,8 +9,29 @@ from epic_app.models.epic_answers import (
     YesNoAnswer,
     YesNoAnswerType,
 )
-from epic_app.models.epic_questions import EvolutionChoiceType
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_questions import (
+    EvolutionChoiceType,
+    KeyAgencyActionsQuestion,
+    NationalFrameworkQuestion,
+)
+
+
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ("url", "id", "user", "question")
+
+    @staticmethod
+    def get_concrete_serializer(q_type: Type[Answer]) -> serializers.ModelSerializer:
+        dict_serializers = {
+            YesNoAnswer: YesNoAnswerSerializer,
+            SingleChoiceAnswer: SingleChoiceAnswerSerializer,
+            MultipleChoiceAnswer: MultipleChoiceAnswerSerializer,
+        }
+        serializer = dict_serializers.get(q_type, None)
+        if not serializer:
+            raise ValueError(f"Question type {q_type} has no designated serializer.")
+        return serializer
 
 
 class YesNoAnswerSerializer(serializers.ModelSerializer):

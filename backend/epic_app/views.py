@@ -1,7 +1,8 @@
 # Create your views here.
-from typing import List
+from typing import List, Type, Union
 
 from django.db.models import QuerySet
+from django.http import HttpRequest
 from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -35,6 +36,7 @@ from epic_app.serializers import (
     ProgramSerializer,
 )
 from epic_app.serializers.answer_serializer import (
+    AnswerSerializer,
     MultipleChoiceAnswerSerializer,
     SingleChoiceAnswerSerializer,
     YesNoAnswerSerializer,
@@ -241,10 +243,6 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         return self._get_question(request, LinkagesQuestion, pk)
 
 
-def get_or_create_answer(request: Request, answer_type: Answer, pk: str = None):
-    raise NotImplementedError
-
-
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
@@ -258,6 +256,19 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         )
         return q_type
 
+    def _get_answer_type(self, question_pk: str) -> Type[Answer]:
+        q_type = self._get_question_type(question_pk)
+        answer_subtypes: List[Type[Answer]] = get_model_subtypes(Answer)
+        a_type = next(
+            (
+                a_t
+                for a_t in answer_subtypes
+                if q_type in a_t._get_supported_questions()
+            ),
+            None,
+        )
+        return a_type
+
     def retrieve(self, request, pk: str, *args, **kwargs):
         # Find to which question subtype it belongs.
         q_type = self._get_question_type(pk)
@@ -268,6 +279,46 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         return Response(q_serializer.data)
+
+    def _get_epic_users_queryset(
+        self, request: HttpRequest
+    ) -> Union[QuerySet, List[EpicUser]]:
+        """
+        Gets the query needed to retrieve data for all involved users.
+        """
+        if not EpicUser.objects.filter(pk=request.user.pk).exists():
+            if not (request.user.is_superuser or request.user.is_staff):
+                raise ValueError(
+                    "This request needs to be done by an `EpicUser` or a `superuser`."
+                )
+            return EpicUser.objects.all()
+        return EpicUser.objects.filter(pk=request.user.pk)
+
+    @action(detail=True, url_path="answers", url_name="answers")
+    def retrieve_answers(self, request: HttpRequest, pk: str = None) -> QuerySet:
+        """
+        Retrieves the `answers` for the given `question`.
+        ASSUMPTION: The request is done with an `EpicUser`.
+
+        Args:
+            request (HttpRequest): Request from the client.
+            pk (str, optional): `Answer` id. Defaults to None.
+        """
+
+        def get_user_answer(epic_user: EpicUser) -> Answer:
+            a_instance, _ = a_type.objects.get_or_create(
+                question=Question.objects.get(pk=pk), user=epic_user
+            )
+            return a_instance
+
+        e_users = self._get_epic_users_queryset(request)
+        a_type = self._get_answer_type(question_pk=pk)
+        a_serializer_type = AnswerSerializer.get_concrete_serializer(a_type)
+        a_instances = [get_user_answer(e_user) for e_user in e_users]
+        a_serializer = a_serializer_type(
+            a_instances, many=True, context={"request": request}
+        )
+        return Response(a_serializer.data)
 
 
 class NationalFrameworkQuestionViewSet(viewsets.ReadOnlyModelViewSet):
