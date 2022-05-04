@@ -592,9 +592,14 @@ class TestAnswerViewSet:
             # We don't need to compare the rest as there are no more fields to compare.
             return
         for answer_field, answer_value in json_data.items():
-            assert compare_expression(
-                str(a_instance.__dict__[answer_field]), str(answer_value)
-            )
+            if answer_field == "user":
+                assert str(a_instance.user.id) == str(answer_value)
+            elif answer_field == "question":
+                assert str(a_instance.question.id) == str(answer_value)
+            else:
+                assert compare_expression(
+                    str(a_instance.__dict__[answer_field]), str(answer_value)
+                )
 
     @pytest.fixture
     def _answers_fixture(self) -> dict:
@@ -811,6 +816,41 @@ class TestAnswerViewSet:
 
         # Verify final expectations.
         assert response.status_code == 200
+        changed_answer = answer_type.objects.get(pk=answer_pk)
+        assert changed_answer is not None
+        self._compare_answer_fields(changed_answer, json_data, lambda x, y: x == y)
+
+    @pytest.mark.parametrize("epic_username", answer_fixture_users)
+    @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
+    def test_PUT_answer(
+        self,
+        epic_username: str,
+        answer_type: Type[Answer],
+        api_client: APIClient,
+        _answers_fixture: dict,
+        _answers_update_fixture: dict,
+    ):
+        # Define test data
+        expected_values = _answers_fixture[answer_type]
+        answer_pk = str(expected_values["id"])
+        full_url = self.url_root + answer_pk + "/"
+        json_data = _answers_update_fixture[answer_type]
+
+        # Verify initial expectations.
+        answer_to_change: Answer = answer_type.objects.get(pk=answer_pk)
+        assert answer_to_change is not None
+        # Data needs to be extended with user, and question.
+        json_data["user"] = answer_to_change.user.id
+        json_data["question"] = answer_to_change.question.id
+        self._compare_answer_fields(answer_to_change, json_data, lambda x, y: x != y)
+
+        # Run test
+        set_user_auth_token(api_client, epic_username)
+        response = api_client.put(full_url, json_data, format="json")
+
+        # Verify final expectations.
+        assert response.status_code == 200
+
         changed_answer = answer_type.objects.get(pk=answer_pk)
         assert changed_answer is not None
         self._compare_answer_fields(changed_answer, json_data, lambda x, y: x == y)
