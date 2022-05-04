@@ -660,7 +660,12 @@ class TestAnswerViewSet:
             MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
         }
 
-    @pytest.mark.parametrize("username", [("Anakin"), ("admin")])
+    answer_fixture_users = [
+        pytest.param("Anakin", id="Answer owner"),
+        pytest.param("admin", id="Admin (super_user / staff)"),
+    ]
+
+    @pytest.mark.parametrize("username", answer_fixture_users)
     def test_GET_answer_authorized_user(
         self, username: str, api_client: APIClient, _answers_fixture: dict
     ):
@@ -691,7 +696,7 @@ class TestAnswerViewSet:
         assert response.status_code == 200
         assert len(response.data) == 0
 
-    @pytest.mark.parametrize("username", [("Anakin"), ("admin")])
+    @pytest.mark.parametrize("username", answer_fixture_users)
     @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
     def test_RETRIEVE_answer_authorized_user(
         self,
@@ -757,10 +762,7 @@ class TestAnswerViewSet:
             ),
         ],
     )
-    @pytest.mark.parametrize(
-        "epic_username",
-        [pytest.param("Anakin", id="Non-admin"), pytest.param("admin", id="Admin")],
-    )
+    @pytest.mark.parametrize("epic_username", answer_fixture_users)
     def test_POST_answer(
         self,
         epic_username: str,
@@ -782,10 +784,7 @@ class TestAnswerViewSet:
         assert response.status_code == 201
         assert len(Answer.objects.all()) == 1
 
-    @pytest.mark.parametrize(
-        "epic_username",
-        [pytest.param("Anakin", id="Non-admin"), pytest.param("admin", id="Admin")],
-    )
+    @pytest.mark.parametrize("epic_username", answer_fixture_users)
     @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
     def test_PATCH_answer(
         self,
