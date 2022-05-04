@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Callable, Optional, Type
+from typing import Any, List, Optional, Type
 
 from django.contrib.auth.models import User
 from django.core.management import call_command
@@ -14,7 +14,7 @@ from epic_app.importers.xlsx import (
     NationalFrameworkQuestionImporter,
 )
 from epic_app.models.epic_questions import LinkagesQuestion
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.tests import test_data_dir
 
 
@@ -115,21 +115,27 @@ class Command(BaseCommand):
             call_command("createsuperuser")
 
         # Create a few basic users.
-        def create_user(user_name: str, user_org: str):
+        def create_user(user_name: str, user_org: EpicOrganization):
             c_user = EpicUser(username=user_name, organization=user_org)
             # Use the same username but with lowercase (it's a test!)
             c_user.set_password(user_name.lower())
             c_user.save()
 
-        create_user("Zelda", "Nintendo")
-        create_user("Ganon", "Nintendo")
-        create_user("Luke", "Rebel Alliance")
-        create_user("Leia", "Rebel Alliance")
-        self.stdout.write(
-            self.style.SUCCESS(
-                "Created some 'dummy' users: 'Zelda', 'Ganon', 'Luke' and 'Leia'. Their passwords match the lowercase username."
+        def create_organization(organization_name: str, user_names: List[str]):
+            epic_org = EpicOrganization.objects.create(name=organization_name)
+            for name in user_names:
+                create_user(name, epic_org)
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "Created organization: '{}' with users: {}.".format(
+                        organization_name, ", ".join([f"'{n}'" for n in user_names])
+                    )
+                    + " Their passwords match the lowercase username."
+                )
             )
-        )
+
+        create_organization("Nintento", ["Zelda", "Ganon"])
+        create_organization("Rebel Alliance", ["Luke", "Leia"])
 
     def _import_test_db(self):
         if not test_data_dir.is_dir():

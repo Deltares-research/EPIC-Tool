@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 from rest_framework import serializers
 
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 
 
 class EpicUserSerializer(serializers.ModelSerializer):
@@ -59,3 +59,32 @@ class EpicUserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errors)
 
         return super(EpicUserSerializer, self).validate(attrs)
+
+    def update(self, instance: EpicUser, validated_data: dict) -> EpicUser:
+        """
+        Partial update of the `EpicUser` fields. At this moment only available to update `password`.
+
+        Args:
+            instance (EpicUser): `EpicUser` to update.
+            validated_data (dict): Dictionary of values valid to be updated.
+
+        Returns:
+            EpicUser: Updated instance.
+        """
+        instance.set_password(validated_data["password"])
+        instance.save()
+        return instance
+
+
+class EpicOrganizationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for 'EpicOrganization'
+    """
+
+    class Meta:
+        """
+        Overriden meta class for serializing purposes.
+        """
+
+        model = EpicOrganization
+        fields = ("url", "name", "organization_users")

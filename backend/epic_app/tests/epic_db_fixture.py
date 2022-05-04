@@ -8,7 +8,7 @@ from epic_app.models.epic_questions import (
     LinkagesQuestion,
     NationalFrameworkQuestion,
 )
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 
 
@@ -38,8 +38,9 @@ def epic_test_db():
         Token.objects.get_or_create(user=u_created)
         return u_created
 
-    u_palpatine: EpicUser = set_epic_user("Palpatine", "Gallactic Empire")
-    u_anakin: EpicUser = set_epic_user("Anakin", "Gallactic Empire")
+    organization = EpicOrganization.objects.create(name="Gallactic Empire")
+    u_palpatine: EpicUser = set_epic_user("Palpatine", organization)
+    u_anakin: EpicUser = set_epic_user("Anakin", organization)
 
     # Areas
     alpha_area = Area.objects.create(name="alpha")

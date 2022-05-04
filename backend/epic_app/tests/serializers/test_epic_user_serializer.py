@@ -4,8 +4,11 @@ import pytest
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
-from epic_app.models.epic_user import EpicUser
-from epic_app.serializers.epic_user_serializer import EpicUserSerializer
+from epic_app.models.epic_user import EpicOrganization, EpicUser
+from epic_app.serializers.epic_user_serializer import (
+    EpicOrganizationSerializer,
+    EpicUserSerializer,
+)
 from epic_app.tests.epic_db_fixture import epic_test_db
 
 
@@ -36,7 +39,7 @@ serializer_context = get_serializer()
 
 
 @pytest.mark.django_db
-class TestEpicUser:
+class TestEpicUserSerializer:
     def test_given_valid_instances_returns_expected_data(self):
         # Define context
         serialized_data = list(
@@ -57,9 +60,23 @@ class TestEpicUser:
             assert epic_user_dict["organization"] == e_org
             assert epic_user_dict["selected_programs"] == e_selected_programs
 
-        validate_epic_user_dict(
-            serialized_data[0], "Palpatine", "Gallactic Empire", [1, 3]
+        validate_epic_user_dict(serialized_data[0], "Palpatine", 1, [1, 3])
+        validate_epic_user_dict(serialized_data[1], "Anakin", 1, [2, 4])
+
+
+@pytest.mark.django_db
+class TestEpicOrganizationSerializer:
+    def test_given_valid_instances_returns_expected_data(self):
+        # Define context
+        serialized_data = list(
+            EpicOrganizationSerializer(
+                EpicOrganization.objects.all(), many=True, context=serializer_context
+            ).data
         )
-        validate_epic_user_dict(
-            serialized_data[1], "Anakin", "Gallactic Empire", [2, 4]
-        )
+        expected_data = {
+            "url": "http://testserver/api/epicorganization/1/",
+            "name": "Gallactic Empire",
+            "organization_users": [2, 3],
+        }
+        assert len(serialized_data) == 1
+        assert serialized_data[0] == expected_data

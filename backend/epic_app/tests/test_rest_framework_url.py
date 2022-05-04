@@ -12,7 +12,7 @@ from epic_app.models.epic_answers import (
     YesNoAnswerType,
 )
 from epic_app.models.epic_questions import EvolutionChoiceType, Question
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
 
@@ -162,7 +162,7 @@ class TestEpicUserViewSet:
         "url": "http://testserver/api/epicuser/3/",
         "id": 3,
         "username": "Anakin",
-        "organization": "Gallactic Empire",
+        "organization": 1,
         "selected_programs": [2, 4],
     }
 
@@ -249,7 +249,7 @@ class TestEpicUserViewSet:
         data_dict = {
             "username": ck_username,
             "password": "IamSup3rm4n!",
-            "organization": "Daily Planet",
+            "organization": EpicOrganization.objects.last().id,
         }
         assert not EpicUser.objects.filter(username=ck_username).exists()
 
@@ -262,6 +262,53 @@ class TestEpicUserViewSet:
         assert EpicUser.objects.filter(
             username=ck_username
         ).exists(), "User was not created despite succesful response."
+
+    @pytest.mark.parametrize(
+        "epic_username, find_username, expected_response",
+        [
+            pytest.param(
+                "Palpatine",
+                "Anakin",
+                dict(status_code=403, content={"detail": "Not found."}),
+                id="Non admins cannot update other users' password.",
+            ),
+            pytest.param(
+                "Anakin",
+                "Anakin",
+                dict(status_code=200, content=anakin_json_data),
+                id="Non admins can update their own password.",
+            ),
+            pytest.param(
+                "admin",
+                "Anakin",
+                dict(status_code=200, content=anakin_json_data),
+                id="Admins can update other users' password.",
+            ),
+        ],
+    )
+    def test_PUT_epic_user_password(
+        self,
+        epic_username: str,
+        find_username: str,
+        expected_response: dict,
+        api_client: APIClient,
+    ):
+        user_found = get_epic_user(find_username)
+        previous_pass = user_found.password
+        changepass_url = "change-password/"
+        url = f"{self.url_root}{user_found.pk}/" + changepass_url
+        data_dict = {
+            "password": "IamSup3rm4n!",
+        }
+
+        # Run request.
+        set_user_auth_token(api_client, epic_username)
+        response = api_client.put(url, data_dict, format="json")
+
+        # Verify final exepctations.
+        assert response.status_code == expected_response["status_code"]
+        if response.status_code == 200:
+            assert previous_pass != get_epic_user(find_username).password
 
 
 @pytest.mark.django_db
@@ -595,7 +642,7 @@ class TestAnswerViewSet:
         "id": 2,
         "user": 3,
         "question": 3,
-        "selected_choice": "Effective",
+        "selected_choice": str(EvolutionChoiceType.EFFECTIVE),
         "justify_answer": "Ea ut ipsum deserunt culpa laborum excepteur laboris ad adipisicing ad officia laboris.",
     }
     multiplechoice_anakin = {
@@ -687,7 +734,7 @@ class TestAnswerViewSet:
             ),
             pytest.param(
                 singlechoice_url,
-                dict(question="3", selected_choice="ENGAGED"),
+                dict(question="3", selected_choice=str(EvolutionChoiceType.ENGAGED)),
                 id="SingleChoice answer",
             ),
             pytest.param(

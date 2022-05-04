@@ -1,3 +1,17 @@
+## v0.17.0 (2022-05-03)
+
+### Feat
+
+- **generate_entity_admin.py**: Allow display of users in an organization
+- **epic_app/admin_models/generate_entity_admin.py**: We can now generate epic users from the organization page
+- **views.py;epic_user_serializer.py**: Added logic to update user's password
+- **epic_app/serializers/epic_user_serializer.py**: Added serializer for EpicOrganization. Adapted and extended related tests
+- **epic_app/models/epic_user.py**: Added organization as a model. Adapted setup and tests
+
+### Refactor
+
+- **epic_app/admin_models**: Moved admin models to different module for better maintenance of the django tree.
+
 ## v0.16.0 (2022-04-29)
 
 ### Feat

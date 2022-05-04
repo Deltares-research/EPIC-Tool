@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from epic_app.epic_permissions import IsAdminOrSelfUser
 from epic_app.models.epic_answers import (
     Answer,
     MultipleChoiceAnswer,
@@ -20,11 +21,12 @@ from epic_app.models.epic_questions import (
     NationalFrameworkQuestion,
     Question,
 )
-from epic_app.models.epic_user import EpicUser
+from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
 from epic_app.serializers import (
     AgencySerializer,
     AreaSerializer,
+    EpicOrganizationSerializer,
     EpicUserSerializer,
     EvolutionQuestionSerializer,
     GroupSerializer,
@@ -55,8 +57,10 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         Returns:
             List[permissions.BasePermission]: List of permissions for the request being done.
         """
-        if self.request.method in ["POST", "PUT", "DELETE"]:
+        if self.request.method in ["POST", "DELETE"]:
             return [permissions.IsAdminUser()]
+        if self.request.method == "PUT":
+            return [IsAdminOrSelfUser()]
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self) -> QuerySet:
@@ -69,6 +73,41 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff or self.request.user.is_superuser:
             return EpicUser.objects.all()
         return EpicUser.objects.filter(id=self.request.user.id)
+
+    @action(
+        methods=["put"],
+        detail=True,
+        permission_classes=[IsAdminOrSelfUser],
+        url_path="change-password",
+        url_name="change_password",
+    )
+    def put_epicuser_password(self, request: Request, pk: str = None):
+        """
+        Updates the field `password` for an `EpicUser` with the given `pk`.
+
+        Args:
+            request (Request): HTTP Request.
+            pk (str, optional): Field representing the `pk` of an `EpicUser`. Defaults to None.
+
+        Returns:
+            Response: Result of the queryset.
+        """
+        serializer: EpicUserSerializer = self.get_serializer(
+            EpicUser.objects.filter(pk=pk).first(), data=request.data, partial=True
+        )
+        serializer.is_valid()
+        serializer.save()
+        return Response(data=serializer.data)
+
+
+class EpicOrganizationViewSet(viewsets.ModelViewSet):
+    """
+    Acess point for CRUD operations on `EpicOrganization` table.
+    """
+
+    queryset = EpicOrganization.objects.all()
+    serializer_class = EpicOrganizationSerializer
+    permission_classes = [permissions.IsAdminUser]
 
 
 class AreaViewSet(viewsets.ReadOnlyModelViewSet):
