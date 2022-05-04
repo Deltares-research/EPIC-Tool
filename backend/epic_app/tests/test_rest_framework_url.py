@@ -16,7 +16,7 @@ from epic_app.models.epic_questions import EvolutionChoiceType, Question
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
-from epic_app.utils import get_model_subtypes
+from epic_app.utils import get_submodel_type_list
 
 
 @pytest.fixture(autouse=True)
@@ -510,7 +510,7 @@ class TestProgramViewSet:
 @pytest.mark.django_db
 class TestQuestionViewSet:
     url_root = "/api/question/"
-    q_subtypes = get_model_subtypes(Question)
+    q_subtypes = get_submodel_type_list(Question)
 
     @pytest.mark.parametrize("username", [("Palpatine"), ("admin")])
     def test_GET_question(self, username: str, api_client: APIClient):
@@ -574,7 +574,7 @@ class TestQuestionViewSet:
 @pytest.mark.django_db
 class TestAnswerViewSet:
     url_root = "/api/answer/"
-    a_subtypes = get_model_subtypes(Answer)
+    a_subtypes = get_submodel_type_list(Answer)
 
     @pytest.fixture
     def _answers_fixture(self) -> dict:
@@ -655,7 +655,7 @@ class TestAnswerViewSet:
         assert len(response.data) == 0
 
     @pytest.mark.parametrize("username", [("Anakin"), ("admin")])
-    @pytest.mark.parametrize("answer_type", get_model_subtypes(Answer))
+    @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
     def test_RETRIEVE_answer_authorized_user(
         self,
         username: str,
@@ -676,7 +676,7 @@ class TestAnswerViewSet:
         assert response.status_code == 200
         assert response.data == expected_values
 
-    @pytest.mark.parametrize("answer_type", get_model_subtypes(Answer))
+    @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
     def test_RETRIEVE_answer_unauthorized_user(
         self,
         answer_type: Type[Answer],
@@ -749,7 +749,7 @@ class TestAnswerViewSet:
         "epic_username",
         [pytest.param("Anakin", id="Non-admin"), pytest.param("admin", id="Admin")],
     )
-    @pytest.mark.parametrize("answer_type", get_model_subtypes(Answer))
+    @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
     def test_PATCH_answer(
         self,
         epic_username: str,
@@ -759,7 +759,8 @@ class TestAnswerViewSet:
     ):
         # Define test data
         expected_values = _answers_fixture[answer_type]
-        full_url = self.url_root + str(expected_values["id"]) + "/"
+        answer_pk = str(expected_values["id"])
+        full_url = self.url_root + answer_pk + "/"
         json_update_dict = {
             YesNoAnswer: dict(
                 short_answer=str(YesNoAnswerType.YES),
@@ -774,13 +775,19 @@ class TestAnswerViewSet:
         json_data = json_update_dict[answer_type]
 
         # Verify initial expectations.
-
+        answer_to_change = answer_type.objects.get(pk=answer_pk)
+        assert answer_to_change is not None
+        for answer_field, answer_value in json_data.items():
+            assert str(answer_to_change.__dict__[answer_field]) != str(answer_value)
         # Run test
         set_user_auth_token(api_client, epic_username)
         response = api_client.patch(full_url, json_data, format="json")
 
         # Verify final expectations.
-        assert response.status_code == 201
+        assert response.status_code == 200
+        changed_answer = answer_type.objects.get(pk=answer_pk)
+        for answer_field, answer_value in json_data.items():
+            assert str(changed_answer.__dict__[answer_field]) == str(answer_value)
 
 
 @pytest.mark.django_db

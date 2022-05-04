@@ -8,13 +8,8 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from epic_app.epic_permissions import IsAdminOrSelfUser
-from epic_app.models.epic_answers import (
-    Answer,
-    MultipleChoiceAnswer,
-    SingleChoiceAnswer,
-    YesNoAnswer,
-)
+import epic_app.epic_permissions as epic_permissions
+from epic_app.models.epic_answers import Answer
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
     KeyAgencyActionsQuestion,
@@ -35,17 +30,12 @@ from epic_app.serializers import (
     NationalFrameworkQuestionSerializer,
     ProgramSerializer,
 )
-from epic_app.serializers.answer_serializer import (
-    AnswerSerializer,
-    MultipleChoiceAnswerSerializer,
-    SingleChoiceAnswerSerializer,
-    YesNoAnswerSerializer,
-)
+from epic_app.serializers.answer_serializer import AnswerSerializer
 from epic_app.serializers.question_serializer import (
     KeyAgencyQuestionSerializer,
     QuestionSerializer,
 )
-from epic_app.utils import get_model_subtypes
+from epic_app.utils import get_submodel_type, get_submodel_type_list
 
 
 class EpicUserViewSet(viewsets.ModelViewSet):
@@ -65,8 +55,8 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         """
         if self.request.method in ["POST", "DELETE"]:
             return [permissions.IsAdminUser()]
-        if self.request.method == "PUT":
-            return [IsAdminOrSelfUser()]
+        if self.request.method in ["PUT", "PATCH"]:
+            return [epic_permissions.IsAdminOrSelfUser()]
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self) -> models.QuerySet:
@@ -83,7 +73,7 @@ class EpicUserViewSet(viewsets.ModelViewSet):
     @action(
         methods=["put"],
         detail=True,
-        permission_classes=[IsAdminOrSelfUser],
+        permission_classes=[epic_permissions.IsAdminOrSelfUser],
         url_path="change-password",
         url_name="change_password",
     )
@@ -243,15 +233,6 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         return self._get_question(request, LinkagesQuestion, pk)
 
 
-def _get_submodel_type(model_type: Type[models.Model], pk: str) -> models.Model:
-    l_subtypes = get_model_subtypes(model_type)
-    sm_type = next(
-        (q_t for q_t in l_subtypes if q_t.objects.filter(pk=pk).exists()),
-        None,
-    )
-    return sm_type
-
-
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
@@ -259,8 +240,8 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
     @staticmethod
     def _get_related_answer_type(question_pk: str) -> Type[Answer]:
-        q_type = _get_submodel_type(Question, question_pk)
-        answer_subtypes: List[Type[Answer]] = get_model_subtypes(Answer)
+        q_type = get_submodel_type(Question, question_pk)
+        answer_subtypes: List[Type[Answer]] = get_submodel_type_list(Answer)
         a_type = next(
             (
                 a_t
@@ -290,7 +271,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         Retrieves a `Question` serialized as its subtype definition.
         """
         # Find to which question subtype it belongs.
-        q_type = _get_submodel_type(Question, pk)
+        q_type = get_submodel_type(Question, pk)
         q_serializer_type = QuestionSerializer.get_concrete_serializer(q_type)
         queryset = q_type.objects.filter(pk=pk)
         q_serializer = q_serializer_type(
@@ -326,26 +307,16 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(a_serializer.data)
 
 
-def answer_get_permissions(request: Request) -> List[permissions.BasePermission]:
-    """
-    `EpicUser` can only be created, updated or deleted when the authorized user is an admin.
-
-    Returns:
-        List[permissions.BasePermission]: List of permissions for the request being done.
-    """
-    if not request.data.get("user", None):
-        request.data["user"] = request.user.id
-    if request.method in ["PUT", "DELETE"]:
-        return [permissions.IsAdminUser()]
-    return [permissions.IsAuthenticated()]
-
-
 class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
 
     def get_permissions(self):
-        return answer_get_permissions(self.request)
+        if not self.request.data.get("user", None):
+            self.request.data["user"] = self.request.user.id
+        if self.request.method in ["PUT", "DELETE", "PATCH"]:
+            return [epic_permissions.IsAdminOrInstanceOwner()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self) -> Union[models.QuerySet, List[Answer]]:
         """
@@ -370,27 +341,30 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         RETRIEVE a single `Answer` which is serialized based on its subtype.
         """
-        a_subtype = _get_submodel_type(Answer, pk)
+        a_subtype = get_submodel_type(Answer, pk)
         a_serializer_type = AnswerSerializer.get_concrete_serializer(a_subtype)
         a_serializer = a_serializer_type(
             self._filter_queryset(a_subtype).get(pk=pk), context={"request": request}
         )
         return Response(data=a_serializer.data)
 
-    def update(self, request, pk: str, *args, **kwargs):
-        """
-        UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
-        """
-        a_subtype = _get_submodel_type(Answer, pk)
-        self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
-        return super().update(request, pk, *args, **kwargs)
+    # def update(self, request, pk: str, *args, **kwargs):
+    #     """
+    #     UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
+    #     """
+    #     a_subtype = get_submodel_type(Answer, pk)
+    #     self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
+    #     return super().update(request, pk, *args, **kwargs)
 
     def partial_update(self, request, pk: str, *args, **kwargs):
         """
         PATCH a single `Answer`. It assumes the given data matches the expected subtype.
         """
-        a_subtype = _get_submodel_type(Answer, pk)
+        a_subtype = get_submodel_type(Answer, pk)
         self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
+        self.queryset = self._filter_queryset(a_subtype).get(pk=pk)
+        # Prevent admins from replacing the user in the partial_update
+        request.data["user"] = self.queryset.user_id
         return super().partial_update(request, pk, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):

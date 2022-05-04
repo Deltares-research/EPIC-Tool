@@ -10,13 +10,10 @@ from epic_app.models.epic_answers import (
     YesNoAnswerType,
 )
 from epic_app.models.epic_questions import EvolutionChoiceType
+from epic_app.utils import get_instance_as_submodel_type
 
 
-class AnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Answer
-        fields = ("url", "id", "user", "question")
-
+class _BaseAnswerSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_concrete_serializer(q_type: Type[Answer]) -> serializers.ModelSerializer:
         dict_serializers = {
@@ -29,8 +26,21 @@ class AnswerSerializer(serializers.ModelSerializer):
             raise ValueError(f"Question type {q_type} has no designated serializer.")
         return serializer
 
+    def update(self, instance: Answer, validated_data):
+        """
+        Override of the update method to allow getting the `Answer` subtype instance and prevent from getting constraint errors.
+        """
+        subtype_instance = get_instance_as_submodel_type(instance)
+        return super().update(subtype_instance, validated_data)
 
-class YesNoAnswerSerializer(serializers.ModelSerializer):
+
+class AnswerSerializer(_BaseAnswerSerializer):
+    class Meta:
+        model = Answer
+        fields = ("url", "id", "user", "question")
+
+
+class YesNoAnswerSerializer(_BaseAnswerSerializer):
     short_answer = serializers.ChoiceField(YesNoAnswerType.choices)
 
     class Meta:
@@ -38,7 +48,7 @@ class YesNoAnswerSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class SingleChoiceAnswerSerializer(serializers.ModelSerializer):
+class SingleChoiceAnswerSerializer(_BaseAnswerSerializer):
     selected_choice = serializers.ChoiceField(EvolutionChoiceType.choices)
 
     class Meta:
@@ -46,7 +56,7 @@ class SingleChoiceAnswerSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class MultipleChoiceAnswerSerializer(serializers.ModelSerializer):
+class MultipleChoiceAnswerSerializer(_BaseAnswerSerializer):
     class Meta:
         model = MultipleChoiceAnswer
         fields = "__all__"
