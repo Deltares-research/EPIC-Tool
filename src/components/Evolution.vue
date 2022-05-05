@@ -3,61 +3,49 @@
     <h2 style="color: darkred">Evolution</h2>
     <h3 style="color: darkred">{{ title }}</h3>
     <br>
-    <h4>What is the level of development for River Basin Planning programs in your country? </h4>
+    <h4>What is the level of development for {{ title }} in your country? </h4>
     <br>
-    <v-row>
+    <v-row v-for=" (dimension,index) in dimensions" :key="dimension.title">
+      <v-col md="12">
+        <h4>{{ dimension.title }}</h4>
+      </v-col>
       <v-col md="3">
         <v-hover v-slot="{ hover }">
-          <v-card height="350px" :elevation="hover ? 16 : 2"
-                  :color="selected==='nascent'?'red lighten-5':'blue-grey lighten-4'"
-                  @click="select('nascent')">
+          <v-card height="200px" :elevation="hover ? 16 : 2" :key="update"
+                  :color="isSelected(index,'nascent')"
+                  @click="select('nascent',index)">
             <v-card-title>Nascent</v-card-title>
-            <v-card-text>No water resources law in place and so no river basin plans are prepared. Water resources
-              development and management takes place in an ad hoc and uncoordinated manner.
-            </v-card-text>
+            <v-card-text>{{ dimension.nascent_description }}</v-card-text>
           </v-card>
         </v-hover>
       </v-col>
       <v-col md="3">
         <v-hover v-slot="{ hover }">
-          <v-card height="350px" :elevation="hover ? 16 : 2"
-                  :color="selected==='engaged'?'red lighten-5':'blue-grey lighten-4'"
-                  @click="select('engaged')">
+          <v-card height="200px" :elevation="hover ? 16 : 2" :key="update"
+                  :color="isSelected(index,'engaged')"
+                  @click="select('engaged',index)">
             <v-card-title>Engaged</v-card-title>
-            <v-card-text>Water resources law in force that requires preparation of basin plans. Several plans prepared
-              but without involvement of stakeholders, and do not comprehensively address flood and drought risk
-              management. No linkage with water use (urban and agriculture) or local flood plans.
-
-            </v-card-text>
+            <v-card-text>{{ dimension.engaged_description }}</v-card-text>
           </v-card>
         </v-hover>
       </v-col>
       <v-col md="3">
         <v-hover v-slot="{ hover }">
-          <v-card height="350px" :elevation="hover ? 16 : 2"
-                  :color="selected==='Capable'?'red lighten-5':'blue-grey lighten-4'"
-                  @click="select('Capable')">
+          <v-card height="200px" :elevation="hover ? 16 : 2" :key="update"
+                  :color="isSelected(index,'Capable')"
+                  @click="select('Capable',index)">
             <v-card-title>Capable</v-card-title>
-            <v-card-text>Basin plans promote stakeholder engagement through formal mechanisms, such as basin committees
-              or
-              authorities. Drought and flood risk management are incorporated into basin plans or undertaken in a
-              parallel
-              process. Some linkage with water use (urban and agriculture) and local flood plans.
-            </v-card-text>
+            <v-card-text>{{ dimension.capable_description }}</v-card-text>
           </v-card>
         </v-hover>
       </v-col>
       <v-col md="3">
         <v-hover v-slot="{ hover }">
-          <v-card height="350px" :elevation="hover ? 16 : 2"
-                  :color="selected==='Effective'?'red lighten-5':'blue-grey lighten-4'"
-                  @click="select('Effective')">
+          <v-card height="200px" :elevation="hover ? 16 : 2" :key="update"
+                  :color="isSelected(index,'Effective')"
+                  @click="select('Effective',index)">
             <v-card-title>Effective</v-card-title>
-            <v-card-text>Basin plans formulated with active engagement by all stakeholders through formal mechanisms.
-              Adaptive planning process utilized. Standalone basin flood management and drought management plans
-              prepared
-              and integrated into overall basin plan. Close linkages with water user and local flood plans.
-            </v-card-text>
+            <v-card-text>{{ dimension.effective_description }}</v-card-text>
           </v-card>
         </v-hover>
       </v-col>
@@ -69,26 +57,49 @@
 </template>
 <script>
 import Vue from 'vue'
+import loadQuestions from "@/assets/js/utils";
 
 export default Vue.extend({
   name: 'Evolution',
-  mounted() {
+  async mounted() {
     let program = this.$store.state.currentProgram;
     this.title = program.name;
+    this.dimensions = await loadQuestions(program.id, 'evolution', this.$store.state.token);
+    this.selected = [this.dimensions.length];
+
   },
   methods: {
-    select: function (program) {
-      this.selected = program
+    isSelected: function (index, selected) {
+      return this.selected[index] === selected ? 'red lighten-5' : 'blue-grey lighten-4';
+    },
+    select: function (program, index) {
+      this.selected[index] = program;
+      this.update++;
     }
   },
   data: () => ({
-    selected: "",
-    title: ""
+    selected: [],
+    update: 1,
+    title: "",
+    dimensions: []
   }),
 
 })
 </script>
 
 <style scoped>
+html {
+  overflow: hidden !important;
+}
+
+.v-card {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.v-card__text {
+  flex-grow: 1;
+  overflow: auto;
+}
 </style>
 ``
