@@ -22,7 +22,6 @@ class YesNoAnswerType(models.TextChoices):
     NO = "N", ("No")
 
 
-# region Cross-Reference Tables
 class Answer(models.Model):
     """
     Cross reference table to define the bounding relationship between a User and the answers they give to each question.
@@ -88,6 +87,9 @@ class Answer(models.Model):
 
         return super(Answer, self).save(*args, **kwargs)
 
+    def is_valid_answer(self) -> bool:
+        raise NotImplementedError("Validation only supported on inherited Answers.")
+
 
 class YesNoAnswer(Answer):
     short_answer: str = models.CharField(
@@ -98,6 +100,9 @@ class YesNoAnswer(Answer):
     @staticmethod
     def _get_supported_questions() -> List[Question]:
         return [NationalFrameworkQuestion, KeyAgencyActionsQuestion]
+
+    def is_valid_answer(self) -> bool:
+        return self.short_answer and self.justify_answer
 
 
 class SingleChoiceAnswer(Answer):
@@ -117,6 +122,9 @@ class SingleChoiceAnswer(Answer):
     def _get_supported_questions() -> List[Question]:
         return [EvolutionQuestion]
 
+    def is_valid_answer(self) -> bool:
+        return self.selected_choice and self.justify_answer
+
 
 class MultipleChoiceAnswer(Answer):
     selected_programs = models.ManyToManyField(
@@ -127,5 +135,5 @@ class MultipleChoiceAnswer(Answer):
     def _get_supported_questions() -> List[Question]:
         return [LinkagesQuestion]
 
-
-# endregion
+    def is_valid_answer(self) -> bool:
+        return any(self.selected_programs.all())

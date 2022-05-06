@@ -81,8 +81,8 @@ class TestEpicUserTokenAuthRequest:
     @pytest.mark.parametrize(
         "url_suffix, response_code",
         [
-            pytest.param("", 405, id="List all"),
-            pytest.param("2/", 404, id="Retrieve epic_user id=2"),
+            pytest.param("", 405, id="GET"),
+            pytest.param("2/", 404, id="RETRIEVE epic_user id=2"),
         ],
     )
     def test_GET_token_auth(
@@ -143,7 +143,7 @@ class TestEpicUserViewSet:
             ),
         ],
     )
-    def test_GET_list_epic_user(
+    def test_GET_epic_user(
         self,
         epic_username: str,
         multiple_entries: bool,
@@ -191,7 +191,7 @@ class TestEpicUserViewSet:
             ),
         ],
     )
-    def test_GET_detail_epic_user(
+    def test_RETRIEVE_epic_user(
         self,
         epic_username: str,
         find_username: str,
@@ -333,8 +333,8 @@ class TestAreaViewSet:
     @pytest.mark.parametrize(
         "url_suffix, expected_entries",
         [
-            pytest.param("", 2, id="get-list"),
-            pytest.param("1/", 4, id="get-retrieve (Area 'alpha' with 4 groups)"),
+            pytest.param("", 2, id="GET"),
+            pytest.param("1/", 4, id="RETRIEVE (Area 'alpha' with 4 groups)"),
         ],
     )
     def test_GET_area(
@@ -374,8 +374,8 @@ class TestAgencyViewSet:
     @pytest.mark.parametrize(
         "url_suffix, expected_entries",
         [
-            pytest.param("", 4, id="get-list"),
-            pytest.param("1/", 4, id="get-retrieve (Agency 'T.I.A.' with 4 fields)"),
+            pytest.param("", 4, id="GET"),
+            pytest.param("1/", 4, id="RETRIEVE (Agency 'T.I.A.' with 4 fields)"),
         ],
     )
     def test_GET_agency(
@@ -415,8 +415,8 @@ class TestGroupViewSet:
     @pytest.mark.parametrize(
         "url_suffix, expected_entries",
         [
-            pytest.param("", 3, id="get-list"),
-            pytest.param("1/", 5, id="get-retrieve (Group 'first' with 5 fields)"),
+            pytest.param("", 3, id="GET"),
+            pytest.param("1/", 5, id="RETRIEVE (Group 'first' with 5 fields)"),
         ],
     )
     def test_GET_group(
@@ -456,11 +456,11 @@ class TestProgramViewSet:
     @pytest.mark.parametrize(
         "url_suffix, expected_entries",
         [
-            pytest.param("", 5, id="get-list"),
-            pytest.param("1/", 7, id="get-retrieve (Program 'a' with 9 fields)"),
+            pytest.param("", 5, id="GET"),
+            pytest.param("1/", 7, id="RETRIEVE (Program 'a' with 9 fields)"),
         ],
     )
-    def test_GET_program(
+    def test_RETRIEVE_program(
         self,
         epic_username: str,
         url_suffix: str,
@@ -480,23 +480,23 @@ class TestProgramViewSet:
         "url_suffix, expected_entries",
         [
             pytest.param(
-                "question-nationalframework/", 2, id="LIST NationalFramework Questions"
+                "question-nationalframework/", 2, id="NationalFramework Questions"
             ),
-            pytest.param("question-evolution/", 2, id="LIST Evolution Questions"),
-            pytest.param("question-linkages/", 1, id="LIST Linkages Questions"),
+            pytest.param("question-evolution/", 2, id="Evolution Questions"),
+            pytest.param("question-linkages/", 1, id="Linkages Questions"),
             pytest.param(
-                "question-keyagencyactions/", 1, id="LIST KeyAgencyActions Questions"
+                "question-keyagencyactions/", 1, id="KeyAgencyActions Questions"
             ),
         ],
     )
-    def test_GET_list_program_questions(
+    def test_GET_questions(
         self,
         url_suffix: str,
         expected_entries: int,
         api_client: APIClient,
     ):
-        # Program a has 5 questions (2xNFQ, 2xEVO, 1xLNK)
-        a_program: Program = Program.objects.filter(name="a").first()
+        # Program 'a' has 6 questions (2xNFQ, 2xEVO, 1xKA, 1xLNK)
+        a_program: Program = Program.objects.get(name="a")
         full_url = self.url_root + f"{a_program.pk}/" + url_suffix
         # Run request.
         set_user_auth_token(api_client, "Palpatine")
@@ -505,6 +505,22 @@ class TestProgramViewSet:
         # Verify final exepctations.
         assert response.status_code == 200
         assert len(response.data) == expected_entries
+
+    def test_GET_progress_epic_user(self, api_client: APIClient):
+        # Define test data.
+        # Program 'a' has 6 questions (2xNFQ, 2xEVO, 2xKAA 1xLNK)
+        progress_suffix = "progress/"
+        a_program: Program = Program.objects.get(name="a")
+        full_url = self.url_root + f"{a_program.pk}/" + progress_suffix
+
+        # Run request.
+        set_user_auth_token(api_client, "Palpatine")
+        response = api_client.get(full_url)
+
+        # Verify final expectations
+        assert response.status_code == 200
+        assert len(response.data) == 2
+        assert len(response.data["question_answers"]) == 6  # 'a' has 6 questions.
 
 
 @pytest.mark.django_db

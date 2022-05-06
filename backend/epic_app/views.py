@@ -2,13 +2,13 @@
 from typing import List, Type, Union
 
 from django.db import models
-from django.http import HttpRequest
 from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-import epic_app.epic_permissions as epic_permissions
+from epic_app import epic_permissions
+from epic_app import serializers as epic_serializer
 from epic_app.models.epic_answers import Answer
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
@@ -19,22 +19,6 @@ from epic_app.models.epic_questions import (
 )
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
-from epic_app.serializers import (
-    AgencySerializer,
-    AreaSerializer,
-    EpicOrganizationSerializer,
-    EpicUserSerializer,
-    EvolutionQuestionSerializer,
-    GroupSerializer,
-    LinkagesQuestionSerializer,
-    NationalFrameworkQuestionSerializer,
-    ProgramSerializer,
-)
-from epic_app.serializers.answer_serializer import AnswerSerializer
-from epic_app.serializers.question_serializer import (
-    KeyAgencyQuestionSerializer,
-    QuestionSerializer,
-)
 from epic_app.utils import get_submodel_type, get_submodel_type_list
 
 
@@ -44,7 +28,7 @@ class EpicUserViewSet(viewsets.ModelViewSet):
     """
 
     queryset = EpicUser.objects.all()
-    serializer_class = EpicUserSerializer
+    serializer_class = epic_serializer.EpicUserSerializer
 
     def get_permissions(self) -> List[permissions.BasePermission]:
         """
@@ -88,7 +72,7 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         Returns:
             Response: Result of the queryset.
         """
-        serializer: EpicUserSerializer = self.get_serializer(
+        serializer: epic_serializer.EpicUserSerializer = self.get_serializer(
             EpicUser.objects.filter(pk=pk).first(), data=request.data, partial=True
         )
         serializer.is_valid()
@@ -102,7 +86,7 @@ class EpicOrganizationViewSet(viewsets.ModelViewSet):
     """
 
     queryset = EpicOrganization.objects.all()
-    serializer_class = EpicOrganizationSerializer
+    serializer_class = epic_serializer.EpicOrganizationSerializer
     permission_classes = [permissions.IsAdminUser]
 
 
@@ -112,7 +96,7 @@ class AreaViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     queryset = Area.objects.all().order_by("name")
-    serializer_class = AreaSerializer
+    serializer_class = epic_serializer.AreaSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 
@@ -122,7 +106,7 @@ class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     queryset = Agency.objects.all().order_by("name")
-    serializer_class = AgencySerializer
+    serializer_class = epic_serializer.AgencySerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 
@@ -132,7 +116,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     queryset = Group.objects.all().order_by("name")
-    serializer_class = GroupSerializer
+    serializer_class = epic_serializer.GroupSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
 
@@ -142,17 +126,25 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """
 
     queryset = Program.objects.all()
-    serializer_class = ProgramSerializer
+    serializer_class = epic_serializer.ProgramSerializer
     permission_classes = [permissions.DjangoModelPermissions]
+
+    @action(detail=True, url_path="progress", url_name="progress")
+    def get_progress(self, request: Request, pk: str = None) -> Response:
+        request.data["user"] = request.user
+        serializer = epic_serializer.ProgressSerializer(
+            Program.objects.get(pk=pk), context={"request": request}
+        )
+        return Response(serializer.data)
 
     def _get_question(
         self, request: Request, question_type: Question, pk: str = None
     ) -> Response:
         question_serializers = {
-            NationalFrameworkQuestion: NationalFrameworkQuestionSerializer,
-            EvolutionQuestion: EvolutionQuestionSerializer,
-            LinkagesQuestion: LinkagesQuestionSerializer,
-            KeyAgencyActionsQuestion: KeyAgencyQuestionSerializer,
+            NationalFrameworkQuestion: epic_serializer.NationalFrameworkQuestionSerializer,
+            EvolutionQuestion: epic_serializer.EvolutionQuestionSerializer,
+            LinkagesQuestion: epic_serializer.LinkagesQuestionSerializer,
+            KeyAgencyActionsQuestion: epic_serializer.KeyAgencyQuestionSerializer,
         }
         queryset: Question = question_type.objects.filter(program=pk)
         serializer: serializers.ModelSerializer = question_serializers[question_type](
@@ -235,7 +227,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
 
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
+    serializer_class = epic_serializer.QuestionSerializer
     permissiion_classes = [permissions.DjangoModelPermissions]
 
     @staticmethod
@@ -253,7 +245,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         return a_type
 
     def _get_epic_users_queryset(
-        self, request: HttpRequest
+        self, request: Request
     ) -> Union[models.QuerySet, List[EpicUser]]:
         """
         Gets the query needed to retrieve data for all involved users.
@@ -272,7 +264,9 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         """
         # Find to which question subtype it belongs.
         q_type = get_submodel_type(Question, pk)
-        q_serializer_type = QuestionSerializer.get_concrete_serializer(q_type)
+        q_serializer_type = epic_serializer.QuestionSerializer.get_concrete_serializer(
+            q_type
+        )
         queryset = q_type.objects.filter(pk=pk)
         q_serializer = q_serializer_type(
             queryset, many=True, context={"request": request}
@@ -281,13 +275,13 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(q_serializer.data)
 
     @action(detail=True, url_path="answers", url_name="answers")
-    def retrieve_answers(self, request: HttpRequest, pk: str = None) -> models.QuerySet:
+    def retrieve_answers(self, request: Request, pk: str = None) -> models.QuerySet:
         """
         Retrieves the `answers` for the given `question`.
         ASSUMPTION: The request is done with an `EpicUser`.
 
         Args:
-            request (HttpRequest): Request from the client.
+            request (Request): Request from the client.
             pk (str, optional): `Answer` id. Defaults to None.
         """
 
@@ -299,7 +293,9 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
         e_users = self._get_epic_users_queryset(request)
         a_type = self._get_related_answer_type(question_pk=pk)
-        a_serializer_type = AnswerSerializer.get_concrete_serializer(a_type)
+        a_serializer_type = epic_serializer.AnswerSerializer.get_concrete_serializer(
+            a_type
+        )
         a_instances = [get_user_answer(e_user) for e_user in e_users]
         a_serializer = a_serializer_type(
             a_instances, many=True, context={"request": request}
@@ -309,7 +305,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
 class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
-    serializer_class = AnswerSerializer
+    serializer_class = epic_serializer.AnswerSerializer
 
     def get_permissions(self):
         if not self.request.data.get("user", None):
@@ -342,15 +338,19 @@ class AnswerViewSet(viewsets.ModelViewSet):
         RETRIEVE a single `Answer` which is serialized based on its subtype.
         """
         a_subtype = get_submodel_type(Answer, pk)
-        a_serializer_type = AnswerSerializer.get_concrete_serializer(a_subtype)
+        a_serializer_type = epic_serializer.AnswerSerializer.get_concrete_serializer(
+            a_subtype
+        )
         a_serializer = a_serializer_type(
             self._filter_queryset(a_subtype).get(pk=pk), context={"request": request}
         )
         return Response(data=a_serializer.data)
 
-    def _get_update_request(self, request: HttpRequest, pk: str) -> HttpRequest:
+    def _get_update_request(self, request: Request, pk: str) -> Request:
         a_subtype = get_submodel_type(Answer, pk)
-        self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
+        self.serializer_class = (
+            epic_serializer.AnswerSerializer.get_concrete_serializer(a_subtype)
+        )
         self.queryset = self._filter_queryset(a_subtype).get(pk=pk)
         # Prevent admins from replacing the user in the partial_update
         request.data["user"] = self.queryset.user_id
@@ -378,5 +378,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         CREATE a new `Answer` using the subtype associated serializer.
         """
         a_subtype = QuestionViewSet._get_related_answer_type(request.data["question"])
-        self.serializer_class = AnswerSerializer.get_concrete_serializer(a_subtype)
+        self.serializer_class = (
+            epic_serializer.AnswerSerializer.get_concrete_serializer(a_subtype)
+        )
         return super().create(request, *args, **kwargs)
