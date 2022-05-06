@@ -1,3 +1,9 @@
+## v0.19.0 (2022-05-06)
+
+### Feat
+
+- **serializers/progress_serializer.py;views.py;urls.py**: Added end point from /api/program/id/progress to retrieve the progress for the current logged in epic user, added serializer and adapted tests
+
 ## v0.18.0 (2022-05-04)
 
 ### Feat
