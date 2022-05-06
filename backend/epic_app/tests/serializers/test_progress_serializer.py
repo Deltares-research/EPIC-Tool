@@ -98,14 +98,7 @@ class TestProgressSerializer:
         # Verify final expectations
         assert list(serialized_dict.keys()) == ["progress", "questions_answers"]
         assert serialized_dict["progress"] == 0.0
-<<<<<<< HEAD
         qa_list = serialized_dict["questions_answers"]
         assert isinstance(qa_list, list)
         assert list(qa_list[0].keys()) == ["question", "answer"]
         assert len(qa_list) == len(program.questions.all())
-        
-=======
-        qa_dict = serialized_dict["questions_answers"]
-        assert isinstance(qa_dict, dict)
-        assert list(qa_dict.keys()) == [q.id for q in program.questions.all()]
->>>>>>> 9e7f600ef1d604fb806b9bf680051889931970e4
