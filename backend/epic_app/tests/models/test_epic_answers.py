@@ -11,7 +11,14 @@ from epic_app.models.epic_answers import (
     YesNoAnswer,
     YesNoAnswerType,
 )
-from epic_app.models.epic_questions import EvolutionChoiceType, Question
+from epic_app.models.epic_questions import (
+    EvolutionChoiceType,
+    EvolutionQuestion,
+    KeyAgencyActionsQuestion,
+    LinkagesQuestion,
+    NationalFrameworkQuestion,
+    Question,
+)
 from epic_app.models.epic_user import EpicUser
 from epic_app.tests.epic_db_fixture import epic_test_db
 
@@ -113,3 +120,21 @@ class TestEpicAnswers:
                 str(ie_exc.value)
                 == f"Question type `{question_subtype.__name__}` not allowed. Supported types: [{supported_answers}]."
             )
+
+    @pytest.mark.parametrize(
+        "question_subtype, answer_subtype",
+        [
+            pytest.param(NationalFrameworkQuestion, YesNoAnswer),
+            pytest.param(KeyAgencyActionsQuestion, YesNoAnswer),
+            pytest.param(EvolutionQuestion, SingleChoiceAnswer),
+            pytest.param(LinkagesQuestion, MultipleChoiceAnswer),
+        ],
+    )
+    def test_SAVE_twice_answer_will_raise_integrity_error(
+        self, question_subtype: Question, answer_subtype: Answer
+    ):
+        with pytest.raises(IntegrityError):
+            # Create it once, there should be no problem
+            self.test_SAVE_answer(question_subtype, answer_subtype)
+            # Create it twice, it should trigger an update instead of create.
+            self.test_SAVE_answer(question_subtype, answer_subtype)

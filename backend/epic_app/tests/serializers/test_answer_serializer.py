@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
@@ -18,14 +20,17 @@ from epic_app.models.epic_questions import (
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
 from epic_app.serializers.answer_serializer import (
+    AnswerSerializer,
     MultipleChoiceAnswerSerializer,
     SingleChoiceAnswerSerializer,
     YesNoAnswerSerializer,
+    _BaseAnswerSerializer,
 )
 from epic_app.tests.epic_db_fixture import epic_test_db
+from epic_app.utils import get_submodel_type_list
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=False)
 @pytest.mark.django_db
 def answer_serializer_fixture(
     epic_test_db: pytest.fixture,
@@ -58,6 +63,32 @@ def answer_serializer_fixture(
     )
     mca.selected_programs.add(Program.objects.all()[4], Program.objects.all()[2])
 
+    return {
+        YesNoAnswer: {
+            "url": "http://testserver/api/answer/1/",
+            "id": 1,
+            "user": 4,
+            "question": 1,
+            "short_answer": str(YesNoAnswerType.YES),
+            "justify_answer": "Velit ex cupidatat do magna ipsum.",
+        },
+        SingleChoiceAnswer: {
+            "id": 2,
+            "justify_answer": "Ipsum anim fugiat sit nostrud enim.",
+            "question": 3,
+            "selected_choice": str(EvolutionChoiceType.ENGAGED),
+            "url": "http://testserver/api/answer/2/",
+            "user": 4,
+        },
+        MultipleChoiceAnswer: {
+            "id": 3,
+            "question": 5,
+            "selected_programs": [3, 5],
+            "url": "http://testserver/api/answer/3/",
+            "user": 4,
+        },
+    }
+
 
 def get_serializer():
     factory = APIRequestFactory()
@@ -73,49 +104,76 @@ serializer_context = get_serializer()
 
 @pytest.mark.django_db
 class TestAnswerSerializer:
+    @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
+    def test_get_concrete_serializer_registered_answer_subclasses_succeeds(
+        self,
+        answer_type: Answer,
+    ):
+        r_serializer = _BaseAnswerSerializer.get_concrete_serializer(answer_type)
+        assert r_serializer is not None
+        assert issubclass(r_serializer, _BaseAnswerSerializer)
+
+    def test_get_concrete_serializer_unregistered_answer_subclasses_raises(self):
+        class DummySerializer(_BaseAnswerSerializer):
+            pass
+
+        with pytest.raises(ValueError) as err_info:
+            _BaseAnswerSerializer.get_concrete_serializer(DummySerializer)
+
+        assert (
+            str(err_info.value)
+            == f"Question type {DummySerializer} has no designated serializer."
+        )
+
+    def test_serialize_all_answers(self, answer_serializer_fixture: dict):
+        expected_data = [
+            dict(
+                url=asf["url"],
+                id=asf["id"],
+                user=asf["user"],
+                question=asf["question"],
+            )
+            for asf in answer_serializer_fixture.values()
+        ]
+
+        serialized_data = list(
+            AnswerSerializer(
+                Answer.objects.all(),
+                many=True,
+                context=serializer_context,
+            ).data
+        )
+
+        assert len(serialized_data) == 3
+        assert json.dumps(serialized_data) == json.dumps(expected_data)
+
     @pytest.mark.parametrize(
-        "serializer, answer_type, expected_data",
+        "serializer, answer_type",
         [
             pytest.param(
                 YesNoAnswerSerializer,
                 YesNoAnswer,
-                {
-                    "url": "http://testserver/api/yesnoanswer/1/",
-                    "id": 1,
-                    "user": 4,
-                    "question": 1,
-                    "short_answer": str(YesNoAnswerType.YES),
-                    "justify_answer": "Velit ex cupidatat do magna ipsum.",
-                },
             ),
             pytest.param(
                 SingleChoiceAnswerSerializer,
                 SingleChoiceAnswer,
-                {
-                    "id": 2,
-                    "justify_answer": "Ipsum anim fugiat sit nostrud enim.",
-                    "question": 3,
-                    "selected_choice": str(EvolutionChoiceType.ENGAGED),
-                    "url": "http://testserver/api/singleanswer/2/",
-                    "user": 4,
-                },
             ),
             pytest.param(
                 MultipleChoiceAnswerSerializer,
                 MultipleChoiceAnswer,
-                {
-                    "id": 3,
-                    "question": 5,
-                    "selected_programs": [3, 5],
-                    "url": "http://testserver/api/multianswer/3/",
-                    "user": 4,
-                },
             ),
         ],
     )
     def test_given_valid_instances_serializer_returns_type_expected_data(
-        self, serializer, answer_type: Answer, expected_data: dict
+        self,
+        serializer,
+        answer_type: Answer,
+        answer_serializer_fixture: dict,
     ):
+        # Define test data
+        expected_data = answer_serializer_fixture[answer_type]
+        expected_data.pop("url")
+        # Run test
         serialized_data = list(
             serializer(
                 answer_type.objects.all(),
@@ -124,5 +182,7 @@ class TestAnswerSerializer:
             ).data
         )
 
+        # Verify final expectations.
         assert len(serialized_data) == 1
-        assert serialized_data[0] == expected_data
+        for field, value in expected_data.items():
+            assert serialized_data[0][field] == value

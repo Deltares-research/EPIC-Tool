@@ -58,7 +58,8 @@ class Answer(models.Model):
             ]
         )
 
-    def _get_supported_questions(self) -> List[Question]:
+    @staticmethod
+    def _get_supported_questions() -> List[Question]:
         """
         Method to be overriden in concrete classes. Base `Answer` does not support any `Question`.
 
@@ -84,6 +85,7 @@ class Answer(models.Model):
                     ),
                 )
             )
+
         return super(Answer, self).save(*args, **kwargs)
 
 
@@ -93,7 +95,8 @@ class YesNoAnswer(Answer):
     )
     justify_answer: str = models.TextField(blank=True)
 
-    def _get_supported_questions(self) -> List[Question]:
+    @staticmethod
+    def _get_supported_questions() -> List[Question]:
         return [NationalFrameworkQuestion, KeyAgencyActionsQuestion]
 
 
@@ -110,7 +113,8 @@ class SingleChoiceAnswer(Answer):
             if c_field.verbose_name.lower() == self.selected_choice.lower()
         )
 
-    def _get_supported_questions(self) -> List[Question]:
+    @staticmethod
+    def _get_supported_questions() -> List[Question]:
         return [EvolutionQuestion]
 
 
@@ -119,7 +123,8 @@ class MultipleChoiceAnswer(Answer):
         to=base_models.Program, blank=True, related_name="selected_answers"
     )
 
-    def _get_supported_questions(self) -> List[Question]:
+    @staticmethod
+    def _get_supported_questions() -> List[Question]:
         return [LinkagesQuestion]
 
 

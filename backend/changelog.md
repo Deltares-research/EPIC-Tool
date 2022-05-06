@@ -1,3 +1,18 @@
+## v0.18.0 (2022-05-04)
+
+### Feat
+
+- **epic_app/serializers/answer_serializer.py;epic_app/views.py**: We can now patch selected programs, adapted tests
+- **epic_app/views.py**: Edited partial_update to allow admin to change values
+- **views.py**: We now assign a valid serializer when creating answers from the endpoint /api/answer/
+- **views.py**: Streamlined get-list get-detail (get / retrieve) for answers. Adapted tests
+- **views.py**: API Client can now retrieve a serialized answer for a question without knowing either type
+- **views.py**: Added endpoint for flat questions
+
+### Refactor
+
+- **views.py;urls.py**: Removed previous 'questions' viewsets as the 'QuestionViewSet' replaces the whole set.
+
 ## v0.17.0 (2022-05-03)
 
 ### Feat
