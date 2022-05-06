@@ -62,7 +62,7 @@
           </v-row>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <v-card class="mb-12" color="grey lighten-1" height="200px"></v-card>
+          <key-agency-actions :key="forceUpdateKeyAgencyAction"/>
           <v-row>
             <v-col md="6">
               <v-btn text color="primary" @click="e1 = 2">
@@ -136,10 +136,12 @@ import ProgramDescription from '../components/ProgramDescription.vue'
 import Linkages from '../components/Linkages'
 import NationalFrameworks from '../components/NationalFrameworks'
 import Evolution from '../components/Evolution'
+import KeyAgencyActions from "@/components/KeyAgencyActions";
 
 export default {
   name: 'Questionnaire',
   components: {
+    KeyAgencyActions,
     ProgramDescription, Linkages, NationalFrameworks, Evolution
   },
   mounted() {

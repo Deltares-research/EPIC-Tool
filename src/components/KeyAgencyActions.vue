@@ -1,11 +1,11 @@
 <template>
   <div>
-    <h2 style="color: darkred">Linkage with National Frameworks</h2>
+    <h2 style="color: darkred">Linkage with Key agencies</h2>
     <h3 style="color: darkred">{{ title }}</h3>
-    <v-textarea rows=6 :value="explanation[page-1]" readonly outlined></v-textarea>
+    <v-textarea rows=4 :value="explanation[page-1]" readonly outlined></v-textarea>
     <v-row>
       <v-col md="8">
-        <v-textarea rows=2 :value="questions[page-1]" readonly outlined></v-textarea>
+        <v-textarea rows=1 :value="questions[page-1]" readonly outlined></v-textarea>
       </v-col>
       <v-col md="4">
         <v-select
@@ -16,7 +16,7 @@
       </v-col>
     </v-row>
     <h3>Please justify your answer</h3>
-    <v-textarea rows=4 outlined></v-textarea>
+    <v-textarea rows=5 outlined></v-textarea>
     <v-row>
       <v-col md="4">
       </v-col>
@@ -38,18 +38,18 @@
 </template>
 <script>
 import Vue from 'vue'
-import loadQuestions from '../assets/js/utils'
+import loadQuestions from "@/assets/js/utils";
 
 export default Vue.extend({
-  name: 'NationalFrameworks',
+  name: 'KeyAgencyActions',
   methods: {},
   async mounted() {
     let program = this.$store.state.currentProgram;
     this.title = program.name;
 
-    let questions = await loadQuestions(program.id, 'nationalframework', this.$store.state.token);
+    let questions = await loadQuestions(program.id, 'keyagencyactions', this.$store.state.token);
+    this.explanation = [questions.length];
     this.questions = [questions.length];
-    this.page = 1;
     for (let i = 0; i < questions.length; i++) {
       this.explanation[i] = questions[i].description;
       this.questions[i] = questions[i].title;
