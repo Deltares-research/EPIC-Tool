@@ -131,6 +131,17 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, url_path="progress", url_name="progress")
     def get_progress(self, request: Request, pk: str = None) -> Response:
+        """
+        Gets the percentage of answered questions for the `Program` with provided `id` and the `EpicUser` currently logged in.
+        Note that the user will be fetched in the `ProgressSerializer` by using the data stored in `context`.
+
+        Args:
+            request (Request): API Request.
+            pk (str, optional): `Program` Id. Defaults to None.
+
+        Returns:
+            Response: Result of the serialised request to `ProgressSerializer`.
+        """
         request.data["user"] = request.user
         serializer = epic_serializer.ProgressSerializer(
             Program.objects.get(pk=pk), context={"request": request}

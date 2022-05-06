@@ -8,18 +8,31 @@ from epic_app.models.epic_user import EpicUser
 from epic_app.models.models import Program
 from epic_app.utils import get_instance_as_submodel_type
 
-QuestionAnswer = Tuple[Question, Optional[Answer]]
+_QuestionAnswer = Tuple[Question, Optional[Answer]]
 
 
-class QuestionAnswerSerializer(serializers.BaseSerializer):
-    def to_representation(self, instance: QuestionAnswer):
+class _QuestionAnswerSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance: _QuestionAnswer):
         question, answer = instance
+        if not isinstance(question, Question):
+            raise ValueError("No valid question provided.")
         return {question.id: answer.id if answer else None}
 
 
 class ProgressSerializer(serializers.BaseSerializer):
-    def _get_question_answer(self, question: Question) -> QuestionAnswer:
-        progress_user: EpicUser = self.context["request"].user
+    """
+    Serializer to show the progress of the context `EpicUser`.
+    Only meant for GET / FETCH endpoints.
+    """
+
+    def _get_context_epic_user(self) -> EpicUser:
+        try:
+            return self.context["request"].user
+        except:
+            raise ValueError("No user found in context-request.")
+
+    def _get_question_answer(self, question: Question) -> _QuestionAnswer:
+        progress_user: EpicUser = self._get_context_epic_user()
         answer = None
         try:
             answer = Answer.objects.get(user=progress_user, question=question)
@@ -27,7 +40,7 @@ class ProgressSerializer(serializers.BaseSerializer):
         finally:
             return (question, answer)
 
-    def _get_total_progress(self, answer_list: List[QuestionAnswer]) -> float:
+    def _get_total_progress(self, answer_list: List[_QuestionAnswer]) -> float:
         valid_answers = sum(a.is_valid_answer() for _, a in answer_list if a)
         return valid_answers / len(answer_list)
 
@@ -39,7 +52,7 @@ class ProgressSerializer(serializers.BaseSerializer):
         qa_list = [self._get_question_answer(q) for q in instance.questions.all()]
         qa_dict = {}
         for qa in qa_list:
-            qa_dict.update(QuestionAnswerSerializer().to_representation(qa))
+            qa_dict.update(_QuestionAnswerSerializer().to_representation(qa))
         return {
             "progress": self._get_total_progress(qa_list),
             "questions_answers": qa_dict,
