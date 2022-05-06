@@ -28,7 +28,7 @@ class TestQuestionAnswerSerializer:
         )
         serializer = _QuestionAnswerSerializer()
         json_dict = serializer.to_representation((q_instance, a_instance))
-        assert json_dict == {q_instance.id: a_instance.id}
+        assert json_dict == dict(question=q_instance.id, answer=a_instance.id)
 
     def test_to_representation_invalid_question(self, epic_test_db):
         q_instance = NationalFrameworkQuestion.objects.first()
@@ -44,7 +44,9 @@ class TestQuestionAnswerSerializer:
     def test_to_representation_no_answer(self, epic_test_db):
         q_instance = NationalFrameworkQuestion.objects.first()
         serializer = _QuestionAnswerSerializer()
-        assert serializer.to_representation((q_instance, None)) == {q_instance.id: None}
+        assert serializer.to_representation((q_instance, None)) == dict(
+            question=q_instance.id, answer=None
+        )
 
 
 @pytest.mark.django_db

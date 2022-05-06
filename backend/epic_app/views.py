@@ -142,7 +142,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         Returns:
             Response: Result of the serialised request to `ProgressSerializer`.
         """
-        request.data["user"] = request.user
+        request.data["user"] = request.user.epic_user
         serializer = epic_serializer.ProgressSerializer(
             Program.objects.get(pk=pk), context={"request": request}
         )
