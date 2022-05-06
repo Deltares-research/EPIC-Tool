@@ -28,7 +28,7 @@ class ProgressSerializer(serializers.BaseSerializer):
             return (question, answer)
 
     def _get_total_progress(self, answer_list: List[QuestionAnswer]) -> float:
-        valid_answers = sum(a.valid_answer() for _, a in answer_list if a)
+        valid_answers = sum(a.is_valid_answer() for _, a in answer_list if a)
         return valid_answers / len(answer_list)
 
     def to_representation(self, instance: Program):
@@ -36,13 +36,11 @@ class ProgressSerializer(serializers.BaseSerializer):
             raise ValueError(
                 f"Expected instance type {type(Program)}, got {type(instance)}"
             )
-        question_answers = [
-            self._get_question_answer(q) for q in instance.questions.all()
-        ]
+        qa_list = [self._get_question_answer(q) for q in instance.questions.all()]
+        qa_dict = {}
+        for qa in qa_list:
+            qa_dict.update(QuestionAnswerSerializer().to_representation(qa))
         return {
-            "progress": self._get_total_progress(question_answers),
-            "question_answers": [
-                QuestionAnswerSerializer().to_representation(qa)
-                for qa in question_answers
-            ],
+            "progress": self._get_total_progress(qa_list),
+            "questions_answers": qa_dict,
         }

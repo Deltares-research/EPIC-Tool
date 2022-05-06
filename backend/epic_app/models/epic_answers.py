@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import abc
 from typing import List
 
 from django.db import IntegrityError, models
@@ -102,7 +101,7 @@ class YesNoAnswer(Answer):
         return [NationalFrameworkQuestion, KeyAgencyActionsQuestion]
 
     def is_valid_answer(self) -> bool:
-        return self.short_answer and self.justify_answer
+        return self.short_answer in YesNoAnswerType
 
 
 class SingleChoiceAnswer(Answer):
@@ -123,7 +122,7 @@ class SingleChoiceAnswer(Answer):
         return [EvolutionQuestion]
 
     def is_valid_answer(self) -> bool:
-        return self.selected_choice and self.justify_answer
+        return self.selected_choice in EvolutionChoiceType
 
 
 class MultipleChoiceAnswer(Answer):

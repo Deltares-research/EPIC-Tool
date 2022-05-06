@@ -12,7 +12,14 @@ from epic_app.models.epic_answers import (
     YesNoAnswer,
     YesNoAnswerType,
 )
-from epic_app.models.epic_questions import EvolutionChoiceType, Question
+from epic_app.models.epic_questions import (
+    EvolutionChoiceType,
+    EvolutionQuestion,
+    KeyAgencyActionsQuestion,
+    LinkagesQuestion,
+    NationalFrameworkQuestion,
+    Question,
+)
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
@@ -506,21 +513,50 @@ class TestProgramViewSet:
         assert response.status_code == 200
         assert len(response.data) == expected_entries
 
-    def test_GET_progress_epic_user(self, api_client: APIClient):
+    @pytest.fixture(autouse=False)
+    def _progress_fixture(self) -> dict:
+        # Create some empty answers for 'Anakin'
+        e_user = EpicUser.objects.get(username="Anakin")
+        answers = {}
+        for nfq in NationalFrameworkQuestion.objects.all():
+            # We will fill the answers for these ones.
+            yna, _ = YesNoAnswer.objects.get_or_create(
+                user=e_user, question=nfq, short_answer=YesNoAnswerType.YES
+            )
+            answers[nfq.id] = yna.id
+        for eq in EvolutionQuestion.objects.all():
+            sca, _ = SingleChoiceAnswer.objects.get_or_create(user=e_user, question=eq)
+            answers[eq.id] = sca.id  # Empty answer
+        for kaa in KeyAgencyActionsQuestion.objects.all():
+            answers[kaa.id] = None
+        for lnk in LinkagesQuestion.objects.all():
+            answers[lnk.id] = None
+
+        return {
+            "progress": len(NationalFrameworkQuestion.objects.all())
+            / len(answers.items()),
+            "questions_answers": answers,
+        }
+
+    def test_RETRIEVE_progress_epic_user(
+        self, api_client: APIClient, _progress_fixture: dict
+    ):
         # Define test data.
         # Program 'a' has 6 questions (2xNFQ, 2xEVO, 2xKAA 1xLNK)
         progress_suffix = "progress/"
+        progress_fixture_user = "Anakin"
         a_program: Program = Program.objects.get(name="a")
         full_url = self.url_root + f"{a_program.pk}/" + progress_suffix
 
         # Run request.
-        set_user_auth_token(api_client, "Palpatine")
+        set_user_auth_token(api_client, progress_fixture_user)
         response = api_client.get(full_url)
 
         # Verify final expectations
         assert response.status_code == 200
         assert len(response.data) == 2
-        assert len(response.data["question_answers"]) == 6  # 'a' has 6 questions.
+        assert len(response.data["questions_answers"]) == 6  # 'a' has 6 questions.
+        assert response.data == _progress_fixture
 
 
 @pytest.mark.django_db
