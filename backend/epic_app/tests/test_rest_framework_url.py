@@ -1,5 +1,5 @@
 import json
-from typing import Callable, Type
+from typing import Callable, Optional, Type
 
 import pytest
 from django.contrib.auth.models import User
@@ -515,26 +515,28 @@ class TestProgramViewSet:
 
     @pytest.fixture(autouse=False)
     def _progress_fixture(self) -> dict:
+        def get_qa(question_id: int, answer_id: Optional[int]) -> dict:
+            return dict(question=question_id, answer=answer_id)
+
         # Create some empty answers for 'Anakin'
         e_user = EpicUser.objects.get(username="Anakin")
-        answers = {}
+        answers = []
         for nfq in NationalFrameworkQuestion.objects.all():
             # We will fill the answers for these ones.
             yna, _ = YesNoAnswer.objects.get_or_create(
                 user=e_user, question=nfq, short_answer=YesNoAnswerType.YES
             )
-            answers[nfq.id] = yna.id
+            answers.append(get_qa(nfq.id, yna.id))
         for eq in EvolutionQuestion.objects.all():
             sca, _ = SingleChoiceAnswer.objects.get_or_create(user=e_user, question=eq)
-            answers[eq.id] = sca.id  # Empty answer
+            answers.append(get_qa(eq.id, sca.id))  # Empty answer
         for kaa in KeyAgencyActionsQuestion.objects.all():
-            answers[kaa.id] = None
+            answers.append(get_qa(kaa.id, None))
         for lnk in LinkagesQuestion.objects.all():
-            answers[lnk.id] = None
+            answers.append(get_qa(lnk.id, None))
 
         return {
-            "progress": len(NationalFrameworkQuestion.objects.all())
-            / len(answers.items()),
+            "progress": len(NationalFrameworkQuestion.objects.all()) / len(answers),
             "questions_answers": answers,
         }
 
@@ -556,7 +558,13 @@ class TestProgramViewSet:
         assert response.status_code == 200
         assert len(response.data) == 2
         assert len(response.data["questions_answers"]) == 6  # 'a' has 6 questions.
-        assert response.data == _progress_fixture
+        assert list(response.data.keys()) == list(_progress_fixture.keys())
+        assert response.data["progress"] == _progress_fixture["progress"]
+        assert len(response.data["questions_answers"]) == len(
+            _progress_fixture["questions_answers"]
+        )
+        for qa in response.data["questions_answers"]:
+            assert qa in _progress_fixture["questions_answers"]
 
 
 @pytest.mark.django_db

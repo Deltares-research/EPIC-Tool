@@ -16,7 +16,7 @@ class _QuestionAnswerSerializer(serializers.BaseSerializer):
         question, answer = instance
         if not isinstance(question, Question):
             raise ValueError("No valid question provided.")
-        return {question.id: answer.id if answer else None}
+        return {"question": question.id, "answer": answer.id if answer else None}
 
 
 class ProgressSerializer(serializers.BaseSerializer):
@@ -50,10 +50,9 @@ class ProgressSerializer(serializers.BaseSerializer):
                 f"Expected instance type {type(Program)}, got {type(instance)}"
             )
         qa_list = [self._get_question_answer(q) for q in instance.questions.all()]
-        qa_dict = {}
-        for qa in qa_list:
-            qa_dict.update(_QuestionAnswerSerializer().to_representation(qa))
         return {
             "progress": self._get_total_progress(qa_list),
-            "questions_answers": qa_dict,
+            "questions_answers": [
+                _QuestionAnswerSerializer().to_representation(qa) for qa in qa_list
+            ],
         }
