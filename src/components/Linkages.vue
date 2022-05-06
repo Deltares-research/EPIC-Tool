@@ -3,8 +3,7 @@
     <h2 style="color:darkred">Linkages</h2>
     <h3 style="color: darkred">{{ title }}</h3>
     <br>
-    <h3>Please select three programs that will help you deliver better results in your program if you could have better
-      collaboration? </h3>
+    <h3>{{ question }}</h3>
     <br>
     <v-card :elevation="2" color="blue-grey lighten-4" v-for="area in this.$store.state.areas" :key="area.id">
       <v-container fluid class="fill-height">
@@ -37,12 +36,17 @@
 </template>
 <script>
 import Vue from 'vue'
+import loadQuestions from "@/assets/js/utils";
 
 export default Vue.extend({
   name: 'SelectProgram',
-  mounted() {
+  async mounted() {
     let program = this.$store.state.currentProgram;
     this.title = program.name;
+
+    let questions = await loadQuestions(program.id, 'linkages', this.$store.state.token);
+    this.question = questions[0].title;
+
   },
   methods: {
     selectProgram: function (programId) {
@@ -58,7 +62,8 @@ export default Vue.extend({
   },
   data: () => ({
     active: false,
-    title:"",
+    title: "",
+    question: "",
     selectedPrograms: new Set(),
   }),
 })

@@ -97,12 +97,12 @@ export default {
         'Authorization': 'Token ' + token,
       },
     }
-    response = await fetch('http://localhost:8000/api/agency/?format=json', options);
+    let response = await fetch('http://localhost:8000/api/agency/?format=json', options);
     this.agencies = await response.json();
     this.agencies.sort((a, b) => a.id - b.id);
 
     if (this.$store.state.initialized) return;
-    let response = await fetch('http://localhost:8000/api/area/?format=json', options);
+    response = await fetch('http://localhost:8000/api/area/?format=json', options);
     let areas = await response.json();
     this.$store.commit("updateAreas", areas);
     this.$store.commit("init");
