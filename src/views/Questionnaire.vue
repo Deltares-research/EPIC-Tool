@@ -32,13 +32,13 @@
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
-          <program-description :key="forceUpdateProgramDescription"></program-description>
+          <program-description ref="programDescription"></program-description>
           <v-card-actions>
             <v-row>
               <v-col md="6">
               </v-col>
               <v-col md="6" class="text-right">
-                <v-btn text color="primary" @click="e1 = 2">National framework
+                <v-btn text color="primary" @click="fromProgramDescriptionToNationalFramework">National framework
                   <v-icon>mdi-step-forward</v-icon>
                 </v-btn>
               </v-col>
@@ -46,64 +46,64 @@
           </v-card-actions>
         </v-stepper-content>
         <v-stepper-content step="2">
-          <national-frameworks :key="forceUpdateNationalFramework"></national-frameworks>
+          <national-frameworks ref="nationalFramework"></national-frameworks>
           <v-row>
             <v-col md="6">
-              <v-btn text color="primary" @click="e1 = 1">
+              <v-btn text color="primary" @click="fromNationalFrameworkToProgramDescription">
                 <v-icon>mdi-step-backward</v-icon>
                 Program description
               </v-btn>
             </v-col>
             <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="e1 = 3">Key agency actions
+              <v-btn text color="primary" @click="fromNationalFrameworkToKeyAgency">Key agency actions
                 <v-icon>mdi-step-forward</v-icon>
               </v-btn>
             </v-col>
           </v-row>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <key-agency-actions :key="forceUpdateKeyAgencyAction"/>
+          <key-agency-actions ref="keyAgency"/>
           <v-row>
             <v-col md="6">
-              <v-btn text color="primary" @click="e1 = 2">
+              <v-btn text color="primary" @click="fromKeyAgencyToNationalFramework">
                 <v-icon>mdi-step-backward</v-icon>
                 National framework
               </v-btn>
             </v-col>
             <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="e1 = 4">Evolution
+              <v-btn text color="primary" @click="fromKeyAgencyToEvolution">Evolution
                 <v-icon>mdi-step-forward</v-icon>
               </v-btn>
             </v-col>
           </v-row>
         </v-stepper-content>
         <v-stepper-content step="4">
-          <evolution :key="forceUpdateEvolution"></evolution>
+          <evolution ref="evolution"></evolution>
           <v-row>
             <v-col md="6">
-              <v-btn text color="primary" @click="e1 = 3">
+              <v-btn text color="primary" @click="fromEvolutionKeyAgency">
                 <v-icon>mdi-step-backward</v-icon>
                 Key agency actions
               </v-btn>
             </v-col>
             <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="e1 = 5">Linkages
+              <v-btn text color="primary" @click="fromEvolutionToLinkages">Linkages
                 <v-icon>mdi-step-forward</v-icon>
               </v-btn>
             </v-col>
           </v-row>
         </v-stepper-content>
         <v-stepper-content step="5">
-          <linkages :key="forceUpdateLinkages"></linkages>
+          <linkages ref="linkages"></linkages>
           <v-row>
             <v-col md="6">
-              <v-btn text color="primary" @click="e1 = 4">
+              <v-btn text color="primary" @click="fromLinkagesToEvolution">
                 <v-icon>mdi-step-backward</v-icon>
                 Key agency actions
               </v-btn>
             </v-col>
             <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="e1 = 6">References
+              <v-btn text color="primary" @click="fromLinkagesToReferences">References
                 <v-icon>mdi-step-forward</v-icon>
               </v-btn>
             </v-col>
@@ -142,14 +142,17 @@ export default {
   name: 'Questionnaire',
   components: {
     KeyAgencyActions,
-    ProgramDescription, Linkages, NationalFrameworks, Evolution
+    ProgramDescription,
+    Linkages,
+    NationalFrameworks,
+    Evolution
   },
-  mounted() {
+  async mounted() {
     this.selectedAreaIndex = this.getFirstAreaToDisplay();
     this.visiblePrograms = this.getVisiblePrograms(this.$store.state.areas[this.selectedAreaIndex].id);
     this.$store.state.currentProgram = this.visiblePrograms[0];
     this.nextProgram = this.getNextProgram();
-    this.forceUpdateProgramDescription++;
+    await this.$refs.programDescription.load();
   },
   data() {
     return {
@@ -158,17 +161,54 @@ export default {
       selectedAreaId: "",
       selectedProgramIndex: 0,
       visiblePrograms: [],
-      forceUpdateProgramDescription: 0,
-      forceUpdateNationalFramework: 0,
-      forceUpdateEvolution: 0,
-      forceUpdateKeyAgencyAction: 0,
-      forceUpdateLinkages: 0,
-      forceUpdateReferences: 0,
       nextProgram: null
     }
   },
   methods: {
-    gotoNextProgram: function () {
+    fromProgramDescriptionToNationalFramework: async function () {
+      this.e1 = 2;
+      await this.$refs.nationalFramework.load();
+    },
+    fromNationalFrameworkToKeyAgency: async function () {
+      await this.$refs.nationalFramework.submitAnswer();
+      await this.$refs.keyAgency.load();
+      this.e1 = 3;
+    },
+    fromKeyAgencyToEvolution: async function () {
+      await this.$refs.keyAgency.submitAnswer();
+      await this.$refs.evolution.load();
+      this.e1 = 4;
+    },
+    fromEvolutionToLinkages: async function () {
+      await this.$refs.evolution.submitAnswer();
+      await this.$refs.linkages.load();
+      this.e1 = 5;
+    },
+    fromLinkagesToReferences: async function () {
+      await this.$refs.linkages.submitAnswer();
+      this.e1 = 6;
+    },
+    fromNationalFrameworkToProgramDescription: async function () {
+      await this.$refs.nationalFramework.submitAnswer();
+      await this.$refs.programDescription.load();
+      this.e1 = 1;
+    },
+    fromKeyAgencyToNationalFramework: async function () {
+      await this.$refs.keyAgency.submitAnswer();
+      await this.$refs.nationalFramework.load();
+      this.e1 = 2;
+    },
+    fromEvolutionKeyAgency: async function () {
+      await this.$refs.evolution.submitAnswer();
+      await this.$refs.keyAgency.load();
+      this.e1 = 3;
+    },
+    fromLinkagesToEvolution: async function () {
+      await this.$refs.linkages.submitAnswer();
+      await this.$refs.evolution.load();
+      this.e1 = 4;
+    },
+    gotoNextProgram: async function () {
       if (this.nextProgram === null) {
         this.$router.push("EndPage");
         return;
@@ -182,7 +222,7 @@ export default {
       this.selectedProgramIndex = this.visiblePrograms.indexOf(this.nextProgram);
 
       this.nextProgram = this.getNextProgram();
-      this.forceUpdate();
+      await this.forceUpdate();
     },
     getNextProgram: function () {
       let programs = [];
@@ -208,24 +248,38 @@ export default {
       }
       return null;
     },
-    updateVisiblePrograms: function (areaId) {
+    updateVisiblePrograms: async function (areaId) {
       this.visiblePrograms = this.getVisiblePrograms(areaId);
-      this.updateSelectedProgram(this.visiblePrograms[0]);
+      await this.updateSelectedProgram(this.visiblePrograms[0]);
       this.selectedProgramIndex = 0;
-      this.forceUpdate();
+      await this.forceUpdate();
     },
-    forceUpdate: function () {
-      this.forceUpdateProgramDescription++;
-      this.forceUpdateNationalFramework++;
-      this.forceUpdateKeyAgencyAction++;
-      this.forceUpdateEvolution++;
-      this.forceUpdateLinkages++;
-      this.forceUpdateReferences++;
+    forceUpdate: async function () {
+      if (this.e1 === 1) {
+        await this.$refs.programDescription.load();
+      }
+
+      if (this.e1 === 2) {
+        await this.$refs.nationalFramework.submitAnswer();
+        await this.$refs.nationalFramework.load();
+      }
+      if (this.e1 === 3) {
+        await this.$refs.keyAgency.submitAnswer();
+        await this.$refs.keyAgency.load();
+      }
+      if (this.e1 === 4) {
+        await this.$refs.evolution.submitAnswer();
+        await this.$refs.evolution.load();
+      }
+      if (this.e1 === 5) {
+        await this.$refs.linkages.submitAnswer();
+        await this.$refs.linkages.load();
+      }
     },
-    updateSelectedProgram: function (program) {
+    updateSelectedProgram: async function (program) {
       this.$store.state.currentProgram = program;
       this.nextProgram = this.getNextProgram();
-      this.forceUpdate();
+      await this.forceUpdate();
     },
     getVisiblePrograms: function (areaId) {
       let programs = [];
@@ -243,4 +297,19 @@ export default {
   }
 }
 </script>
+<style scoped>
+html {
+  overflow: hidden !important;
+}
+
+.v-card {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.v-card__text {
+  flex-grow: 1;
+  overflow: auto;
+}
+</style>
 
