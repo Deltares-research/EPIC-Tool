@@ -190,13 +190,16 @@ class MultipleChoiceAnswer(Answer):
 
     @staticmethod
     def get_detailed_summary(answers_list: List[YesNoAnswer]) -> Dict[str, Any]:
-        all_sp = dict(
-            Counter(
-                itertools.chain.from_iterable(
-                    [a.selected_programs for a in answers_list]
+        all_sp = {
+            p.id: p_count
+            for p, p_count in dict(
+                Counter(
+                    itertools.chain.from_iterable(
+                        [a.selected_programs.all() for a in answers_list]
+                    )
                 )
-            )
-        )
+            ).items()
+        }
         return {
             **all_sp,
             **dict(

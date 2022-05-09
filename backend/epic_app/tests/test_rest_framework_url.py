@@ -350,7 +350,10 @@ class TestEpicOrganizationViewSet:
         for kaa in KeyAgencyActionsQuestion.objects.all():
             answers.append(get_qa(kaa.id, None))
         for lnk in LinkagesQuestion.objects.all():
-            answers.append(get_qa(lnk.id, None))
+            mca = MultipleChoiceAnswer(question=lnk, user=e_user)
+            mca.save()
+            mca.selected_programs.add(Program.objects.first(), Program.objects.last())
+            answers.append(get_qa(lnk.id, mca.id))
 
         return None
 
