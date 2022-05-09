@@ -1,5 +1,5 @@
 import itertools
-from typing import List
+from typing import List, Optional
 
 import pytest
 from django.db import IntegrityError
@@ -78,6 +78,9 @@ class TestEpicAnswers:
             str(err_info.value)
             == "Question type `Question` not allowed. Supported types: []."
         )
+        with pytest.raises(NotImplementedError) as exc_err:
+            base_answer.is_valid_answer()
+        assert str(exc_err.value) == "Validation only supported on inherited Answers."
 
     @pytest.mark.parametrize(
         "question_subtype",
@@ -138,3 +141,106 @@ class TestEpicAnswers:
             self.test_SAVE_answer(question_subtype, answer_subtype)
             # Create it twice, it should trigger an update instead of create.
             self.test_SAVE_answer(question_subtype, answer_subtype)
+
+
+@pytest.mark.django_db
+class TestSingleChoiceAnswer:
+    @pytest.mark.parametrize(
+        "selected_choice, expected_result",
+        [
+            pytest.param("", False, id="No selected choice"),
+            pytest.param(
+                EvolutionChoiceType.CAPABLE, True, id="CAPABLE selected choice"
+            ),
+            pytest.param(
+                EvolutionChoiceType.EFFECTIVE, True, id="EFFECTIVE selected choice"
+            ),
+            pytest.param(
+                EvolutionChoiceType.ENGAGED, True, id="ENGAGED selected choice"
+            ),
+            pytest.param(
+                EvolutionChoiceType.NASCENT, True, id="NASCENT selected choice"
+            ),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "justify_answer",
+        [
+            pytest.param("", id="Empty justification filled"),
+            pytest.param("Lorem ipsum", id="Justification filled"),
+        ],
+    )
+    def test_singlechoiceanswer_is_valid_answer(
+        self,
+        selected_choice: Optional[EvolutionChoiceType],
+        justify_answer: Optional[str],
+        expected_result: bool,
+    ):
+        an_user: EpicUser = EpicUser.objects.first()
+        SingleChoiceAnswer.objects.all().delete()
+        an_evolution_question = EvolutionQuestion.objects.first()
+        sca = SingleChoiceAnswer.objects.create(
+            user=an_user, question=an_evolution_question
+        )
+        sca.selected_choice = selected_choice
+        sca.justify_answer = justify_answer
+        sca.save()
+        assert sca.is_valid_answer() == expected_result
+
+
+@pytest.mark.django_db
+class TestYesNoAnswer:
+    @pytest.mark.parametrize(
+        "justify_answer",
+        [
+            pytest.param("", id="Empty justification filled"),
+            pytest.param("Lorem ipsum", id="Justification filled"),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "yesno_answer, expected_result",
+        [
+            pytest.param(YesNoAnswerType.YES, True, id="Yes answer"),
+            pytest.param(YesNoAnswerType.NO, True, id="No answer"),
+            pytest.param("", False, id="Empty answer"),
+        ],
+    )
+    def test_yesnoanswer_is_valid_answer(
+        self,
+        yesno_answer: Optional[YesNoAnswerType],
+        justify_answer: Optional[str],
+        expected_result: bool,
+    ):
+        an_user: EpicUser = EpicUser.objects.first()
+        YesNoAnswer.objects.all().delete()
+        a_yn_question = NationalFrameworkQuestion.objects.first()
+        yna = YesNoAnswer.objects.create(user=an_user, question=a_yn_question)
+        yna.short_answer = yesno_answer
+        yna.justify_answer = justify_answer
+        yna.save()
+        assert yna.is_valid_answer() == expected_result
+
+
+@pytest.mark.django_db
+class TestMultipleChoiceAnswer:
+    @pytest.mark.parametrize(
+        "selected_programs, expected_result",
+        [
+            pytest.param([1], True, id="One selection"),
+            pytest.param([1, 2], True, id="Multiple selection"),
+            pytest.param("", False, id="No selection"),
+            pytest.param([], False, id="Empty selection"),
+        ],
+    )
+    def test_multiplechoiceanswer_is_valid_answer(
+        self,
+        selected_programs: Optional[List[int]],
+        expected_result: bool,
+    ):
+        an_user: EpicUser = EpicUser.objects.first()
+        MultipleChoiceAnswer.objects.all().delete()
+        a_lnk_question = LinkagesQuestion.objects.first()
+        mca = MultipleChoiceAnswer.objects.create(user=an_user, question=a_lnk_question)
+        mca.selected_programs.set(selected_programs)
+        mca.save()
+        assert mca.is_valid_answer() == expected_result
