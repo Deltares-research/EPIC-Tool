@@ -16,4 +16,4 @@ from epic_app.serializers.question_serializer import (
     NationalFrameworkQuestionSerializer,
     QuestionSerializer,
 )
-from epic_app.serializers.report_serializer import ReportSerializer
+from epic_app.serializers.report_serializer import ProgramReportSerializer

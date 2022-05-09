@@ -94,8 +94,13 @@ class EpicOrganizationViewSet(viewsets.ModelViewSet):
         """
         RETRIEVES all the `Answers` for each of the `Questions` filled by the `EpicUsers` of the requested `EpicOrganization`.
         """
-        r_serializer = epic_serializer.ReportSerializer(
-            self.queryset.filter(pk=pk), many=False, context={"request": request}
+        r_serializer = epic_serializer.ProgramReportSerializer(
+            Program.objects.all(),
+            many=True,
+            context={
+                "request": request,
+                "users": self.queryset.get(pk=pk).organization_users,
+            },
         )
         return Response(r_serializer.data)
 

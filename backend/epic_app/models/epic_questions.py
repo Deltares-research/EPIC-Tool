@@ -4,7 +4,6 @@ from django.db import IntegrityError, models
 from django.utils.translation import gettext_lazy as _
 
 from epic_app.models import models as base_models
-from epic_app.models.epic_user import EpicUser
 
 
 class Question(models.Model):
