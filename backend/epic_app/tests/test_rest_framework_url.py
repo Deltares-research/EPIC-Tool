@@ -1,5 +1,4 @@
 import json
-from ast import Mult
 from typing import Callable, Optional, Type
 
 import pytest
