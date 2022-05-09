@@ -89,6 +89,16 @@ class EpicOrganizationViewSet(viewsets.ModelViewSet):
     serializer_class = epic_serializer.EpicOrganizationSerializer
     permission_classes = [permissions.IsAdminUser]
 
+    @action(detail=True, url_path="report", url_name="report")
+    def get_answers_report(self, request: Request, pk: str = None) -> models.QuerySet:
+        """
+        RETRIEVES all the `Answers` for each of the `Questions` filled by the `EpicUsers` of the requested `EpicOrganization`.
+        """
+        r_serializer = epic_serializer.ReportSerializer(
+            self.queryset.filter(pk=pk), many=False, context={"request": request}
+        )
+        return Response(r_serializer.data)
+
 
 class AreaViewSet(viewsets.ReadOnlyModelViewSet):
     """
