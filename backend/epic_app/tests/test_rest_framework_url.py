@@ -786,22 +786,31 @@ class TestAnswerViewSet:
             },
         }
 
-    @pytest.fixture(autouse=False)
-    def _answers_update_fixture(self) -> dict:
-        """
-        Returns a dictionary of values that can be used to return the values generated at the `_answer_fixture` method.
-        """
-        return {
-            YesNoAnswer: dict(
-                short_answer=str(YesNoAnswerType.YES),
-                justify_answer="For my own reasons",
-            ),
-            SingleChoiceAnswer: dict(
-                selected_choice=str(EvolutionChoiceType.ENGAGED),
-                justify_answer="For the lulz",
-            ),
-            MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
-        }
+    _answers_update_dict = {
+        YesNoAnswer: dict(
+            short_answer=str(YesNoAnswerType.YES),
+            justify_answer="For my own reasons",
+        ),
+        SingleChoiceAnswer: dict(
+            selected_choice=str(EvolutionChoiceType.ENGAGED),
+            justify_answer="For the lulz",
+        ),
+        MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
+    }
+    _empty_answers_update_dict = {
+        YesNoAnswer: dict(
+            short_answer="",
+        ),
+        SingleChoiceAnswer: dict(
+            selected_choice="",
+        ),
+        MultipleChoiceAnswer: dict(selected_programs=[]),
+    }
+
+    update_patch_params = [
+        pytest.param(_empty_answers_update_dict, id="Set values to empty"),
+        pytest.param(_answers_update_dict, id="Set new values"),
+    ]
 
     answer_fixture_users = [
         pytest.param("Anakin", id="Answer owner"),
@@ -929,19 +938,20 @@ class TestAnswerViewSet:
 
     @pytest.mark.parametrize("epic_username", answer_fixture_users)
     @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
+    @pytest.mark.parametrize("update_dict", update_patch_params)
     def test_PATCH_answer(
         self,
         epic_username: str,
         answer_type: Type[Answer],
+        update_dict: dict,
         api_client: APIClient,
         _answers_fixture: dict,
-        _answers_update_fixture: dict,
     ):
         # Define test data
         expected_values = _answers_fixture[answer_type]
         answer_pk = str(expected_values["id"])
         full_url = self.url_root + answer_pk + "/"
-        json_data = _answers_update_fixture[answer_type]
+        json_data = update_dict[answer_type]
 
         # Verify initial expectations.
         answer_to_change = answer_type.objects.get(pk=answer_pk)
@@ -960,19 +970,20 @@ class TestAnswerViewSet:
 
     @pytest.mark.parametrize("epic_username", answer_fixture_users)
     @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
+    @pytest.mark.parametrize("update_dict", update_patch_params)
     def test_PUT_answer(
         self,
         epic_username: str,
         answer_type: Type[Answer],
+        update_dict: dict,
         api_client: APIClient,
         _answers_fixture: dict,
-        _answers_update_fixture: dict,
     ):
         # Define test data
         expected_values = _answers_fixture[answer_type]
         answer_pk = str(expected_values["id"])
         full_url = self.url_root + answer_pk + "/"
-        json_data = _answers_update_fixture[answer_type]
+        json_data = update_dict[answer_type]
 
         # Verify initial expectations.
         answer_to_change: Answer = answer_type.objects.get(pk=answer_pk)
