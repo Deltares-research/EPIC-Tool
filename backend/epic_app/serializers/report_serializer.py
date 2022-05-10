@@ -5,14 +5,8 @@ from typing import Any, Dict, List, Type, Union
 from django.db import models
 from rest_framework import serializers
 
-from epic_app import serializers as epic_serializer
 from epic_app.models.epic_answers import Answer
-from epic_app.models.epic_questions import (
-    EvolutionQuestion,
-    LinkagesQuestion,
-    Question,
-    YesNoQuestion,
-)
+from epic_app.models.epic_questions import Question
 from epic_app.models.models import Program
 from epic_app.serializers.answer_serializer import AnswerSerializer
 from epic_app.utils import get_instance_as_submodel_type

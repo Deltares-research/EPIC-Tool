@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 from collections import Counter
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from django.db import IntegrityError, models
 
@@ -89,11 +89,15 @@ class Answer(models.Model):
         return super(Answer, self).save(*args, **kwargs)
 
     def is_valid_answer(self) -> bool:
-        raise NotImplementedError("Validation only supported on inherited Answers.")
+        raise NotImplementedError(
+            "Validation only supported on inherited Answer classes."
+        )
 
     @staticmethod
     def get_detailed_summary(answers_list: List[Answer]) -> Dict[str, Any]:
-        raise NotImplementedError("Implement in concrete classes.")
+        raise NotImplementedError(
+            "Detailed summary only supported on inherited Answer classes."
+        )
 
 
 class YesNoAnswer(Answer):
@@ -152,7 +156,9 @@ class SingleChoiceAnswer(Answer):
         return self.selected_choice in EvolutionChoiceType
 
     @staticmethod
-    def get_detailed_summary(answers_list: List[YesNoAnswer]) -> Dict[str, Any]:
+    def get_detailed_summary(
+        answers_list: Union[models.QuerySet, List[YesNoAnswer]]
+    ) -> Dict[str, Any]:
         def _single_choice_summary(filter_type: EvolutionChoiceType) -> Dict[str, Any]:
             filter_query = answers_list.filter(selected_choice=filter_type)
             label = str(filter_type.label)

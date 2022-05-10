@@ -1,5 +1,5 @@
 import itertools
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import pytest
 from django.db import IntegrityError
@@ -80,7 +80,16 @@ class TestEpicAnswers:
         )
         with pytest.raises(NotImplementedError) as exc_err:
             base_answer.is_valid_answer()
-        assert str(exc_err.value) == "Validation only supported on inherited Answers."
+        assert (
+            str(exc_err.value)
+            == "Validation only supported on inherited Answer classes."
+        )
+        with pytest.raises(NotImplementedError) as exc_err:
+            base_answer.get_detailed_summary(Answer.objects.all())
+        assert (
+            str(exc_err.value)
+            == "Detailed summary only supported on inherited Answer classes."
+        )
 
     @pytest.mark.parametrize(
         "question_subtype",
@@ -187,6 +196,67 @@ class TestSingleChoiceAnswer:
         sca.save()
         assert sca.is_valid_answer() == expected_result
 
+    @pytest.mark.parametrize(
+        "selected_choice",
+        EvolutionChoiceType,
+    )
+    def test_singlechoiceanswer_get_detailed_summary(
+        self,
+        selected_choice: Optional[EvolutionChoiceType],
+    ):
+        # Define test data
+        SingleChoiceAnswer.objects.all().delete()
+        sca = SingleChoiceAnswer.objects.create(
+            user=EpicUser.objects.first(), question=EvolutionQuestion.objects.first()
+        )
+        justify = "Consequat quis adipisicing culpa veniam aliquip anim amet labore commodo ullamco laborum quis enim in."
+        sca.selected_choice = selected_choice
+        sca.justify_answer = justify
+        sca.save()
+
+        # Define exepcted results
+        def _get_result(choice_type) -> int:
+            return 1 if selected_choice == choice_type else 0
+
+        def _get_justify(choice_type) -> List[Optional[str]]:
+            return [justify] if selected_choice == choice_type else []
+
+        expected_result = {
+            str(EvolutionChoiceType.CAPABLE.label): _get_result(
+                EvolutionChoiceType.CAPABLE
+            ),
+            f"{str(EvolutionChoiceType.CAPABLE.label)}_justify": _get_justify(
+                EvolutionChoiceType.CAPABLE
+            ),
+            str(EvolutionChoiceType.EFFECTIVE.label): _get_result(
+                EvolutionChoiceType.EFFECTIVE
+            ),
+            f"{str(EvolutionChoiceType.EFFECTIVE.label)}_justify": _get_justify(
+                EvolutionChoiceType.EFFECTIVE
+            ),
+            str(EvolutionChoiceType.ENGAGED.label): _get_result(
+                EvolutionChoiceType.ENGAGED
+            ),
+            f"{str(EvolutionChoiceType.ENGAGED.label)}_justify": _get_justify(
+                EvolutionChoiceType.ENGAGED
+            ),
+            str(EvolutionChoiceType.NASCENT.label): _get_result(
+                EvolutionChoiceType.NASCENT
+            ),
+            f"{str(EvolutionChoiceType.NASCENT.label)}_justify": _get_justify(
+                EvolutionChoiceType.NASCENT
+            ),
+            "no_valid_response": 0,
+        }
+
+        # Run test
+        return_summary = SingleChoiceAnswer.get_detailed_summary(
+            SingleChoiceAnswer.objects.all()
+        )
+
+        # Verify expectations
+        assert return_summary == expected_result
+
 
 @pytest.mark.django_db
 class TestYesNoAnswer:
@@ -220,6 +290,50 @@ class TestYesNoAnswer:
         yna.save()
         assert yna.is_valid_answer() == expected_result
 
+    @pytest.mark.parametrize(
+        "short_answer",
+        YesNoAnswerType,
+    )
+    def test_yesnoanswer_get_detailed_summary(
+        self,
+        short_answer: Optional[YesNoAnswerType],
+    ):
+        # Define test data
+        YesNoAnswer.objects.all().delete()
+        sca = YesNoAnswer.objects.create(
+            user=EpicUser.objects.first(),
+            question=NationalFrameworkQuestion.objects.first(),
+        )
+        justify = "Consequat quis adipisicing culpa veniam aliquip anim amet labore commodo ullamco laborum quis enim in."
+        sca.short_answer = short_answer
+        sca.justify_answer = justify
+        sca.save()
+
+        # Define exepcted results
+        def _get_result(yn_type) -> int:
+            return 1 if short_answer == yn_type else 0
+
+        def _get_justify(yn_type) -> List[Optional[str]]:
+            return [justify] if short_answer == yn_type else []
+
+        expected_result = {
+            str(YesNoAnswerType.YES.label): _get_result(YesNoAnswerType.YES),
+            f"{str(YesNoAnswerType.YES.label)}_justify": _get_justify(
+                YesNoAnswerType.YES
+            ),
+            str(YesNoAnswerType.NO.label): _get_result(YesNoAnswerType.NO),
+            f"{str(YesNoAnswerType.NO.label)}_justify": _get_justify(
+                YesNoAnswerType.NO
+            ),
+            "no_valid_response": 0,
+        }
+
+        # Run test
+        return_summary = YesNoAnswer.get_detailed_summary(YesNoAnswer.objects.all())
+
+        # Verify expectations
+        assert return_summary == expected_result
+
 
 @pytest.mark.django_db
 class TestMultipleChoiceAnswer:
@@ -244,3 +358,34 @@ class TestMultipleChoiceAnswer:
         mca.selected_programs.set(selected_programs)
         mca.save()
         assert mca.is_valid_answer() == expected_result
+
+    @pytest.mark.parametrize(
+        "selected_programs",
+        [
+            pytest.param([1], id="One selection"),
+            pytest.param([1, 2], id="Multiple selection"),
+            pytest.param("", id="No selection"),
+            pytest.param([], id="Empty selection"),
+        ],
+    )
+    def test_multiplechoiceanswer_get_detailed_summary(
+        self,
+        selected_programs: Optional[List[int]],
+    ):
+        # Define test data.
+        MultipleChoiceAnswer.objects.all().delete()
+        mca = MultipleChoiceAnswer.objects.create(
+            user=EpicUser.objects.first(), question=LinkagesQuestion.objects.first()
+        )
+        mca.selected_programs.set(selected_programs)
+        mca.save()
+
+        # Define expectations
+        expected_result = {p_id: 1 for p_id in selected_programs}
+        expected_result["no_valid_response"] = 0 if any(selected_programs) else 1
+
+        # Run test
+        detailed_summary = mca.get_detailed_summary(MultipleChoiceAnswer.objects.all())
+
+        # Verify final expectations
+        assert detailed_summary == expected_result
