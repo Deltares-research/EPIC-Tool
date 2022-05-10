@@ -160,7 +160,7 @@ class TestEpicUserViewSet:
         assert response.status_code == 200
         assert len(response.data) > 1
 
-    def test_GET_epic_user_as_user(
+    def test_GET_epic_user_as_user_not_allowed(
         self,
         api_client: APIClient,
     ):
@@ -210,7 +210,7 @@ class TestEpicUserViewSet:
             pytest.param("Palpatine", id="Authenticated USER"),
         ],
     )
-    def test_POST_as_not_admin_returns_error(
+    def test_POST_as_not_admin_not_allowed(
         self, epic_username: str, api_client: APIClient
     ):
         """
@@ -265,13 +265,13 @@ class TestEpicUserViewSet:
                 "Palpatine",
                 "Anakin",
                 dict(status_code=403, content={"detail": "Not found."}),
-                id="Non admins cannot update other users' password.",
+                id="Cannot update other users' password.",
             ),
             pytest.param(
                 "Anakin",
                 "Anakin",
                 dict(status_code=200, content=anakin_json_data),
-                id="Non admins can update their own password.",
+                id="Can update their own password.",
             ),
             pytest.param(
                 "admin",
