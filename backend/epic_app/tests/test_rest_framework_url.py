@@ -356,11 +356,36 @@ class TestEpicOrganizationViewSet:
 
         return None
 
-    def test_GET_epic_organization(self):
-        pass
+    def test_GET_epic_organization_as_admin(self, admin_api_client: APIClient):
+        # Run request
+        response = admin_api_client.get(self.url_root)
 
-    def test_RETRIEVE_epic_organization(self):
-        pass
+        # Verify final expectations
+        assert response.status_code == 200
+        assert len(response.data) == len(EpicOrganization.objects.all())
+
+    def test_GET_epic_organization_as_user_denied(self, api_client: APIClient):
+        # Run request
+        set_user_auth_token(api_client, "Anakin")
+        response = api_client.get(self.url_root)
+
+        # Verify final expectations
+        assert response.status_code == 403
+
+    def test_RETRIEVE_epic_organization_as_admin(self, admin_api_client: APIClient):
+        # Run request
+        response = admin_api_client.get(self.url_root + "1/")
+
+        # Verify final expectations
+        assert response.status_code == 200
+
+    def test_RETRIEVE_epic_organization_as_user_denied(self, api_client: APIClient):
+        # Run request
+        set_user_auth_token(api_client, "Anakin")
+        response = api_client.get(self.url_root + "1/")
+
+        # Verify final expectations
+        assert response.status_code == 403
 
     def test_RETRIEVE_report(self, _report_fixture: dict, admin_api_client: APIClient):
         full_url = self.url_root + "1/" + "report/"
