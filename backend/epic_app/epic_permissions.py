@@ -17,10 +17,10 @@ class IsAdminOrSelfUser(permissions.BasePermission):
         return _is_admin(request) or str(request.user.pk) == view.kwargs["pk"]
 
 
-class IsAdminOrInstanceOwner(permissions.BasePermission):
+class IsInstanceOwner(permissions.BasePermission):
     """
     Allows access to admin users and users in the field `user` of an entity.
     """
 
     def has_permission(self, request: HttpRequest, view):
-        return _is_admin(request) or request.user.pk == view.get_object().user.pk
+        return request.user.pk == view.get_object().user.pk

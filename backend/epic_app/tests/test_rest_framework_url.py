@@ -772,39 +772,43 @@ class TestAnswerViewSet:
             },
         }
 
-    _answers_update_dict = {
-        YesNoAnswer: dict(
-            short_answer=str(YesNoAnswerType.YES),
-            justify_answer="For my own reasons",
-        ),
-        SingleChoiceAnswer: dict(
-            selected_choice=str(EvolutionChoiceType.ENGAGED),
-            justify_answer="For the lulz",
-        ),
-        MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
-    }
-    _empty_answers_update_dict = {
-        YesNoAnswer: dict(
-            short_answer="",
-        ),
-        SingleChoiceAnswer: dict(
-            selected_choice="",
-        ),
-        MultipleChoiceAnswer: dict(selected_programs=[]),
-    }
-
     update_patch_params = [
-        pytest.param(_empty_answers_update_dict, id="Set values to empty"),
-        pytest.param(_answers_update_dict, id="Set new values"),
+        pytest.param(
+            {
+                YesNoAnswer: dict(
+                    short_answer="",
+                ),
+                SingleChoiceAnswer: dict(
+                    selected_choice="",
+                ),
+                MultipleChoiceAnswer: dict(selected_programs=[]),
+            },
+            id="Set values to empty",
+        ),
+        pytest.param(
+            {
+                YesNoAnswer: dict(
+                    short_answer=str(YesNoAnswerType.YES),
+                    justify_answer="For my own reasons",
+                ),
+                SingleChoiceAnswer: dict(
+                    selected_choice=str(EvolutionChoiceType.ENGAGED),
+                    justify_answer="For the lulz",
+                ),
+                MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
+            },
+            id="Set new values",
+        ),
     ]
 
     answer_fixture_users = [
-        pytest.param("Anakin", id="Answer owner"),
+        pytest.param("Anakin", id="Instance owner"),
+        pytest.param("Palpatine", id="Non-instance owner authenticated user"),
         pytest.param("admin", id="Admin (super_user / staff)"),
     ]
 
     @pytest.mark.parametrize("username", answer_fixture_users)
-    def test_GET_answer_authorized_user(
+    def test_GET_answer_returns_only_users_answers(
         self, username: str, api_client: APIClient, _answers_fixture: dict
     ):
         # Define test data, only url, id, user and question available when GET-LIST
@@ -820,23 +824,15 @@ class TestAnswerViewSet:
 
         # Verify final expectations.
         assert response.status_code == 200
+        if not username == self.anakin.username:
+            assert len(response.data) == 0
+            return
         assert len(response.data) == 3
         assert json.dumps(response.data) == json.dumps(expected_values)
 
-    def test_GET_answer_non_authorized_user(
-        self, api_client: APIClient, _answers_fixture: dict
-    ):
-        # Run test
-        set_user_auth_token(api_client, "Palpatine")
-        response = api_client.get(self.url_root)
-
-        # Verify final expectations.
-        assert response.status_code == 200
-        assert len(response.data) == 0
-
     @pytest.mark.parametrize("username", answer_fixture_users)
     @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
-    def test_RETRIEVE_answer_authorized_user(
+    def test_RETRIEVE_answer_only_for_instance_owner(
         self,
         username: str,
         answer_type: Type[Answer],
@@ -853,23 +849,11 @@ class TestAnswerViewSet:
         response = api_client.get(full_url)
 
         # Verify final expectations.
-        assert response.status_code == 200
-        assert response.data == expected_values
-
-    @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
-    def test_RETRIEVE_answer_unauthorized_user(
-        self,
-        answer_type: Type[Answer],
-        api_client: APIClient,
-        _answers_fixture: dict,
-    ):
-        expected_values = _answers_fixture[answer_type]
-        full_url = self.url_root + str(expected_values["id"]) + "/"
-
-        # Run test
-        set_user_auth_token(api_client, "Palpatine")
-        with pytest.raises(answer_type.DoesNotExist):
-            api_client.get(full_url)
+        if username == "Anakin":
+            assert response.status_code == 200
+            assert response.data == expected_values
+        else:
+            assert response.status_code == 403
 
     @pytest.mark.parametrize(
         "json_data",
@@ -949,6 +933,9 @@ class TestAnswerViewSet:
         response = api_client.patch(full_url, json_data, format="json")
 
         # Verify final expectations.
+        if not epic_username == "Anakin":
+            assert response.status_code == 404
+            return
         assert response.status_code == 200
         changed_answer = answer_type.objects.get(pk=answer_pk)
         assert changed_answer is not None
@@ -984,6 +971,9 @@ class TestAnswerViewSet:
         response = api_client.put(full_url, json_data, format="json")
 
         # Verify final expectations.
+        if not epic_username == "Anakin":
+            assert response.status_code == 404
+            return
         assert response.status_code == 200
 
         changed_answer = answer_type.objects.get(pk=answer_pk)

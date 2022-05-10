@@ -2,6 +2,7 @@
 from typing import List, Type, Union
 
 from django.db import models
+from django.http import HttpResponseForbidden
 from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -333,7 +334,22 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = epic_serializer.AnswerSerializer
-    permissions = [permissions.IsAuthenticated]
+    # permissions = [permissions.DjangoModelPermissions]
+
+    def get_permissions(self):
+        """
+        `Answer` can only be created, updated or deleted when the authorized user is self.
+
+        Returns:
+            List[permissions.BasePermission]: List of permissions for the request being done.
+        """
+        if not self.request.data.get("user", None) and getattr(
+            self.request.user, "epicuser", False
+        ):
+            self.request.data["user"] = self.request.user.epicuser.id
+        if self.request.method in ["DELETE", "PUT", "PATCH"]:
+            return [epic_permissions.IsInstanceOwner()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self) -> Union[models.QuerySet, List[Answer]]:
         """
@@ -352,10 +368,18 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         return answer_type.objects.filter(user=self.request.user)
 
+    def _get_is_authorized_user(self, request, pk: str) -> bool:
+        return (
+            getattr(request.user, "epicuser", False)
+            and Answer.objects.filter(pk=pk, user=request.user.epicuser).exists()
+        )
+
     def retrieve(self, request, pk: str, *args, **kwargs):
         """
         RETRIEVE a single `Answer` which is serialized based on its subtype.
         """
+        if not self._get_is_authorized_user(request, pk):
+            return HttpResponseForbidden()
         a_subtype = get_submodel_type(Answer, pk)
         a_serializer_type = epic_serializer.AnswerSerializer.get_concrete_serializer(
             a_subtype
@@ -366,6 +390,8 @@ class AnswerViewSet(viewsets.ModelViewSet):
         return Response(data=a_serializer.data)
 
     def _get_update_request(self, request: Request, pk: str) -> Request:
+        if not self._get_is_authorized_user(request, pk):
+            return HttpResponseForbidden()
         a_subtype = get_submodel_type(Answer, pk)
         self.serializer_class = (
             epic_serializer.AnswerSerializer.get_concrete_serializer(a_subtype)
