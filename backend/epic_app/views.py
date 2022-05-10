@@ -32,30 +32,6 @@ class EpicUserViewSet(viewsets.ModelViewSet):
     serializer_class = epic_serializer.EpicUserSerializer
     permission_classes = [permissions.IsAdminUser]
 
-    # def get_permissions(self) -> List[permissions.BasePermission]:
-    #     """
-    #     `EpicUser` can only be created, updated or deleted when the authorized user is an admin.
-
-    #     Returns:
-    #         List[permissions.BasePermission]: List of permissions for the request being done.
-    #     """
-    #     if self.request.method in ["POST", "DELETE"]:
-    #         return [permissions.IsAdminUser()]
-    #     if self.request.method in ["PUT", "PATCH"]:
-    #         return [epic_permissions.IsAdminOrSelfUser()]
-    #     return [permissions.IsAuthenticated()]
-
-    # def get_queryset(self) -> models.QuerySet:
-    #     """
-    #     GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
-
-    #     Returns:
-    #         models.QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
-    #     """
-    #     if self.request.user.is_staff or self.request.user.is_superuser:
-    #         return EpicUser.objects.all()
-    #     return EpicUser.objects.filter(id=self.request.user.id)
-
     @action(
         methods=["put"],
         detail=True,
