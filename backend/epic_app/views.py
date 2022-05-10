@@ -386,7 +386,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
         """
-        return super().update(
+        return super(AnswerViewSet, self).update(
             self._get_update_request(request, pk), pk, *args, **kwargs
         )
 
@@ -395,7 +395,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         PATCH a single `Answer`. It assumes the given data matches the expected subtype.
         """
 
-        return super().partial_update(
+        return super(AnswerViewSet, self).partial_update(
             self._get_update_request(request, pk), pk, *args, **kwargs
         )
 
