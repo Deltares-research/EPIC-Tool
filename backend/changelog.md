@@ -1,3 +1,10 @@
+## v0.20.0 (2022-05-10)
+
+### Feat
+
+- **epic_answers.py**: We now list a summary of selected programs
+- **views.py;serializers/report_serializer.py;models/epic_answers.py**: It is now possible to get a detailed summary of each question based on their (sub)type
+
 ## v0.19.0 (2022-05-06)
 
 ### Feat
