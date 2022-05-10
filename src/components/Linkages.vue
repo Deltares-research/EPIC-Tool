@@ -36,19 +36,27 @@
 </template>
 <script>
 import Vue from 'vue'
-import loadQuestions from "@/assets/js/utils";
+import * as util from "@/assets/js/utils";
 
 export default Vue.extend({
   name: 'SelectProgram',
-  async mounted() {
-    let program = this.$store.state.currentProgram;
-    this.title = program.name;
-
-    let questions = await loadQuestions(program.id, 'linkages', this.$store.state.token);
-    this.question = questions[0].title;
-
-  },
   methods: {
+    submitAnswer: async function () {
+      await util.saveSelectedProgramsAnswer(this.answer[0].id, [...this.selectedPrograms], this.$store.state.token)
+    },
+    load: async function () {
+      let program = this.$store.state.currentProgram;
+      this.title = program.name;
+
+      let questions = await util.loadQuestions(program.id, 'linkages', this.$store.state.token);
+      this.question = questions[0].title;
+
+      this.answer = await util.loadAnswer(questions[0].id, this.$store.state.token);
+      this.selectedPrograms = new Set();
+      for (let i = 0; i < this.answer[0].selected_programs.length; i++) {
+        this.selectedPrograms.add(this.answer[0].selected_programs[i]);
+      }
+    },
     selectProgram: function (programId) {
       if (this.selectedPrograms.has(programId)) {
         this.selectedPrograms.delete(programId);
@@ -63,6 +71,7 @@ export default Vue.extend({
   data: () => ({
     active: false,
     title: "",
+    answer: "",
     question: "",
     selectedPrograms: new Set(),
   }),

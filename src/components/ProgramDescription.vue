@@ -8,14 +8,16 @@
 <script>
 export default {
   name: 'ProgramDescription',
-  mounted() {
-    let program = this.$store.state.currentProgram;
-    this.title = program.name;
-    this.description = program.description;
+  methods: {
+    load: function () {
+      let program = this.$store.state.currentProgram;
+      this.title = program.name;
+      this.description = program.description;
+    }
   },
   data: () => ({
     title: "",
-    description:""
+    description: ""
   }),
 }
 </script>
