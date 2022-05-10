@@ -49,7 +49,9 @@ class YesNoAnswerSerializer(_BaseAnswerSerializer):
 
 
 class SingleChoiceAnswerSerializer(_BaseAnswerSerializer):
-    selected_choice = serializers.ChoiceField(EvolutionChoiceType.choices, allow_blank=True)
+    selected_choice = serializers.ChoiceField(
+        EvolutionChoiceType.choices, allow_blank=True
+    )
 
     class Meta:
         model = SingleChoiceAnswer
