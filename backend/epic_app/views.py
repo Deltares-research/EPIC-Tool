@@ -29,30 +29,31 @@ class EpicUserViewSet(viewsets.ModelViewSet):
 
     queryset = EpicUser.objects.all()
     serializer_class = epic_serializer.EpicUserSerializer
+    permission_classes = [permissions.IsAdminUser]
 
-    def get_permissions(self) -> List[permissions.BasePermission]:
-        """
-        `EpicUser` can only be created, updated or deleted when the authorized user is an admin.
+    # def get_permissions(self) -> List[permissions.BasePermission]:
+    #     """
+    #     `EpicUser` can only be created, updated or deleted when the authorized user is an admin.
 
-        Returns:
-            List[permissions.BasePermission]: List of permissions for the request being done.
-        """
-        if self.request.method in ["POST", "DELETE"]:
-            return [permissions.IsAdminUser()]
-        if self.request.method in ["PUT", "PATCH"]:
-            return [epic_permissions.IsAdminOrSelfUser()]
-        return [permissions.IsAuthenticated()]
+    #     Returns:
+    #         List[permissions.BasePermission]: List of permissions for the request being done.
+    #     """
+    #     if self.request.method in ["POST", "DELETE"]:
+    #         return [permissions.IsAdminUser()]
+    #     if self.request.method in ["PUT", "PATCH"]:
+    #         return [epic_permissions.IsAdminOrSelfUser()]
+    #     return [permissions.IsAuthenticated()]
 
-    def get_queryset(self) -> models.QuerySet:
-        """
-        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
+    # def get_queryset(self) -> models.QuerySet:
+    #     """
+    #     GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
 
-        Returns:
-            models.QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
-        """
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            return EpicUser.objects.all()
-        return EpicUser.objects.filter(id=self.request.user.id)
+    #     Returns:
+    #         models.QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
+    #     """
+    #     if self.request.user.is_staff or self.request.user.is_superuser:
+    #         return EpicUser.objects.all()
+    #     return EpicUser.objects.filter(id=self.request.user.id)
 
     @action(
         methods=["put"],
@@ -85,7 +86,7 @@ class EpicOrganizationViewSet(viewsets.ModelViewSet):
     Acess point for CRUD operations on `EpicOrganization` table.
     """
 
-    queryset = EpicOrganization.objects.all()
+    queryset = EpicOrganization.objects.all().order_by("name")
     serializer_class = epic_serializer.EpicOrganizationSerializer
     permission_classes = [permissions.IsAdminUser]
 
@@ -332,13 +333,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = epic_serializer.AnswerSerializer
-
-    def get_permissions(self):
-        if not self.request.data.get("user", None):
-            self.request.data["user"] = self.request.user.id
-        if self.request.method in ["PUT", "DELETE", "PATCH"]:
-            return [epic_permissions.IsAdminOrInstanceOwner()]
-        return [permissions.IsAuthenticated()]
+    permissions = [permissions.IsAuthenticated]
 
     def get_queryset(self) -> Union[models.QuerySet, List[Answer]]:
         """
@@ -355,8 +350,6 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         Filter querysets to prevent unauthorized `EpicUsers` from retrieving `Answers` from others.
         """
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            return answer_type.objects.all()
         return answer_type.objects.filter(user=self.request.user)
 
     def retrieve(self, request, pk: str, *args, **kwargs):
@@ -378,8 +371,6 @@ class AnswerViewSet(viewsets.ModelViewSet):
             epic_serializer.AnswerSerializer.get_concrete_serializer(a_subtype)
         )
         self.queryset = self._filter_queryset(a_subtype).get(pk=pk)
-        # Prevent admins from replacing the user in the partial_update
-        request.data["user"] = self.queryset.user_id
         return request
 
     def update(self, request, pk: str, *args, **kwargs):

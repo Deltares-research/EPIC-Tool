@@ -68,6 +68,12 @@ def set_user_auth_token(api_client: APIClient, username: str) -> str:
     api_client.credentials(HTTP_AUTHORIZATION=token_str)
 
 
+@pytest.fixture
+def admin_api_client(api_client: APIClient) -> APIClient:
+    set_user_auth_token(api_client, "admin")
+    return api_client
+
+
 @pytest.mark.django_db
 class TestEpicUserTokenAuthRequest:
     url_root = "/api/token-auth/"
@@ -135,38 +141,6 @@ class TestEpicUserTokenAuthRequest:
 class TestEpicUserViewSet:
     url_root = "/api/epicuser/"
 
-    @pytest.mark.parametrize(
-        "epic_username, multiple_entries",
-        [
-            pytest.param(
-                "Palpatine",
-                False,
-                id="Non admins cannot retrieve other users.",
-            ),
-            pytest.param(
-                "admin",
-                True,
-                id="Admins can retrieve other users.",
-            ),
-        ],
-    )
-    def test_GET_epic_user(
-        self,
-        epic_username: str,
-        multiple_entries: bool,
-        api_client: APIClient,
-    ):
-        # Define test data.
-        set_user_auth_token(api_client, epic_username)
-        response = api_client.get(self.url_root)
-
-        # Verify final exepctations.
-        assert response.status_code == 200
-        if not multiple_entries:
-            assert len(response.data) == 1
-        else:
-            assert len(response.data) > 1
-
     anakin_json_data = {
         "url": "http://testserver/api/epicuser/3/",
         "id": 3,
@@ -175,47 +149,59 @@ class TestEpicUserViewSet:
         "selected_programs": [2, 4],
     }
 
-    @pytest.mark.parametrize(
-        "epic_username, find_username, expected_response",
-        [
-            pytest.param(
-                "Palpatine",
-                "Anakin",
-                dict(status_code=404, content={"detail": "Not found."}),
-                id="Non admins cannot retrieve other users.",
-            ),
-            pytest.param(
-                "Anakin",
-                "Anakin",
-                dict(status_code=200, content=anakin_json_data),
-                id="Non admins can retrieve themselves.",
-            ),
-            pytest.param(
-                "admin",
-                "Anakin",
-                dict(status_code=200, content=anakin_json_data),
-                id="Admins can retrieve other users.",
-            ),
-        ],
-    )
-    def test_RETRIEVE_epic_user(
+    def test_GET_epic_user_as_admin(
         self,
-        epic_username: str,
-        find_username: str,
-        expected_response: dict,
+        admin_api_client: APIClient,
+    ):
+        # Define test data.
+        response = admin_api_client.get(self.url_root)
+
+        # Verify final exepctations.
+        assert response.status_code == 200
+        assert len(response.data) > 1
+
+    def test_GET_epic_user_as_user(
+        self,
         api_client: APIClient,
     ):
         # Define test data.
-        user_found = get_epic_user(find_username)
+        set_user_auth_token(api_client, "Palpatine")
+        response = api_client.get(self.url_root)
+
+        # Verify final exepctations.
+        assert response.status_code == 403
+
+    def test_RETRIEVE_epic_user_as_admin(
+        self,
+        admin_api_client: APIClient,
+    ):
+        # Define test data.
+        user_found = get_epic_user("Anakin")
         url = f"{self.url_root}{user_found.pk}/"
 
         # Run request.
-        set_user_auth_token(api_client, epic_username)
+        response = admin_api_client.get(url)
+
+        # Verify final exepctations.
+        assert response.status_code == 200
+        assert json.loads(response.content) == self.anakin_json_data
+
+    @pytest.mark.parametrize("username", ["Anakin", "Palpatine"])
+    def test_RETRIEVE_epic_user_as_user_not_allowed(
+        self,
+        username: str,
+        api_client: APIClient,
+    ):
+        # Define test data.
+        user_found = get_epic_user("Anakin")
+        url = f"{self.url_root}{user_found.pk}/"
+
+        # Run request.
+        set_user_auth_token(api_client, username)
         response = api_client.get(url)
 
         # Verify final exepctations.
-        assert response.status_code == expected_response["status_code"]
-        assert json.loads(response.content) == expected_response["content"]
+        assert response.status_code == 403
 
     @pytest.mark.parametrize(
         "epic_username",
@@ -224,7 +210,7 @@ class TestEpicUserViewSet:
             pytest.param("Palpatine", id="Authenticated USER"),
         ],
     )
-    def test_POST_when_not_admin_returns_error(
+    def test_POST_as_not_admin_returns_error(
         self, epic_username: str, api_client: APIClient
     ):
         """
@@ -253,7 +239,7 @@ class TestEpicUserViewSet:
             username=ck_username
         ).exists(), "User was created despite not having to."
 
-    def test_POST_when_admin_returns_created(self, api_client: APIClient):
+    def test_POST_as_admin_returns_created(self, api_client: APIClient):
         ck_username = "ClarkKent"
         data_dict = {
             "username": ck_username,
