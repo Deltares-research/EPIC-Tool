@@ -36,5 +36,8 @@ class IsInstanceOwner(permissions.BasePermission):
     Allows access to admin users and users in the field `user` of an entity.
     """
 
-    def has_permission(self, request: HttpRequest, view):
-        return request.user.pk == view.get_object().user.pk
+    def has_permission(self, request: HttpRequest, view) -> bool:
+        try:
+            return request.user.pk == view.get_object().user.pk
+        except:
+            return False

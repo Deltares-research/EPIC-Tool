@@ -59,7 +59,7 @@ jobs:
       - name: Test with pytest
         run: |
           cd backend
-          poetry run pytest --cov . --cov-report xml:coverage-reports/coverage-nbsdynamics-src.xml --junitxml=xunit-reports/xunit-result-nbsdynamics-src.xml
+          poetry run pytest --cov . --cov-report xml:coverage-reports/coverage-epictool-src.xml --junitxml=xunit-reports/xunit-result-epictool-src.xml
 
       - name: Autoformat code if the check fails
         if: ${{ (matrix.os == 'ubuntu-18.04') && (matrix.python-version == 3.8) }}
