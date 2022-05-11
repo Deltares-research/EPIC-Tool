@@ -68,6 +68,12 @@ def set_user_auth_token(api_client: APIClient, username: str) -> str:
     api_client.credentials(HTTP_AUTHORIZATION=token_str)
 
 
+@pytest.fixture
+def admin_api_client(api_client: APIClient) -> APIClient:
+    set_user_auth_token(api_client, "admin")
+    return api_client
+
+
 @pytest.mark.django_db
 class TestEpicUserTokenAuthRequest:
     url_root = "/api/token-auth/"
@@ -135,98 +141,77 @@ class TestEpicUserTokenAuthRequest:
 class TestEpicUserViewSet:
     url_root = "/api/epicuser/"
 
-    @pytest.mark.parametrize(
-        "epic_username, multiple_entries",
-        [
-            pytest.param(
-                "Palpatine",
-                False,
-                id="Non admins cannot retrieve other users.",
-            ),
-            pytest.param(
-                "admin",
-                True,
-                id="Admins can retrieve other users.",
-            ),
-        ],
-    )
-    def test_GET_epic_user(
-        self,
-        epic_username: str,
-        multiple_entries: bool,
-        api_client: APIClient,
-    ):
-        # Define test data.
-        set_user_auth_token(api_client, epic_username)
-        response = api_client.get(self.url_root)
-
-        # Verify final exepctations.
-        assert response.status_code == 200
-        if not multiple_entries:
-            assert len(response.data) == 1
-        else:
-            assert len(response.data) > 1
-
     anakin_json_data = {
         "url": "http://testserver/api/epicuser/3/",
         "id": 3,
         "username": "Anakin",
         "organization": 1,
-        "selected_programs": [2, 4],
+        "is_advisor": False,
     }
 
-    @pytest.mark.parametrize(
-        "epic_username, find_username, expected_response",
-        [
-            pytest.param(
-                "Palpatine",
-                "Anakin",
-                dict(status_code=404, content={"detail": "Not found."}),
-                id="Non admins cannot retrieve other users.",
-            ),
-            pytest.param(
-                "Anakin",
-                "Anakin",
-                dict(status_code=200, content=anakin_json_data),
-                id="Non admins can retrieve themselves.",
-            ),
-            pytest.param(
-                "admin",
-                "Anakin",
-                dict(status_code=200, content=anakin_json_data),
-                id="Admins can retrieve other users.",
-            ),
-        ],
-    )
-    def test_RETRIEVE_epic_user(
+    def test_GET_epic_user_as_admin(
         self,
-        epic_username: str,
-        find_username: str,
-        expected_response: dict,
+        admin_api_client: APIClient,
+    ):
+        # Define test data.
+        response = admin_api_client.get(self.url_root)
+
+        # Verify final exepctations.
+        assert response.status_code == 200
+        assert len(response.data) > 1
+
+    def test_GET_epic_user_as_user_not_allowed(
+        self,
         api_client: APIClient,
     ):
         # Define test data.
-        user_found = get_epic_user(find_username)
+        set_user_auth_token(api_client, "Palpatine")
+        response = api_client.get(self.url_root)
+
+        # Verify final exepctations.
+        assert response.status_code == 403
+
+    def test_RETRIEVE_epic_user_as_admin(
+        self,
+        admin_api_client: APIClient,
+    ):
+        # Define test data.
+        user_found = get_epic_user("Anakin")
         url = f"{self.url_root}{user_found.pk}/"
 
         # Run request.
-        set_user_auth_token(api_client, epic_username)
+        response = admin_api_client.get(url)
+
+        # Verify final exepctations.
+        assert response.status_code == 200
+        assert json.loads(response.content) == self.anakin_json_data
+
+    @pytest.mark.parametrize("username", ["Anakin", "Palpatine"])
+    def test_RETRIEVE_epic_user_as_user_not_allowed(
+        self,
+        username: str,
+        api_client: APIClient,
+    ):
+        # Define test data.
+        user_found = get_epic_user("Anakin")
+        url = f"{self.url_root}{user_found.pk}/"
+
+        # Run request.
+        set_user_auth_token(api_client, username)
         response = api_client.get(url)
 
         # Verify final exepctations.
-        assert response.status_code == expected_response["status_code"]
-        assert json.loads(response.content) == expected_response["content"]
+        assert response.status_code == 403
 
     @pytest.mark.parametrize(
         "epic_username",
         [
             pytest.param(None, id="No user authenticated"),
-            pytest.param("Palpatine", id="Authenticated USER"),
+            pytest.param("Palpatine", id="Authenticated EpicUser"),
+            pytest.param("admin", id="Admin User"),
         ],
     )
-    def test_POST_when_not_admin_returns_error(
-        self, epic_username: str, api_client: APIClient
-    ):
+    def test_POST_not_allowed(self, epic_username: str, api_client: APIClient):
         """
         Note: This test is to verify that we DO NOT allow user creation unless
         from an admin. In the future we might allow anyone to create new ones.
@@ -253,25 +238,6 @@ class TestEpicUserViewSet:
             username=ck_username
         ).exists(), "User was created despite not having to."
 
-    def test_POST_when_admin_returns_created(self, api_client: APIClient):
-        ck_username = "ClarkKent"
-        data_dict = {
-            "username": ck_username,
-            "password": "IamSup3rm4n!",
-            "organization": EpicOrganization.objects.last().id,
-        }
-        assert not EpicUser.objects.filter(username=ck_username).exists()
-
-        # Run request.
-        set_user_auth_token(api_client, "admin")
-        response = api_client.post(self.url_root, data_dict, format="json")
-
-        # Verify final expectations.
-        assert response.status_code == 201
-        assert EpicUser.objects.filter(
-            username=ck_username
-        ).exists(), "User was not created despite succesful response."
-
     @pytest.mark.parametrize(
         "epic_username, find_username, expected_response",
         [
@@ -279,13 +245,13 @@ class TestEpicUserViewSet:
                 "Palpatine",
                 "Anakin",
                 dict(status_code=403, content={"detail": "Not found."}),
-                id="Non admins cannot update other users' password.",
+                id="Cannot update other users' password.",
             ),
             pytest.param(
                 "Anakin",
                 "Anakin",
                 dict(status_code=200, content=anakin_json_data),
-                id="Non admins can update their own password.",
+                id="Can update their own password.",
             ),
             pytest.param(
                 "admin",
@@ -335,8 +301,9 @@ class TestEpicOrganizationViewSet:
             return dict(question=question_id, answer=answer_id)
 
         # Create some empty answers for 'Anakin'
-        e_user = EpicUser.objects.get(username="Anakin")
+        e_user: EpicUser = EpicUser.objects.get(username="Anakin")
         answers = []
+
         for nfq in NationalFrameworkQuestion.objects.all():
             # We will fill the answers for these ones.
             yna, _ = YesNoAnswer.objects.get_or_create(
@@ -387,11 +354,21 @@ class TestEpicOrganizationViewSet:
         # Verify final expectations
         assert response.status_code == 403
 
-    def test_RETRIEVE_report(self, _report_fixture: dict, admin_api_client: APIClient):
+    @pytest.mark.parametrize(
+        "username",
+        [
+            pytest.param("admin", id="Admin user"),
+            pytest.param("Dooku", id="Advisor EpicUser"),
+        ],
+    )
+    def test_RETRIEVE_report_as_permitted_user(
+        self, username: str, _report_fixture: dict, api_client: APIClient
+    ):
         full_url = self.url_root + "1/" + "report/"
 
         # Run request
-        response = admin_api_client.get(full_url)
+        set_user_auth_token(api_client, username)
+        response = api_client.get(full_url)
 
         # Verify final expectations
         assert response.status_code == 200
@@ -786,30 +763,43 @@ class TestAnswerViewSet:
             },
         }
 
-    @pytest.fixture(autouse=False)
-    def _answers_update_fixture(self) -> dict:
-        """
-        Returns a dictionary of values that can be used to return the values generated at the `_answer_fixture` method.
-        """
-        return {
-            YesNoAnswer: dict(
-                short_answer=str(YesNoAnswerType.YES),
-                justify_answer="For my own reasons",
-            ),
-            SingleChoiceAnswer: dict(
-                selected_choice=str(EvolutionChoiceType.ENGAGED),
-                justify_answer="For the lulz",
-            ),
-            MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
-        }
+    update_patch_params = [
+        pytest.param(
+            {
+                YesNoAnswer: dict(
+                    short_answer="",
+                ),
+                SingleChoiceAnswer: dict(
+                    selected_choice="",
+                ),
+                MultipleChoiceAnswer: dict(selected_programs=[]),
+            },
+            id="Set values to empty",
+        ),
+        pytest.param(
+            {
+                YesNoAnswer: dict(
+                    short_answer=str(YesNoAnswerType.YES),
+                    justify_answer="For my own reasons",
+                ),
+                SingleChoiceAnswer: dict(
+                    selected_choice=str(EvolutionChoiceType.ENGAGED),
+                    justify_answer="For the lulz",
+                ),
+                MultipleChoiceAnswer: dict(selected_programs=[3, 4]),
+            },
+            id="Set new values",
+        ),
+    ]
 
     answer_fixture_users = [
-        pytest.param("Anakin", id="Answer owner"),
+        pytest.param("Anakin", id="Instance owner"),
+        pytest.param("Palpatine", id="Non-instance owner authenticated user"),
         pytest.param("admin", id="Admin (super_user / staff)"),
     ]
 
     @pytest.mark.parametrize("username", answer_fixture_users)
-    def test_GET_answer_authorized_user(
+    def test_GET_answer_returns_only_users_answers(
         self, username: str, api_client: APIClient, _answers_fixture: dict
     ):
         # Define test data, only url, id, user and question available when GET-LIST
@@ -825,23 +815,15 @@ class TestAnswerViewSet:
 
         # Verify final expectations.
         assert response.status_code == 200
+        if not username == self.anakin.username:
+            assert len(response.data) == 0
+            return
         assert len(response.data) == 3
         assert json.dumps(response.data) == json.dumps(expected_values)
 
-    def test_GET_answer_non_authorized_user(
-        self, api_client: APIClient, _answers_fixture: dict
-    ):
-        # Run test
-        set_user_auth_token(api_client, "Palpatine")
-        response = api_client.get(self.url_root)
-
-        # Verify final expectations.
-        assert response.status_code == 200
-        assert len(response.data) == 0
-
     @pytest.mark.parametrize("username", answer_fixture_users)
     @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
-    def test_RETRIEVE_answer_authorized_user(
+    def test_RETRIEVE_answer_only_for_instance_owner(
         self,
         username: str,
         answer_type: Type[Answer],
@@ -858,23 +840,11 @@ class TestAnswerViewSet:
         response = api_client.get(full_url)
 
         # Verify final expectations.
-        assert response.status_code == 200
-        assert response.data == expected_values
-
-    @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
-    def test_RETRIEVE_answer_unauthorized_user(
-        self,
-        answer_type: Type[Answer],
-        api_client: APIClient,
-        _answers_fixture: dict,
-    ):
-        expected_values = _answers_fixture[answer_type]
-        full_url = self.url_root + str(expected_values["id"]) + "/"
-
-        # Run test
-        set_user_auth_token(api_client, "Palpatine")
-        with pytest.raises(answer_type.DoesNotExist):
-            api_client.get(full_url)
+        if username == "Anakin":
+            assert response.status_code == 200
+            assert response.data == expected_values
+        else:
+            assert response.status_code == 403
 
     @pytest.mark.parametrize(
         "json_data",
@@ -929,19 +899,20 @@ class TestAnswerViewSet:
 
     @pytest.mark.parametrize("epic_username", answer_fixture_users)
     @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
+    @pytest.mark.parametrize("update_dict", update_patch_params)
     def test_PATCH_answer(
         self,
         epic_username: str,
         answer_type: Type[Answer],
+        update_dict: dict,
         api_client: APIClient,
         _answers_fixture: dict,
-        _answers_update_fixture: dict,
     ):
         # Define test data
         expected_values = _answers_fixture[answer_type]
         answer_pk = str(expected_values["id"])
         full_url = self.url_root + answer_pk + "/"
-        json_data = _answers_update_fixture[answer_type]
+        json_data = update_dict[answer_type]
 
         # Verify initial expectations.
         answer_to_change = answer_type.objects.get(pk=answer_pk)
@@ -953,6 +924,9 @@ class TestAnswerViewSet:
         response = api_client.patch(full_url, json_data, format="json")
 
         # Verify final expectations.
+        if not epic_username == "Anakin":
+            assert response.status_code == 404
+            return
         assert response.status_code == 200
         changed_answer = answer_type.objects.get(pk=answer_pk)
         assert changed_answer is not None
@@ -960,19 +934,20 @@ class TestAnswerViewSet:
 
     @pytest.mark.parametrize("epic_username", answer_fixture_users)
     @pytest.mark.parametrize("answer_type", get_submodel_type_list(Answer))
+    @pytest.mark.parametrize("update_dict", update_patch_params)
     def test_PUT_answer(
         self,
         epic_username: str,
         answer_type: Type[Answer],
+        update_dict: dict,
         api_client: APIClient,
         _answers_fixture: dict,
-        _answers_update_fixture: dict,
     ):
         # Define test data
         expected_values = _answers_fixture[answer_type]
         answer_pk = str(expected_values["id"])
         full_url = self.url_root + answer_pk + "/"
-        json_data = _answers_update_fixture[answer_type]
+        json_data = update_dict[answer_type]
 
         # Verify initial expectations.
         answer_to_change: Answer = answer_type.objects.get(pk=answer_pk)
@@ -987,6 +962,9 @@ class TestAnswerViewSet:
         response = api_client.put(full_url, json_data, format="json")
 
         # Verify final expectations.
+        if not epic_username == "Anakin":
+            assert response.status_code == 404
+            return
         assert response.status_code == 200
 
         changed_answer = answer_type.objects.get(pk=answer_pk)
@@ -1001,6 +979,7 @@ class TestUrlUnavailableActions:
         [
             pytest.param(TestEpicUserTokenAuthRequest.url_root),
             pytest.param(TestEpicUserViewSet.url_root),
+            pytest.param(TestEpicOrganizationViewSet.url_root),
             pytest.param(TestAreaViewSet.url_root),
             pytest.param(TestAgencyViewSet.url_root),
             pytest.param(TestGroupViewSet.url_root),
@@ -1029,10 +1008,29 @@ class TestUrlUnavailableActions:
     @pytest.mark.parametrize(
         "url_root, data_dict",
         [
-            pytest.param(TestAreaViewSet.url_root, {"name": "Area51"}),
-            pytest.param(TestAgencyViewSet.url_root, {"name": "C.N.I."}),
-            pytest.param(TestGroupViewSet.url_root, {"name": "NFG", "area": "1"}),
-            pytest.param(TestProgramViewSet.url_root, {"name": "ACS", "group": "1"}),
+            pytest.param(
+                TestEpicOrganizationViewSet.url_root,
+                {"name": "Riot"},
+                id="EpicOrganization",
+            ),
+            pytest.param(
+                TestEpicUserViewSet.url_root,
+                {"username": "ClarkKent", "password": "!amSup3rm4n"},
+                id="EpicUser",
+            ),
+            pytest.param(TestAreaViewSet.url_root, {"name": "Area51"}, id="Area"),
+            pytest.param(TestAgencyViewSet.url_root, {"name": "C.N.I."}, id="Agency"),
+            pytest.param(
+                TestGroupViewSet.url_root, {"name": "NFG", "area": "1"}, id="Group"
+            ),
+            pytest.param(
+                TestProgramViewSet.url_root, {"name": "ACS", "group": "1"}, id="Program"
+            ),
+            pytest.param(
+                TestQuestionViewSet.url_root,
+                {"title": "A dummy question", "program": "1"},
+                id="Question",
+            ),
         ],
     )
     def test_POST_with_auth_returns_error(

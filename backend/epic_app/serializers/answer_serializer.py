@@ -41,7 +41,7 @@ class AnswerSerializer(_BaseAnswerSerializer):
 
 
 class YesNoAnswerSerializer(_BaseAnswerSerializer):
-    short_answer = serializers.ChoiceField(YesNoAnswerType.choices)
+    short_answer = serializers.ChoiceField(YesNoAnswerType.choices, allow_blank=True)
 
     class Meta:
         model = YesNoAnswer
@@ -49,7 +49,9 @@ class YesNoAnswerSerializer(_BaseAnswerSerializer):
 
 
 class SingleChoiceAnswerSerializer(_BaseAnswerSerializer):
-    selected_choice = serializers.ChoiceField(EvolutionChoiceType.choices)
+    selected_choice = serializers.ChoiceField(
+        EvolutionChoiceType.choices, allow_blank=True
+    )
 
     class Meta:
         model = SingleChoiceAnswer
@@ -57,8 +59,6 @@ class SingleChoiceAnswerSerializer(_BaseAnswerSerializer):
 
 
 class MultipleChoiceAnswerSerializer(_BaseAnswerSerializer):
-    # selected_programs = SimpleProgramSerializer(many=True)
-
     class Meta:
         model = MultipleChoiceAnswer
         fields = "__all__"

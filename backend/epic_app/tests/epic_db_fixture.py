@@ -41,6 +41,9 @@ def epic_test_db():
     organization = EpicOrganization.objects.create(name="Gallactic Empire")
     u_palpatine: EpicUser = set_epic_user("Palpatine", organization)
     u_anakin: EpicUser = set_epic_user("Anakin", organization)
+    u_dooku: EpicUser = set_epic_user("Dooku", organization)
+    u_dooku.is_advisor = True
+    u_dooku.save()
 
     # Areas
     alpha_area = Area.objects.create(name="alpha")
@@ -82,12 +85,6 @@ def epic_test_db():
     c_program.agencies.add(cia_agency, rws_agency)
     d_program.agencies.add(mi6_agency, cia_agency)
     e_program.agencies.add(rws_agency, mi6_agency)
-
-    # Set programs:
-    u_palpatine.selected_programs.add(a_program)
-    u_palpatine.selected_programs.add(c_program)
-    u_anakin.selected_programs.add(b_program)
-    u_anakin.selected_programs.add(d_program)
 
     # Add questions to program a (for instance).
     NationalFrameworkQuestion.objects.create(

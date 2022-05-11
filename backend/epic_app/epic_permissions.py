@@ -8,6 +8,20 @@ def _is_admin(request: HttpRequest) -> bool:
     )
 
 
+class IsEpicAdvisor(permissions.BasePermission):
+    def has_permission(self, request, view) -> bool:
+        return bool(
+            request.user and request.user.epicuser and request.user.epicuser.is_advisor
+        )
+
+
+class IsAdminOrEpicAdvisor(permissions.IsAdminUser):
+    def has_permission(self, request, view):
+        return super(IsAdminOrEpicAdvisor, self).has_permission(request, view) or bool(
+            request.user and request.user.epicuser and request.user.epicuser.is_advisor
+        )
+
+
 class IsAdminOrSelfUser(permissions.BasePermission):
     """
     Allows access only to admin users and the user itself.
@@ -17,10 +31,10 @@ class IsAdminOrSelfUser(permissions.BasePermission):
         return _is_admin(request) or str(request.user.pk) == view.kwargs["pk"]
 
 
-class IsAdminOrInstanceOwner(permissions.BasePermission):
+class IsInstanceOwner(permissions.BasePermission):
     """
     Allows access to admin users and users in the field `user` of an entity.
     """
 
     def has_permission(self, request: HttpRequest, view):
-        return _is_admin(request) or request.user.pk == view.get_object().user.pk
+        return request.user.pk == view.get_object().user.pk

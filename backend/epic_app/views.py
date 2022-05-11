@@ -2,6 +2,7 @@
 from typing import List, Type, Union
 
 from django.db import models
+from django.http import HttpResponseForbidden
 from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -22,37 +23,14 @@ from epic_app.models.models import Agency, Area, Group, Program
 from epic_app.utils import get_submodel_type, get_submodel_type_list
 
 
-class EpicUserViewSet(viewsets.ModelViewSet):
+class EpicUserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Acess point for CRUD operations on `EpicUser` table.
     """
 
     queryset = EpicUser.objects.all()
     serializer_class = epic_serializer.EpicUserSerializer
-
-    def get_permissions(self) -> List[permissions.BasePermission]:
-        """
-        `EpicUser` can only be created, updated or deleted when the authorized user is an admin.
-
-        Returns:
-            List[permissions.BasePermission]: List of permissions for the request being done.
-        """
-        if self.request.method in ["POST", "DELETE"]:
-            return [permissions.IsAdminUser()]
-        if self.request.method in ["PUT", "PATCH"]:
-            return [epic_permissions.IsAdminOrSelfUser()]
-        return [permissions.IsAuthenticated()]
-
-    def get_queryset(self) -> models.QuerySet:
-        """
-        GET list `EpicUser`. When an admin all entries will be retrieved, otherwise only its own `EpicUser` one.
-
-        Returns:
-            models.QuerySet: Query instance containing the available `EpicUser` objects based on the authenticated user making the request.
-        """
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            return EpicUser.objects.all()
-        return EpicUser.objects.filter(id=self.request.user.id)
+    permission_classes = [permissions.IsAdminUser]
 
     @action(
         methods=["put"],
@@ -80,16 +58,21 @@ class EpicUserViewSet(viewsets.ModelViewSet):
         return Response(data=serializer.data)
 
 
-class EpicOrganizationViewSet(viewsets.ModelViewSet):
+class EpicOrganizationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Acess point for CRUD operations on `EpicOrganization` table.
     """
 
-    queryset = EpicOrganization.objects.all()
+    queryset = EpicOrganization.objects.all().order_by("name")
     serializer_class = epic_serializer.EpicOrganizationSerializer
     permission_classes = [permissions.IsAdminUser]
 
-    @action(detail=True, url_path="report", url_name="report")
+    @action(
+        detail=True,
+        url_path="report",
+        url_name="report",
+        permission_classes=[epic_permissions.IsAdminOrEpicAdvisor],
+    )
     def get_answers_report(self, request: Request, pk: str = None) -> models.QuerySet:
         """
         RETRIEVES all the `Answers` for each of the `Questions` filled by the `EpicUsers` of the requested `EpicOrganization`.
@@ -334,10 +317,18 @@ class AnswerViewSet(viewsets.ModelViewSet):
     serializer_class = epic_serializer.AnswerSerializer
 
     def get_permissions(self):
-        if not self.request.data.get("user", None):
-            self.request.data["user"] = self.request.user.id
-        if self.request.method in ["PUT", "DELETE", "PATCH"]:
-            return [epic_permissions.IsAdminOrInstanceOwner()]
+        """
+        `Answer` can only be created, updated or deleted when the authorized user is self.
+
+        Returns:
+            List[permissions.BasePermission]: List of permissions for the request being done.
+        """
+        if not self.request.data.get("user", None) and getattr(
+            self.request.user, "epicuser", False
+        ):
+            self.request.data["user"] = self.request.user.epicuser.id
+        if self.request.method in ["DELETE", "PUT", "PATCH"]:
+            return [epic_permissions.IsInstanceOwner()]
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self) -> Union[models.QuerySet, List[Answer]]:
@@ -355,14 +346,20 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         Filter querysets to prevent unauthorized `EpicUsers` from retrieving `Answers` from others.
         """
-        if self.request.user.is_staff or self.request.user.is_superuser:
-            return answer_type.objects.all()
         return answer_type.objects.filter(user=self.request.user)
+
+    def _get_is_authorized_user(self, request, pk: str) -> bool:
+        return (
+            getattr(request.user, "epicuser", False)
+            and Answer.objects.filter(pk=pk, user=request.user.epicuser).exists()
+        )
 
     def retrieve(self, request, pk: str, *args, **kwargs):
         """
         RETRIEVE a single `Answer` which is serialized based on its subtype.
         """
+        if not self._get_is_authorized_user(request, pk):
+            return HttpResponseForbidden()
         a_subtype = get_submodel_type(Answer, pk)
         a_serializer_type = epic_serializer.AnswerSerializer.get_concrete_serializer(
             a_subtype
@@ -373,20 +370,20 @@ class AnswerViewSet(viewsets.ModelViewSet):
         return Response(data=a_serializer.data)
 
     def _get_update_request(self, request: Request, pk: str) -> Request:
+        if not self._get_is_authorized_user(request, pk):
+            return HttpResponseForbidden()
         a_subtype = get_submodel_type(Answer, pk)
         self.serializer_class = (
             epic_serializer.AnswerSerializer.get_concrete_serializer(a_subtype)
         )
         self.queryset = self._filter_queryset(a_subtype).get(pk=pk)
-        # Prevent admins from replacing the user in the partial_update
-        request.data["user"] = self.queryset.user_id
         return request
 
     def update(self, request, pk: str, *args, **kwargs):
         """
         UPDATE a single `Answer`. It assumes the given data matches the expected subtype.
         """
-        return super().update(
+        return super(AnswerViewSet, self).update(
             self._get_update_request(request, pk), pk, *args, **kwargs
         )
 
@@ -395,7 +392,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         PATCH a single `Answer`. It assumes the given data matches the expected subtype.
         """
 
-        return super().partial_update(
+        return super(AnswerViewSet, self).partial_update(
             self._get_update_request(request, pk), pk, *args, **kwargs
         )
 
