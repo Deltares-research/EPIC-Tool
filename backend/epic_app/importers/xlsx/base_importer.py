@@ -43,7 +43,13 @@ class BaseEpicImporter:
         """
         loaded_workbook: openpyxl.Workbook = openpyxl.load_workbook(input_file)
         loaded_sheet = loaded_workbook.active
-        return list(map(self.XlsxLineObject.from_xlsx_row, loaded_sheet.rows))
+
+        def _get_valid_rows():
+            for row in loaded_sheet.rows:
+                if row[0].value:
+                    yield row
+
+        return list(map(self.XlsxLineObject.from_xlsx_row, _get_valid_rows()))
 
     def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
         """

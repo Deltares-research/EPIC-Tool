@@ -48,6 +48,7 @@ class EpicDomainImporter(BaseEpicImporter):
         Args:
             areas_dictionary (Dict[str, List[CsvLineObject]]): Dictionary containing text objects to add in the database.
         """
+        programs_to_save = []
         for r_area, r_area_values in areas_dictionary.items():
             # Create new area
             c_area = Area(name=r_area.strip())
@@ -64,7 +65,9 @@ class EpicDomainImporter(BaseEpicImporter):
                         description=r_csv_value.description.strip(),
                         group=c_group,
                     )
-                    c_program.save()
+                    programs_to_save.append(c_program)
+        for p in programs_to_save:
+            p.save()
 
     def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
         self._cleanup_epic_domain()
