@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import List
+import itertools
+from collections import Counter
+from typing import Any, Dict, List, Union
 
 from django.db import IntegrityError, models
 
@@ -87,7 +89,15 @@ class Answer(models.Model):
         return super(Answer, self).save(*args, **kwargs)
 
     def is_valid_answer(self) -> bool:
-        raise NotImplementedError("Validation only supported on inherited Answers.")
+        raise NotImplementedError(
+            "Validation only supported on inherited Answer classes."
+        )
+
+    @staticmethod
+    def get_detailed_summary(answers_list: List[Answer]) -> Dict[str, Any]:
+        raise NotImplementedError(
+            "Detailed summary only supported on inherited Answer classes."
+        )
 
 
 class YesNoAnswer(Answer):
@@ -102,6 +112,27 @@ class YesNoAnswer(Answer):
 
     def is_valid_answer(self) -> bool:
         return self.short_answer in YesNoAnswerType
+
+    @staticmethod
+    def get_detailed_summary(answers_list: List[YesNoAnswer]) -> Dict[str, Any]:
+        def _yesno_type_summary(filter_type: YesNoAnswerType) -> Dict[str, Any]:
+            filter_query = answers_list.filter(short_answer=filter_type)
+            return {
+                filter_type.label: len(filter_query),
+                f"{filter_type.label}_justify": [
+                    fq.justify_answer for fq in filter_query.all() if fq.justify_answer
+                ],
+            }
+
+        return {
+            **_yesno_type_summary(YesNoAnswerType.YES),
+            **_yesno_type_summary(YesNoAnswerType.NO),
+            **dict(
+                no_valid_response=len(
+                    [al for al in answers_list.all() if not al.is_valid_answer()]
+                )
+            ),
+        }
 
 
 class SingleChoiceAnswer(Answer):
@@ -124,6 +155,32 @@ class SingleChoiceAnswer(Answer):
     def is_valid_answer(self) -> bool:
         return self.selected_choice in EvolutionChoiceType
 
+    @staticmethod
+    def get_detailed_summary(
+        answers_list: Union[models.QuerySet, List[YesNoAnswer]]
+    ) -> Dict[str, Any]:
+        def _single_choice_summary(filter_type: EvolutionChoiceType) -> Dict[str, Any]:
+            filter_query = answers_list.filter(selected_choice=filter_type)
+            label = str(filter_type.label)
+            return {
+                label: len(filter_query),
+                f"{label}_justify": [
+                    fq.justify_answer for fq in filter_query.all() if fq.justify_answer
+                ],
+            }
+
+        return {
+            **_single_choice_summary(EvolutionChoiceType.CAPABLE),
+            **_single_choice_summary(EvolutionChoiceType.EFFECTIVE),
+            **_single_choice_summary(EvolutionChoiceType.ENGAGED),
+            **_single_choice_summary(EvolutionChoiceType.NASCENT),
+            **dict(
+                no_valid_response=len(
+                    [al for al in answers_list.all() if not al.is_valid_answer()]
+                )
+            ),
+        }
+
 
 class MultipleChoiceAnswer(Answer):
     selected_programs = models.ManyToManyField(
@@ -136,3 +193,24 @@ class MultipleChoiceAnswer(Answer):
 
     def is_valid_answer(self) -> bool:
         return any(self.selected_programs.all())
+
+    @staticmethod
+    def get_detailed_summary(answers_list: List[YesNoAnswer]) -> Dict[str, Any]:
+        all_sp = {
+            p.id: p_count
+            for p, p_count in dict(
+                Counter(
+                    itertools.chain.from_iterable(
+                        [a.selected_programs.all() for a in answers_list]
+                    )
+                )
+            ).items()
+        }
+        return {
+            **all_sp,
+            **dict(
+                no_valid_response=len(
+                    [al for al in answers_list.all() if not al.is_valid_answer()]
+                )
+            ),
+        }

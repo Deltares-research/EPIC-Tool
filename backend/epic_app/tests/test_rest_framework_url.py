@@ -44,7 +44,7 @@ def api_client() -> APIClient:
 
 @pytest.mark.django_db
 def get_admin_user() -> User:
-    admin_user: User = User.objects.filter(username="admin").first()
+    admin_user: User = User.objects.get(username="admin")
     assert admin_user.is_superuser
     assert admin_user.is_staff
     return admin_user
@@ -52,7 +52,7 @@ def get_admin_user() -> User:
 
 @pytest.mark.django_db
 def get_epic_user(username: str) -> EpicUser:
-    epic_user: EpicUser = EpicUser.objects.filter(username=username).first()
+    epic_user: EpicUser = EpicUser.objects.get(username=username)
     assert not epic_user.is_superuser
     assert not epic_user.is_staff
     return epic_user
@@ -60,7 +60,7 @@ def get_epic_user(username: str) -> EpicUser:
 
 @pytest.mark.django_db
 def set_user_auth_token(api_client: APIClient, username: str) -> str:
-    epic_user = User.objects.filter(username=username).first()
+    epic_user = User.objects.get(username=username)
     assert epic_user
     token_str = "Token " + epic_user.auth_token.key
 
@@ -318,6 +318,84 @@ class TestEpicUserViewSet:
         assert response.status_code == expected_response["status_code"]
         if response.status_code == 200:
             assert previous_pass != get_epic_user(find_username).password
+
+
+@pytest.mark.django_db
+class TestEpicOrganizationViewSet:
+    url_root = "/api/epicorganization/"
+
+    @pytest.fixture(autouse=False)
+    def admin_api_client(self, api_client: APIClient) -> APIClient:
+        set_user_auth_token(api_client, "admin")
+        return api_client
+
+    @pytest.fixture(autouse=False)
+    def _report_fixture(self) -> dict:
+        def get_qa(question_id: int, answer_id: Optional[int]) -> dict:
+            return dict(question=question_id, answer=answer_id)
+
+        # Create some empty answers for 'Anakin'
+        e_user = EpicUser.objects.get(username="Anakin")
+        answers = []
+        for nfq in NationalFrameworkQuestion.objects.all():
+            # We will fill the answers for these ones.
+            yna, _ = YesNoAnswer.objects.get_or_create(
+                user=e_user, question=nfq, short_answer=YesNoAnswerType.YES
+            )
+            answers.append(get_qa(nfq.id, yna.id))
+        for eq in EvolutionQuestion.objects.all():
+            sca, _ = SingleChoiceAnswer.objects.get_or_create(user=e_user, question=eq)
+            answers.append(get_qa(eq.id, sca.id))  # Empty answer
+        for kaa in KeyAgencyActionsQuestion.objects.all():
+            answers.append(get_qa(kaa.id, None))
+        for lnk in LinkagesQuestion.objects.all():
+            mca = MultipleChoiceAnswer(question=lnk, user=e_user)
+            mca.save()
+            mca.selected_programs.add(Program.objects.first(), Program.objects.last())
+            answers.append(get_qa(lnk.id, mca.id))
+
+        return None
+
+    def test_GET_epic_organization_as_admin(self, admin_api_client: APIClient):
+        # Run request
+        response = admin_api_client.get(self.url_root)
+
+        # Verify final expectations
+        assert response.status_code == 200
+        assert len(response.data) == len(EpicOrganization.objects.all())
+
+    def test_GET_epic_organization_as_user_denied(self, api_client: APIClient):
+        # Run request
+        set_user_auth_token(api_client, "Anakin")
+        response = api_client.get(self.url_root)
+
+        # Verify final expectations
+        assert response.status_code == 403
+
+    def test_RETRIEVE_epic_organization_as_admin(self, admin_api_client: APIClient):
+        # Run request
+        response = admin_api_client.get(self.url_root + "1/")
+
+        # Verify final expectations
+        assert response.status_code == 200
+
+    def test_RETRIEVE_epic_organization_as_user_denied(self, api_client: APIClient):
+        # Run request
+        set_user_auth_token(api_client, "Anakin")
+        response = api_client.get(self.url_root + "1/")
+
+        # Verify final expectations
+        assert response.status_code == 403
+
+    def test_RETRIEVE_report(self, _report_fixture: dict, admin_api_client: APIClient):
+        full_url = self.url_root + "1/" + "report/"
+
+        # Run request
+        response = admin_api_client.get(full_url)
+
+        # Verify final expectations
+        assert response.status_code == 200
+        assert len(response.data) == len(Program.objects.all())
 
 
 @pytest.mark.django_db
