@@ -53,15 +53,13 @@ class TestEpicUserSerializer:
             epic_user_dict: dict,
             e_user: str,
             e_org: str,
-            e_selected_programs: List[int],
         ):
             assert isinstance(epic_user_dict, dict)
             assert epic_user_dict["username"] == e_user
             assert epic_user_dict["organization"] == e_org
-            assert epic_user_dict["selected_programs"] == e_selected_programs
 
-        validate_epic_user_dict(serialized_data[0], "Palpatine", 1, [1, 3])
-        validate_epic_user_dict(serialized_data[1], "Anakin", 1, [2, 4])
+        validate_epic_user_dict(serialized_data[0], "Palpatine", 1)
+        validate_epic_user_dict(serialized_data[1], "Anakin", 1)
 
 
 @pytest.mark.django_db

@@ -62,7 +62,7 @@ class LnkAdmin(admin.ModelAdmin):
 
 class EpicUserInline(admin.TabularInline):
     model = EpicUser
-    fields = ("username", "email", "is_staff")
+    fields = ("username", "email", "is_advisor")
 
 
 class EpicOrganizationAdmin(GenerateEntityAdmin):

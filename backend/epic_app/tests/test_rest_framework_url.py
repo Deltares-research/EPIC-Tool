@@ -146,7 +146,7 @@ class TestEpicUserViewSet:
         "id": 3,
         "username": "Anakin",
         "organization": 1,
-        "selected_programs": [2, 4],
+        "is_advisor": False,
     }
 
     def test_GET_epic_user_as_admin(

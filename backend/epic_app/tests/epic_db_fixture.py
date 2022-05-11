@@ -83,12 +83,6 @@ def epic_test_db():
     d_program.agencies.add(mi6_agency, cia_agency)
     e_program.agencies.add(rws_agency, mi6_agency)
 
-    # Set programs:
-    u_palpatine.selected_programs.add(a_program)
-    u_palpatine.selected_programs.add(c_program)
-    u_anakin.selected_programs.add(b_program)
-    u_anakin.selected_programs.add(d_program)
-
     # Add questions to program a (for instance).
     NationalFrameworkQuestion.objects.create(
         title="Is this a National Framework question?",
