@@ -52,13 +52,11 @@ class EpicUser(User):
         User (auth.models.User): Derives directly from the base class User.
     """
 
+    is_advisor = models.BooleanField(default=False)
     organization = models.ForeignKey(
         to=EpicOrganization,
         on_delete=models.CASCADE,
         related_name="organization_users",
         blank=True,
         null=True,
-    )
-    selected_programs = models.ManyToManyField(
-        to=Program, blank=True, related_name="selected_by_users"
     )

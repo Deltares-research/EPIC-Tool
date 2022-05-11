@@ -47,21 +47,21 @@ class TestEpicUserSerializer:
                 EpicUser.objects.all(), many=True, context=serializer_context
             ).data
         )
-        assert len(serialized_data) == 2
+        assert len(serialized_data) == 3
 
         def validate_epic_user_dict(
             epic_user_dict: dict,
             e_user: str,
-            e_org: str,
-            e_selected_programs: List[int],
+            is_advisor: bool,
         ):
             assert isinstance(epic_user_dict, dict)
             assert epic_user_dict["username"] == e_user
-            assert epic_user_dict["organization"] == e_org
-            assert epic_user_dict["selected_programs"] == e_selected_programs
+            assert epic_user_dict["organization"] == 1
+            assert epic_user_dict["is_advisor"] == is_advisor
 
-        validate_epic_user_dict(serialized_data[0], "Palpatine", 1, [1, 3])
-        validate_epic_user_dict(serialized_data[1], "Anakin", 1, [2, 4])
+        validate_epic_user_dict(serialized_data[0], "Palpatine", False)
+        validate_epic_user_dict(serialized_data[1], "Anakin", False)
+        validate_epic_user_dict(serialized_data[2], "Dooku", True)
 
 
 @pytest.mark.django_db
@@ -76,7 +76,7 @@ class TestEpicOrganizationSerializer:
         expected_data = {
             "url": "http://testserver/api/epicorganization/1/",
             "name": "Gallactic Empire",
-            "organization_users": [2, 3],
+            "organization_users": [2, 3, 4],
         }
         assert len(serialized_data) == 1
         assert serialized_data[0] == expected_data

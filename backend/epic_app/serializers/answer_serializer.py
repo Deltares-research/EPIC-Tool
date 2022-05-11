@@ -59,8 +59,6 @@ class SingleChoiceAnswerSerializer(_BaseAnswerSerializer):
 
 
 class MultipleChoiceAnswerSerializer(_BaseAnswerSerializer):
-    # selected_programs = SimpleProgramSerializer(many=True)
-
     class Meta:
         model = MultipleChoiceAnswer
         fields = "__all__"

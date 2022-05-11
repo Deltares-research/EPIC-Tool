@@ -35,7 +35,6 @@ def get_waldo() -> EpicUser:
     """
     waldo_user = EpicUser.objects.filter(username="Waldo").first()
     assert isinstance(waldo_user, EpicUser)
-    assert len(waldo_user.selected_programs) == 0
     return waldo_user
 
 
@@ -68,7 +67,8 @@ class TestEpicUser:
         assert isinstance(created_user, EpicUser)
         assert isinstance(created_user, User)
         assert created_user.is_superuser is False
-        assert not any(created_user.selected_programs.all())
+        assert created_user.is_staff is False
+        assert created_user.is_advisor is False
         assert created_user in epic_organization.organization_users.all()
 
 

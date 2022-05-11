@@ -45,47 +45,49 @@ def answer_serializer_fixture(
         username="TheOneWhoAsks",
         organization=EpicOrganization.objects.create(name="TestCorp"),
     )
-    YesNoAnswer.objects.create(
+    nfq = NationalFrameworkQuestion.objects.all().first()
+    evq = EvolutionQuestion.objects.all().first()
+    lkq = LinkagesQuestion.objects.all().first()
+    yna = YesNoAnswer.objects.create(
         user=theonewhoasks,
-        question=NationalFrameworkQuestion.objects.all().first(),
+        question=nfq,
         short_answer=YesNoAnswerType.YES,
         justify_answer="Velit ex cupidatat do magna ipsum.",
     )
-    SingleChoiceAnswer.objects.create(
+    sca = SingleChoiceAnswer.objects.create(
         user=theonewhoasks,
-        question=EvolutionQuestion.objects.all().first(),
+        question=evq,
         selected_choice=EvolutionChoiceType.ENGAGED,
         justify_answer="Ipsum anim fugiat sit nostrud enim.",
     )
     mca = MultipleChoiceAnswer.objects.create(
         user=theonewhoasks,
-        question=LinkagesQuestion.objects.all().first(),
+        question=lkq,
     )
     mca.selected_programs.add(Program.objects.all()[4], Program.objects.all()[2])
-
     return {
         YesNoAnswer: {
             "url": "http://testserver/api/answer/1/",
-            "id": 1,
-            "user": 4,
-            "question": 1,
+            "id": yna.id,
+            "user": theonewhoasks.id,
+            "question": nfq.id,
             "short_answer": str(YesNoAnswerType.YES),
             "justify_answer": "Velit ex cupidatat do magna ipsum.",
         },
         SingleChoiceAnswer: {
-            "id": 2,
+            "id": sca.id,
             "justify_answer": "Ipsum anim fugiat sit nostrud enim.",
-            "question": 3,
+            "question": evq.id,
             "selected_choice": str(EvolutionChoiceType.ENGAGED),
             "url": "http://testserver/api/answer/2/",
-            "user": 4,
+            "user": theonewhoasks.id,
         },
         MultipleChoiceAnswer: {
-            "id": 3,
-            "question": 5,
+            "id": mca.id,
+            "question": lkq.id,
             "selected_programs": [3, 5],
             "url": "http://testserver/api/answer/3/",
-            "user": 4,
+            "user": theonewhoasks.id,
         },
     }
 

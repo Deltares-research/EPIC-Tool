@@ -29,7 +29,7 @@ class EpicUserSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "organization",
-            "selected_programs",
+            "is_advisor",
             "password",
         )
         extra_kwargs = {"password": {"write_only": True}}
