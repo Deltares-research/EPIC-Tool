@@ -354,21 +354,27 @@ class TestEpicOrganizationViewSet:
         # Verify final expectations
         assert response.status_code == 403
 
-    @pytest.mark.parametrize(
-        "username",
-        [
-            pytest.param("admin", id="Admin user"),
-            pytest.param("Dooku", id="Advisor EpicUser"),
-        ],
-    )
-    def test_RETRIEVE_report_as_permitted_user(
-        self, username: str, _report_fixture: dict, api_client: APIClient
+    def test_RETRIEVE_report_as_advisor_epic_user(
+        self, _report_fixture: dict, api_client: APIClient
     ):
-        full_url = self.url_root + "1/" + "report/"
+        # The results of this endpoint are better tested through the serializer.
+        full_url = self.url_root + "report/"
 
         # Run request
-        set_user_auth_token(api_client, username)
+        set_user_auth_token(api_client, "Dooku")
         response = api_client.get(full_url)
+
+        # Verify final expectations
+        assert response.status_code == 200
+        assert len(response.data) == len(Program.objects.all())
+
+    def test_RETRIEVE_report_as_admin_user(
+        self, _report_fixture: dict, admin_api_client: APIClient
+    ):
+        full_url = self.url_root + "report/"
+
+        # Run request
+        response = admin_api_client.get(full_url)
 
         # Verify final expectations
         assert response.status_code == 200
@@ -925,7 +931,7 @@ class TestAnswerViewSet:
 
         # Verify final expectations.
         if not epic_username == "Anakin":
-            assert response.status_code == 404
+            assert response.status_code == 403
             return
         assert response.status_code == 200
         changed_answer = answer_type.objects.get(pk=answer_pk)
@@ -963,13 +969,30 @@ class TestAnswerViewSet:
 
         # Verify final expectations.
         if not epic_username == "Anakin":
-            assert response.status_code == 404
+            assert response.status_code == 403
             return
         assert response.status_code == 200
 
         changed_answer = answer_type.objects.get(pk=answer_pk)
         assert changed_answer is not None
         self._compare_answer_fields(changed_answer, json_data, lambda x, y: x == y)
+
+
+@pytest.mark.django_db
+class TestApiDocumentation:
+    url_root = "/api/docs/"
+
+    @pytest.mark.parametrize(
+        "url_suffix",
+        [
+            pytest.param("", id="OpenAPI Schema"),
+            pytest.param("swagger", id="Swagger"),
+            pytest.param("reference", id="CoreApi"),
+        ],
+    )
+    def test_reference_doc_works(self, url_suffix, admin_api_client: APIClient):
+        response = admin_api_client.get(self.url_root + url_suffix)
+        assert response.status_code == 200
 
 
 @pytest.mark.django_db

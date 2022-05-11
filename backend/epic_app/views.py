@@ -68,7 +68,7 @@ class EpicOrganizationViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAdminUser]
 
     @action(
-        detail=True,
+        detail=False,
         url_path="report",
         url_name="report",
         permission_classes=[epic_permissions.IsAdminOrEpicAdvisor],
@@ -77,12 +77,20 @@ class EpicOrganizationViewSet(viewsets.ReadOnlyModelViewSet):
         """
         RETRIEVES all the `Answers` for each of the `Questions` filled by the `EpicUsers` of the requested `EpicOrganization`.
         """
+
+        def _filter_queryset() -> Union[models.QuerySet, List[EpicUser]]:
+            if bool(request.user.is_staff or request.user.is_superuser):
+                return EpicUser.objects.all()
+            else:
+                epic_org = request.user.epicuser.organization
+                return epic_org.organization_users
+
         r_serializer = epic_serializer.ProgramReportSerializer(
             Program.objects.all(),
             many=True,
             context={
                 "request": request,
-                "users": self.queryset.get(pk=pk).organization_users,
+                "users": _filter_queryset(),
             },
         )
         return Response(r_serializer.data)
