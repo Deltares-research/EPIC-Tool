@@ -1,3 +1,9 @@
+## v0.21.0 (2022-05-11)
+
+### Feat
+
+- **epic_app/models/epic_user.py**: Added is_advisor property for EpicUsers, adapted related code
+
 ## v0.20.0 (2022-05-10)
 
 ### Feat
