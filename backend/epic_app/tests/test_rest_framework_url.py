@@ -301,8 +301,9 @@ class TestEpicOrganizationViewSet:
             return dict(question=question_id, answer=answer_id)
 
         # Create some empty answers for 'Anakin'
-        e_user = EpicUser.objects.get(username="Anakin")
+        e_user: EpicUser = EpicUser.objects.get(username="Anakin")
         answers = []
+
         for nfq in NationalFrameworkQuestion.objects.all():
             # We will fill the answers for these ones.
             yna, _ = YesNoAnswer.objects.get_or_create(
@@ -353,11 +354,21 @@ class TestEpicOrganizationViewSet:
         # Verify final expectations
         assert response.status_code == 403
 
-    def test_RETRIEVE_report(self, _report_fixture: dict, admin_api_client: APIClient):
+    @pytest.mark.parametrize(
+        "username",
+        [
+            pytest.param("admin", id="Admin user"),
+            pytest.param("Dooku", id="Advisor EpicUser"),
+        ],
+    )
+    def test_RETRIEVE_report_as_permitted_user(
+        self, username: str, _report_fixture: dict, api_client: APIClient
+    ):
         full_url = self.url_root + "1/" + "report/"
 
         # Run request
-        response = admin_api_client.get(full_url)
+        set_user_auth_token(api_client, username)
+        response = api_client.get(full_url)
 
         # Verify final expectations
         assert response.status_code == 200

@@ -41,6 +41,9 @@ def epic_test_db():
     organization = EpicOrganization.objects.create(name="Gallactic Empire")
     u_palpatine: EpicUser = set_epic_user("Palpatine", organization)
     u_anakin: EpicUser = set_epic_user("Anakin", organization)
+    u_dooku: EpicUser = set_epic_user("Dooku", organization)
+    u_dooku.is_advisor = True
+    u_dooku.save()
 
     # Areas
     alpha_area = Area.objects.create(name="alpha")

@@ -71,6 +71,7 @@ class EpicOrganizationViewSet(viewsets.ReadOnlyModelViewSet):
         detail=True,
         url_path="report",
         url_name="report",
+        permission_classes=[epic_permissions.IsAdminOrEpicAdvisor],
     )
     def get_answers_report(self, request: Request, pk: str = None) -> models.QuerySet:
         """
@@ -314,7 +315,6 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = epic_serializer.AnswerSerializer
-    # permissions = [permissions.DjangoModelPermissions]
 
     def get_permissions(self):
         """
