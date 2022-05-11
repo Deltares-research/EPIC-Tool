@@ -207,12 +207,11 @@ class TestEpicUserViewSet:
         "epic_username",
         [
             pytest.param(None, id="No user authenticated"),
-            pytest.param("Palpatine", id="Authenticated USER"),
+            pytest.param("Palpatine", id="Authenticated EpicUser"),
+            pytest.param("admin", id="Admin User"),
         ],
     )
-    def test_POST_as_not_admin_not_allowed(
-        self, epic_username: str, api_client: APIClient
-    ):
+    def test_POST_not_allowed(self, epic_username: str, api_client: APIClient):
         """
         Note: This test is to verify that we DO NOT allow user creation unless
         from an admin. In the future we might allow anyone to create new ones.
@@ -238,25 +237,6 @@ class TestEpicUserViewSet:
         assert not EpicUser.objects.filter(
             username=ck_username
         ).exists(), "User was created despite not having to."
-
-    def test_POST_as_admin_returns_created(self, api_client: APIClient):
-        ck_username = "ClarkKent"
-        data_dict = {
-            "username": ck_username,
-            "password": "IamSup3rm4n!",
-            "organization": EpicOrganization.objects.last().id,
-        }
-        assert not EpicUser.objects.filter(username=ck_username).exists()
-
-        # Run request.
-        set_user_auth_token(api_client, "admin")
-        response = api_client.post(self.url_root, data_dict, format="json")
-
-        # Verify final expectations.
-        assert response.status_code == 201
-        assert EpicUser.objects.filter(
-            username=ck_username
-        ).exists(), "User was not created despite succesful response."
 
     @pytest.mark.parametrize(
         "epic_username, find_username, expected_response",
@@ -988,6 +968,7 @@ class TestUrlUnavailableActions:
         [
             pytest.param(TestEpicUserTokenAuthRequest.url_root),
             pytest.param(TestEpicUserViewSet.url_root),
+            pytest.param(TestEpicOrganizationViewSet.url_root),
             pytest.param(TestAreaViewSet.url_root),
             pytest.param(TestAgencyViewSet.url_root),
             pytest.param(TestGroupViewSet.url_root),
@@ -1016,10 +997,29 @@ class TestUrlUnavailableActions:
     @pytest.mark.parametrize(
         "url_root, data_dict",
         [
-            pytest.param(TestAreaViewSet.url_root, {"name": "Area51"}),
-            pytest.param(TestAgencyViewSet.url_root, {"name": "C.N.I."}),
-            pytest.param(TestGroupViewSet.url_root, {"name": "NFG", "area": "1"}),
-            pytest.param(TestProgramViewSet.url_root, {"name": "ACS", "group": "1"}),
+            pytest.param(
+                TestEpicOrganizationViewSet.url_root,
+                {"name": "Riot"},
+                id="EpicOrganization",
+            ),
+            pytest.param(
+                TestEpicUserViewSet.url_root,
+                {"username": "ClarkKent", "password": "!amSup3rm4n"},
+                id="EpicUser",
+            ),
+            pytest.param(TestAreaViewSet.url_root, {"name": "Area51"}, id="Area"),
+            pytest.param(TestAgencyViewSet.url_root, {"name": "C.N.I."}, id="Agency"),
+            pytest.param(
+                TestGroupViewSet.url_root, {"name": "NFG", "area": "1"}, id="Group"
+            ),
+            pytest.param(
+                TestProgramViewSet.url_root, {"name": "ACS", "group": "1"}, id="Program"
+            ),
+            pytest.param(
+                TestQuestionViewSet.url_root,
+                {"title": "A dummy question", "program": "1"},
+                id="Question",
+            ),
         ],
     )
     def test_POST_with_auth_returns_error(

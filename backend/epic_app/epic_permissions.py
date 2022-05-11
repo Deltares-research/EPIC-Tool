@@ -8,6 +8,20 @@ def _is_admin(request: HttpRequest) -> bool:
     )
 
 
+class IsEpicAdvisor(permissions.BasePermission):
+    def has_permission(self, request, view) -> bool:
+        return bool(
+            request.user and request.user.epicuser and request.user.epicuser.is_advisor
+        )
+
+
+class IsAdminOrEpicAdvisor(permissions.IsAdminUser):
+    def has_permission(self, request, view):
+        return super(IsAdminOrEpicAdvisor, self).has_permission(request, view) or bool(
+            request.user and request.user.epicuser and request.user.epicuser.is_advisor
+        )
+
+
 class IsAdminOrSelfUser(permissions.BasePermission):
     """
     Allows access only to admin users and the user itself.
