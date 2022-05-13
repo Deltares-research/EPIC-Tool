@@ -5,10 +5,7 @@ from typing import Dict, List, Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.forms import ValidationError
 
-from epic_app.importers.xlsx.base_importer import (
-    BaseEpicImporter,
-    ValidateProgramReference,
-)
+from epic_app.importers.xlsx.base_importer import BaseEpicImporter
 from epic_app.models.models import Agency, Program
 
 
@@ -24,18 +21,21 @@ class EpicAgencyImporter(BaseEpicImporter):
             new_line.program = cls.get_valid_cell(xlsx_row, 1)
             return new_line
 
-    def _import_agencies(self, agencies_dictionary: Dict[str, List[XlsxLineObject]]):
-        missing_programs = []
-        for agency_csvobjs in agencies_dictionary.values():
-            for csv_obj in agency_csvobjs:
-                if Program.get_program_by_name(csv_obj.program.lower()) is None:
-                    missing_programs.append(csv_obj.program)
-        if any(missing_programs):
-            str_mp = ", ".join(set(missing_programs))
-            raise ValidationError(
-                f"The provided programs do not exist in the current database: \n{str_mp}"
-            )
+    def _validate(
+        self,
+        xlsx_line_objects: List[XlsxLineObject],
+    ) -> List[str]:
+        errors_found = []
+        n_line_addition = 2  # Excluded header + start enumerate is 0.
+        for n_line, xlsx_line in enumerate(xlsx_line_objects):
+            if not Program.objects.filter(name__iexact=xlsx_line.program).exists():
+                error_line = n_line + n_line_addition
+                errors_found.append(
+                    f"  - Line {error_line}. Program: '{xlsx_line.program}' does not exist."
+                )
+        return errors_found
 
+    def _import_agencies(self, agencies_dictionary: Dict[str, List[XlsxLineObject]]):
         # Remove all previous agency objects.
         Agency.objects.all().delete()
         for agency_name, agency_csvobj in agencies_dictionary.items():
@@ -55,7 +55,7 @@ class EpicAgencyImporter(BaseEpicImporter):
         Agency.objects.all().delete()
         line_objects = self._get_xlsx_line_objects(input_file)
         _headers = line_objects.pop(0)
-        validator = ValidateProgramReference()
-        if not validator.validate(line_objects):
-            raise ValidationError(validator.errors)
+        errors_found = self._validate(line_objects)
+        if any(errors_found):
+            raise ValidationError(errors_found)
         self._import_agencies(self.group_entity("agency", line_objects))

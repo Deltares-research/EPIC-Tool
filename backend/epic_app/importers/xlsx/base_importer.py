@@ -1,6 +1,6 @@
 import io
 from pathlib import Path
-from typing import Any, Dict, List, Protocol, Tuple, Union, runtime_checkable
+from typing import Any, Callable, Dict, List, Protocol, Tuple, Union, runtime_checkable
 
 import openpyxl
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -94,22 +94,3 @@ class BaseEpicImporter:
         """
         tuple_list = [(x.__dict__[group_key], x) for x in data_read]
         return self.tuple_to_dict(tuple_list)
-
-
-class ValidateProgramReference:
-    errors: List[str] = []
-
-    def validate(
-        self,
-        xlsx_line_objects: List[BaseEpicImporter.XlsxLineObject],
-        excluded_header: bool = True,
-    ) -> bool:
-        available_program_names = [p.name.lower() for p in Program.objects.all()]
-        n_line_addition = 2 if excluded_header else 1
-        for n_line, xlsx_line in enumerate(xlsx_line_objects):
-            p_name = xlsx_line.program
-            if p_name.lower() not in available_program_names:
-                self.errors.append(
-                    f"  - Line {n_line + n_line_addition}. Program: '{p_name}' does not exist."
-                )
-        return not any(self.errors)
