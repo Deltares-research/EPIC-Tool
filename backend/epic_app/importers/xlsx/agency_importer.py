@@ -5,7 +5,10 @@ from typing import Dict, List, Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.forms import ValidationError
 
-from epic_app.importers.xlsx.base_importer import BaseEpicImporter
+from epic_app.importers.xlsx.base_importer import (
+    BaseEpicImporter,
+    ValidateProgramReference,
+)
 from epic_app.models.models import Agency, Program
 
 
@@ -52,4 +55,7 @@ class EpicAgencyImporter(BaseEpicImporter):
         Agency.objects.all().delete()
         line_objects = self._get_xlsx_line_objects(input_file)
         _headers = line_objects.pop(0)
+        validator = ValidateProgramReference()
+        if not validator.validate(line_objects):
+            raise ValidationError(validator.errors)
         self._import_agencies(self.group_entity("agency", line_objects))

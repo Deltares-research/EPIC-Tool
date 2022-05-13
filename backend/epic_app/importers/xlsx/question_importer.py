@@ -3,9 +3,13 @@ from pathlib import Path
 from typing import List, Type, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.forms import ValidationError
 from openpyxl.cell import Cell
 
-from epic_app.importers.xlsx.base_importer import BaseEpicImporter
+from epic_app.importers.xlsx.base_importer import (
+    BaseEpicImporter,
+    ValidateProgramReference,
+)
 from epic_app.models.epic_questions import (
     EvolutionQuestion,
     KeyAgencyActionsQuestion,
@@ -42,6 +46,10 @@ class _YesNoJustifyQuestionImporter(BaseEpicImporter):
         # Skip the first line as it's the columns names
         _headers = line_objects.pop(0)
         self._cleanup_questions()
+        validator = ValidateProgramReference()
+        if not validator.validate(line_objects):
+            raise ValidationError(validator.errors)
+
         self._import_questions(line_objects)
 
     def _get_type(self) -> Type[Question]:
@@ -54,7 +62,7 @@ class _YesNoJustifyQuestionImporter(BaseEpicImporter):
         for q_question in imported_questions:
             # Create new question
             f_program_query = Program.objects.filter(
-                name=q_question.program, group__name=q_question.group
+                name__iexact=q_question.program, group__name=q_question.group
             )
             if not f_program_query.exists():
                 raise ValueError(
@@ -105,6 +113,10 @@ class EvolutionQuestionImporter(BaseEpicImporter):
         line_objects = self._get_xlsx_line_objects(input_file)
         self._cleanup_questions()
         _headers = line_objects.pop(0)
+        validator = ValidateProgramReference()
+        if not validator.validate(line_objects):
+            raise ValidationError(validator.errors)
+
         self._import_questions(line_objects)
 
     def _cleanup_questions(self):
@@ -113,11 +125,7 @@ class EvolutionQuestionImporter(BaseEpicImporter):
     def _import_questions(self, imported_questions: List[XlsxLineObject]):
         for q_question in imported_questions:
             # Create new question
-            if not Program.objects.filter(name=q_question.program).exists():
-                raise ValueError(
-                    f"Program '{q_question.program}' not found, import can't go through."
-                )
-            p_found = Program.objects.filter(name=q_question.program).first()
+            p_found = Program.objects.get(name__iexact=q_question.program)
             c_question = EvolutionQuestion(
                 title=q_question.dimension,
                 nascent_description=q_question.nascent_description,

@@ -76,7 +76,9 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS("Import successful."))
                 except Exception as err_info:
                     self.stdout.write(self.style.ERROR(f"Failed to import {filepath}."))
-                    self.stdout.write(self.style.ERROR_OUTPUT(err_info))
+                    self.stdout.write(
+                        self.style.ERROR_OUTPUT("\n".join(err_info.messages))
+                    )
             else:
                 self.stdout.write(
                     self.style.ERROR(f"File to import not found at {filepath}")
