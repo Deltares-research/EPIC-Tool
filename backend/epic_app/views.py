@@ -354,6 +354,8 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         Filter querysets to prevent unauthorized `EpicUsers` from retrieving `Answers` from others.
         """
+        if not isinstance(self.request.user, EpicUser):
+            return EpicUser.objects.none()
         return answer_type.objects.filter(user=self.request.user)
 
     def _get_is_authorized_user(self, request, pk: str) -> bool:

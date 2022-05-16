@@ -8,17 +8,22 @@ def _is_admin(request: HttpRequest) -> bool:
     )
 
 
+def _is_epicuser_advisor(request: HttpRequest) -> bool:
+    try:
+        return request.user.epicuser and request.user.epicuser.is_advisor
+    except:
+        return None
+
+
 class IsEpicAdvisor(permissions.BasePermission):
     def has_permission(self, request, view) -> bool:
-        return bool(
-            request.user and request.user.epicuser and request.user.epicuser.is_advisor
-        )
+        return bool(request.user and _is_epicuser_advisor(request))
 
 
 class IsAdminOrEpicAdvisor(permissions.IsAdminUser):
-    def has_permission(self, request, view):
+    def has_permission(self, request, view) -> bool:
         return super(IsAdminOrEpicAdvisor, self).has_permission(request, view) or bool(
-            request.user and request.user.epicuser and request.user.epicuser.is_advisor
+            request.user and _is_epicuser_advisor(request)
         )
 
 
@@ -28,7 +33,9 @@ class IsAdminOrSelfUser(permissions.BasePermission):
     """
 
     def has_permission(self, request: HttpRequest, view):
-        return _is_admin(request) or str(request.user.pk) == view.kwargs["pk"]
+        return _is_admin(request) or (
+            request.user.pk != None and str(request.user.pk) == view.kwargs["pk"]
+        )
 
 
 class IsInstanceOwner(permissions.BasePermission):
