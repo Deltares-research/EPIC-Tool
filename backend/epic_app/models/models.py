@@ -99,6 +99,8 @@ class Program(models.Model):
     group: Group = models.ForeignKey(
         to=Group, on_delete=models.CASCADE, related_name="programs"
     )
+    reference_description = models.TextField(max_length=258, blank=True, null=True)
+    reference_link = models.URLField(max_length=128, blank=True)
 
     @staticmethod
     def check_unique_name(value: str):

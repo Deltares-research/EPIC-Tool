@@ -23,6 +23,8 @@ class EpicDomainImporter(BaseEpicImporter):
         group: str
         program: str
         description: Optional[str]
+        reference: Optional[str]
+        reference_link: Optional[str]
 
         @classmethod
         def from_xlsx_row(cls, xlsx_row: Any):
@@ -31,7 +33,22 @@ class EpicDomainImporter(BaseEpicImporter):
             new_obj.group = cls.get_valid_cell(xlsx_row, 1)
             new_obj.program = cls.get_valid_cell(xlsx_row, 2)
             new_obj.description = cls.get_valid_cell(xlsx_row, 3)
+            new_obj.reference = cls.get_valid_cell(xlsx_row, 4)
+            new_obj.reference_link = cls.get_valid_cell(xlsx_row, 5)
             return new_obj
+
+        def to_epic_program(self) -> Program:
+            epic_area, _ = Area.objects.get_or_create(name=self.area.strip)
+            epic_group, _ = Group.objects.get_or_create(
+                name=self.group.strip(), area=epic_area
+            )
+            return Program(
+                name=self.program.strip(),
+                description=self.description.strip(),
+                reference_description=self.reference.strip(),
+                reference_link=self.reference_link,
+                group=epic_group,
+            )
 
     def _cleanup_epic_domain(self):
         """
@@ -41,36 +58,10 @@ class EpicDomainImporter(BaseEpicImporter):
         Group.objects.all().delete()
         Program.objects.all().delete()
 
-    def _import_epic_domain(self, areas_dictionary: Dict[str, List[XlsxLineObject]]):
-        """
-        Imports all the read objects from the csv into the database.
-
-        Args:
-            areas_dictionary (Dict[str, List[CsvLineObject]]): Dictionary containing text objects to add in the database.
-        """
-        programs_to_save = []
-        for r_area, r_area_values in areas_dictionary.items():
-            # Create new area
-            c_area = Area(name=r_area.strip())
-            c_area.save()
-            read_groups = self.group_entity("group", r_area_values)
-            for r_group, r_group_values in read_groups.items():
-                # Create new group
-                c_group = Group(name=r_group.strip(), area=c_area)
-                c_group.save()
-                for r_csv_value in r_group_values:
-                    # Create new program
-                    c_program = Program(
-                        name=r_csv_value.program.strip(),
-                        description=r_csv_value.description.strip(),
-                        group=c_group,
-                    )
-                    programs_to_save.append(c_program)
-        for p in programs_to_save:
-            p.save()
-
     def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
         self._cleanup_epic_domain()
-        line_objects = self._get_xlsx_line_objects(input_file)
+        line_objects: List[self.XlsxLineObject] = self._get_xlsx_line_objects(
+            input_file
+        )
         _headers = line_objects.pop(0)
-        self._import_epic_domain(self.group_entity("area", line_objects))
+        list(map(lambda x: x.to_epic_program().save(), line_objects))
