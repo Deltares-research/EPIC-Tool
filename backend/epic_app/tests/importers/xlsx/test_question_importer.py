@@ -26,13 +26,13 @@ class TestYesNoJustifyQuestionImporter:
         KeyAgencyActionsQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "keyagencyactionsquestions.xlsx",
             question_type=KeyAgencyActionsQuestion,
-            expected_entries=42,
-            first_entry_title="Is this an example question?",
+            expected_entries=145,
+            first_entry_title="Does the national WRM agency have key close links with other relevant agencies?",
         ),
         NationalFrameworkQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "nationalframeworkquestions.xlsx",
             question_type=NationalFrameworkQuestion,
-            expected_entries=42,
+            expected_entries=39,
             first_entry_title="Is there a national strategic water resources management plan in place?",
         ),
     }
@@ -87,4 +87,4 @@ class TestEvolutionQuestionImporter:
 
         EvolutionQuestionImporter().import_file(test_file)
 
-        assert len(EvolutionQuestion.objects.all()) == 51
+        assert len(EvolutionQuestion.objects.all()) == 46

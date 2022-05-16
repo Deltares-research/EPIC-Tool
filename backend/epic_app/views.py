@@ -1,6 +1,7 @@
 # Create your views here.
 from typing import List, Type, Union
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.http import HttpResponseForbidden
 from rest_framework import permissions, serializers, viewsets
@@ -354,6 +355,8 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         Filter querysets to prevent unauthorized `EpicUsers` from retrieving `Answers` from others.
         """
+        if not isinstance(self.request.user, User):
+            return EpicUser.objects.none()
         return answer_type.objects.filter(user=self.request.user)
 
     def _get_is_authorized_user(self, request, pk: str) -> bool:
