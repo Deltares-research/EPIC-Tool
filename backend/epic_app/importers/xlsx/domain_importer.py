@@ -38,7 +38,7 @@ class EpicDomainImporter(BaseEpicImporter):
             return new_obj
 
         def to_epic_program(self) -> Program:
-            epic_area, _ = Area.objects.get_or_create(name=self.area.strip)
+            epic_area, _ = Area.objects.get_or_create(name=self.area.strip())
             epic_group, _ = Group.objects.get_or_create(
                 name=self.group.strip(), area=epic_area
             )
