@@ -12,9 +12,23 @@ export default new Vuex.Store({
         programs: [],
         programSelection: new Set(),
         currentProgram: {},
+        completedPrograms: new Set(),
+        completedAreas: new Set(),
         initialized: false,
     },
     mutations: {
+        updateCompletedAreas(state, completedAreas) {
+            state.completedAreas.clear();
+            completedAreas.forEach(program => {
+                state.completedAreas.add(program);
+            })
+        },
+        updateCompletedPrograms(state, completedPrograms) {
+            state.completedPrograms.clear();
+            completedPrograms.forEach(program => {
+                state.completedPrograms.add(program);
+            })
+        },
         toggleAgencySelection(state, agency) {
             if (state.selectedAgency.programs !== undefined) {
                 for (const program of state.selectedAgency.programs) {

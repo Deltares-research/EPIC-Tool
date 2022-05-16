@@ -1,18 +1,20 @@
 <template>
   <div>
-    <p>Progress 45% 2 minutes left</p>
-    <v-progress-linear value="45"></v-progress-linear>
+    <br>
+    <p>Progress {{ progress }}%</p>
+    <v-progress-linear :value="progress"></v-progress-linear>
     <br>
     <v-tabs v-model="selectedAreaIndex">
       <v-tab v-for="(area) in this.$store.state.areas" :key="area.id" @change="updateVisiblePrograms(area.id)"
              :disabled="getVisiblePrograms(area.id).length===0">
         {{ area.name }}
+        <v-icon v-if="isAreaCompleted(area.id)" right>mdi-checkbox-marked-circle</v-icon>
       </v-tab>
     </v-tabs>
     <v-tabs v-model="selectedProgramIndex">
-      <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)">{{
-          program.name
-        }}
+      <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)">
+        {{ program.name }}
+        <v-icon v-if="isProgramCompleted(program.id)" right>mdi-checkbox-marked-circle</v-icon>
       </v-tab>
     </v-tabs>
     <br>
@@ -137,6 +139,7 @@ import Linkages from '../components/Linkages'
 import NationalFrameworks from '../components/NationalFrameworks'
 import Evolution from '../components/Evolution'
 import KeyAgencyActions from "@/components/KeyAgencyActions";
+import * as util from '../assets/js/utils'
 
 export default {
   name: 'Questionnaire',
@@ -153,10 +156,12 @@ export default {
     this.$store.state.currentProgram = this.visiblePrograms[0];
     this.nextProgram = this.getNextProgram();
     await this.$refs.programDescription.load();
+    await this.updateProgress();
   },
   data() {
     return {
       e1: 1,
+      progress: 0,
       selectedAreaIndex: 0,
       selectedAreaId: "",
       selectedProgramIndex: 0,
@@ -165,6 +170,35 @@ export default {
     }
   },
   methods: {
+    isAreaCompleted(areaId) {
+      return this.$store.state.completedAreas.has(areaId);
+    },
+    isProgramCompleted(programId) {
+      return this.$store.state.completedPrograms.has(programId);
+    },
+    async updateProgress() {
+      let totalProgress = 0;
+      const completedPrograms = new Set();
+      for (let program of this.$store.state.programSelection) {
+        const progress = await util.loadProgress(program, this.$store.state.token);
+        if (progress === 1) completedPrograms.add(program);
+        totalProgress = totalProgress + progress;
+      }
+      totalProgress = totalProgress / this.$store.state.programSelection.size;
+      this.progress = (totalProgress * 100).toFixed(0);
+      this.$store.commit("updateCompletedPrograms", completedPrograms);
+
+      let completedAreas = new Set();
+      for (let i = 0; i < this.$store.state.areas.length; i++) {
+        let area = this.$store.state.areas[i];
+        let visiblePrograms = this.getVisiblePrograms(area.id);
+        if (visiblePrograms.length === 0) continue;
+        let unCompletedPrograms = visiblePrograms.filter(program => !this.isProgramCompleted(program.id));
+        if (unCompletedPrograms.length !== 0) continue;
+        completedAreas.add(area.id);
+      }
+      this.$store.commit("updateCompletedAreas", completedAreas);
+    },
     fromProgramDescriptionToNationalFramework: async function () {
       this.e1 = 2;
       await this.$refs.nationalFramework.load();
@@ -173,40 +207,48 @@ export default {
       await this.$refs.nationalFramework.submitAnswer();
       await this.$refs.keyAgency.load();
       this.e1 = 3;
+      await this.updateProgress();
     },
     fromKeyAgencyToEvolution: async function () {
       await this.$refs.keyAgency.submitAnswer();
       await this.$refs.evolution.load();
       this.e1 = 4;
+      await this.updateProgress();
     },
     fromEvolutionToLinkages: async function () {
       await this.$refs.evolution.submitAnswer();
       await this.$refs.linkages.load();
       this.e1 = 5;
+      await this.updateProgress();
     },
     fromLinkagesToReferences: async function () {
       await this.$refs.linkages.submitAnswer();
       this.e1 = 6;
+      await this.updateProgress();
     },
     fromNationalFrameworkToProgramDescription: async function () {
       await this.$refs.nationalFramework.submitAnswer();
       await this.$refs.programDescription.load();
       this.e1 = 1;
+      await this.updateProgress();
     },
     fromKeyAgencyToNationalFramework: async function () {
       await this.$refs.keyAgency.submitAnswer();
       await this.$refs.nationalFramework.load();
       this.e1 = 2;
+      await this.updateProgress();
     },
     fromEvolutionKeyAgency: async function () {
       await this.$refs.evolution.submitAnswer();
       await this.$refs.keyAgency.load();
       this.e1 = 3;
+      await this.updateProgress();
     },
     fromLinkagesToEvolution: async function () {
       await this.$refs.linkages.submitAnswer();
       await this.$refs.evolution.load();
       this.e1 = 4;
+      await this.updateProgress();
     },
     gotoNextProgram: async function () {
       if (this.nextProgram === null) {
@@ -275,6 +317,7 @@ export default {
         await this.$refs.linkages.submitAnswer();
         await this.$refs.linkages.load();
       }
+      await this.updateProgress();
     },
     updateSelectedProgram: async function (program) {
       this.$store.state.currentProgram = program;
