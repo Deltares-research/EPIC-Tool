@@ -26,7 +26,9 @@ class Command(BaseCommand):
     default_data_dir: Optional[Path] = None
 
     def add_arguments(self, parser):
-        parser.add_argument("default_files", type=Path, default=test_data_dir / "xlsx")
+        parser.add_argument(
+            "default_files", type=Path, default=test_data_dir / "xlsx", nargs="?"
+        )
 
     def _remove_migrations(self):
         """
