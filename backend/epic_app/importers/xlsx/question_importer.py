@@ -80,7 +80,7 @@ class _YesNoJustifyQuestionImporter(BaseEpicImporter):
             c_question: Question = self._get_type()(
                 title=q_question.title,
                 description=q_question.description,
-                program=f_program_query.first(),
+                program=f_program_query,
             )
             c_question.save()
 
