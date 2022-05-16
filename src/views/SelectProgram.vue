@@ -3,6 +3,7 @@
     <h2 style="color:darkred">Program selection</h2>
     <br>
     <h3>Please select 1 or more programs</h3>
+    <p>Current selection is: {{ selectedProgramsText }}</p>
     <br>
     <v-dialog v-model="showDialog" width="500">
       <v-card>
@@ -64,7 +65,7 @@
       </v-col>
       <v-col md="3"></v-col>
       <v-col md="1">
-        <v-btn to="Questionnaire" text color="primary">Start
+        <v-btn to="Questionnaire" text color="primary" :disabled="this.$store.state.programSelection.size===0">Start
           <v-icon>mdi-step-forward</v-icon>
         </v-btn>
       </v-col>
@@ -101,6 +102,7 @@ export default {
     this.agencies = await response.json();
     this.agencies.sort((a, b) => a.id - b.id);
 
+    this.updateSelectedProgramsText();
     if (this.$store.state.initialized) return;
     response = await fetch('http://localhost:8000/api/area/?format=json', options);
     let areas = await response.json();
@@ -114,10 +116,23 @@ export default {
       groupSelection: new Set(),
       showDialog: false,
       title: "",
-      description: ""
+      description: "",
+      selectedProgramsText: "",
     }
   },
   methods: {
+    updateSelectedProgramsText: function () {
+      let selectedProgramsText = "";
+      for (let program of this.$store.state.programs) {
+        if (!this.$store.state.programSelection.has(program.id)) continue;
+        if (selectedProgramsText === "") {
+          selectedProgramsText = program.name;
+          continue;
+        }
+        selectedProgramsText = selectedProgramsText + ", " + program.name;
+      }
+      this.selectedProgramsText = selectedProgramsText;
+    },
     isAgencySelected: function (agency) {
       if (this.$store.state.selectedAgency === undefined) return false;
       return this.$store.state.selectedAgency.id === agency.id;
@@ -125,12 +140,14 @@ export default {
     selectProgramsForAgency: function (agency) {
       this.$store.commit("toggleAgencySelection", agency);
       this.updateCheckBox++;
+      this.updateSelectedProgramsText();
     },
     getCheckBoxValue: function (programId) {
       return this.$store.state.programSelection.has(programId);
     },
     selectProgram: function (programId) {
       this.$store.commit("toggleSelection", programId);
+      this.updateSelectedProgramsText();
     },
     isGroupSelected: function (groupId) {
       return this.groupSelection.has(groupId);
