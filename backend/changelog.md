@@ -1,3 +1,9 @@
+## v0.21.1 (2022-05-13)
+
+### Fix
+
+- **epic_app/importers/xlsx/**: improved import by delegating validation to each method for better error handling
+
 ## v0.21.0 (2022-05-11)
 
 ### Feat

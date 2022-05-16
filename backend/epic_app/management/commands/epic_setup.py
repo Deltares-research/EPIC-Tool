@@ -23,6 +23,10 @@ class Command(BaseCommand):
     # epic_setup.py -> commands -> management -> epic_app
     epic_app_dir: Path = Path(__file__).parent.parent.parent
     root_dir: Path = epic_app_dir.parent
+    default_data_dir: Optional[Path] = None
+
+    def add_arguments(self, parser):
+        parser.add_argument("default_files", type=Path, default=test_data_dir / "xlsx")
 
     def _remove_migrations(self):
         """
@@ -51,25 +55,30 @@ class Command(BaseCommand):
             self.style.SUCCESS("Successfully cleaned up previous database structure.")
         )
 
-    def _import_files(self, test_data_dir: Path):
+    def _import_files(self, import_files_dir: Path):
         """
         Imports all the available files to create a reliable test environment.
 
         Args:
-            test_data_dir (Path): Path to the test directory.
+            import_files_dir (Path): Path to the test directory.
         """
 
         def import_and_log(filepath: Path, epic_importer: Type[BaseEpicImporter]):
-            test_file = test_data_dir / "xlsx" / filepath
-            if test_file.is_file():
+            import_file = import_files_dir / filepath
+            if import_file.is_file():
                 self.stdout.write(
-                    self.style.MIGRATE_HEADING(f"Importing main data from {test_file}.")
+                    self.style.MIGRATE_HEADING(
+                        f"Importing main data from {import_file}."
+                    )
                 )
                 try:
-                    epic_importer().import_file(test_file)
+                    epic_importer().import_file(import_file)
                     self.stdout.write(self.style.SUCCESS("Import successful."))
-                except Exception:
+                except Exception as err_info:
                     self.stdout.write(self.style.ERROR(f"Failed to import {filepath}."))
+                    self.stdout.write(
+                        self.style.ERROR_OUTPUT("\n".join(err_info.messages))
+                    )
             else:
                 self.stdout.write(
                     self.style.ERROR(f"File to import not found at {filepath}")
@@ -138,14 +147,14 @@ class Command(BaseCommand):
         create_organization("Rebel Alliance", ["Luke", "Leia"])
 
     def _import_test_db(self):
-        if not test_data_dir.is_dir():
+        if not self.default_data_dir.is_dir():
             self.stdout.write(
                 self.style.ERROR(
-                    f"No test data found at {test_data_dir}, database will be empty on start."
+                    f"No test data found at {self.default_data_dir}, database will be empty on start."
                 )
             )
         try:
-            self._import_files(test_data_dir)
+            self._import_files(self.default_data_dir)
             self._create_dummy_users()
         except Exception as e_info:
             call_command("flush")
@@ -166,6 +175,7 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> Optional[str]:
         try:
             self._cleanup_db()
+            self.default_data_dir = options["default_files"]
             self._migrate_db()
         except Exception as e_info:
             self.stdout.write(

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List, Type, Union
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.forms import ValidationError
 from openpyxl.cell import Cell
 
 from epic_app.importers.xlsx.base_importer import BaseEpicImporter
@@ -42,6 +43,10 @@ class _YesNoJustifyQuestionImporter(BaseEpicImporter):
         # Skip the first line as it's the columns names
         _headers = line_objects.pop(0)
         self._cleanup_questions()
+        errors_found = self._validate(line_objects)
+        if any(errors_found):
+            raise ValidationError(errors_found)
+
         self._import_questions(line_objects)
 
     def _get_type(self) -> Type[Question]:
@@ -50,16 +55,28 @@ class _YesNoJustifyQuestionImporter(BaseEpicImporter):
     def _cleanup_questions(self):
         self._get_type().objects.all().delete()
 
+    def _validate(
+        self,
+        xlsx_line_objects: List[XlsxLineObject],
+    ) -> List[str]:
+        errors_found = []
+        n_line_addition = 2  # Excluded header + start enumerate is 0.
+        for n_line, xlsx_line in enumerate(xlsx_line_objects):
+            if not Program.objects.filter(
+                name__iexact=xlsx_line.program, group__name__iexact=xlsx_line.group
+            ).exists():
+                error_line = n_line + n_line_addition
+                errors_found.append(
+                    f"  - Line {error_line}. Program: '{xlsx_line.program}', Group: '{xlsx_line.group}' does not exist."
+                )
+        return errors_found
+
     def _import_questions(self, imported_questions: List[XlsxLineObject]):
         for q_question in imported_questions:
             # Create new question
-            f_program_query = Program.objects.filter(
-                name=q_question.program, group__name=q_question.group
+            f_program_query = Program.objects.get(
+                name__iexact=q_question.program, group__name__iexact=q_question.group
             )
-            if not f_program_query.exists():
-                raise ValueError(
-                    f"Program '{q_question.program}' for group '{q_question.group} not found, import can't go through."
-                )
             c_question: Question = self._get_type()(
                 title=q_question.title,
                 description=q_question.description,
@@ -101,10 +118,28 @@ class EvolutionQuestionImporter(BaseEpicImporter):
             new_line.effective_description = cls.get_valid_cell(xlsx_row, 6)
             return new_line
 
+    def _validate(
+        self,
+        xlsx_line_objects: List[XlsxLineObject],
+    ) -> List[str]:
+        errors_found = []
+        n_line_addition = 2  # Excluded header + start enumerate is 0.
+        for n_line, xlsx_line in enumerate(xlsx_line_objects):
+            if not Program.objects.filter(name__iexact=xlsx_line.program).exists():
+                error_line = n_line + n_line_addition
+                errors_found.append(
+                    f"  - Line {error_line}. Program: '{xlsx_line.program}' does not exist."
+                )
+        return errors_found
+
     def import_file(self, input_file: Union[InMemoryUploadedFile, Path]):
         line_objects = self._get_xlsx_line_objects(input_file)
         self._cleanup_questions()
         _headers = line_objects.pop(0)
+        errors_found = self._validate(line_objects)
+        if any(errors_found):
+            raise ValidationError(errors_found)
+
         self._import_questions(line_objects)
 
     def _cleanup_questions(self):
@@ -113,11 +148,7 @@ class EvolutionQuestionImporter(BaseEpicImporter):
     def _import_questions(self, imported_questions: List[XlsxLineObject]):
         for q_question in imported_questions:
             # Create new question
-            if not Program.objects.filter(name=q_question.program).exists():
-                raise ValueError(
-                    f"Program '{q_question.program}' not found, import can't go through."
-                )
-            p_found = Program.objects.filter(name=q_question.program).first()
+            p_found = Program.objects.get(name__iexact=q_question.program)
             c_question = EvolutionQuestion(
                 title=q_question.dimension,
                 nascent_description=q_question.nascent_description,
