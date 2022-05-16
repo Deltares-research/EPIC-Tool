@@ -80,7 +80,7 @@ class TestEpicDomainImporter:
         # Verify final expectations
         assert len(Area.objects.all()) == 5
         assert len(Group.objects.all()) == 11
-        assert len(Program.objects.all()) == 43
+        assert len(Program.objects.all()) == 39
         assert any(
             [p.description != "" for p in Program.objects.all()]
         ), "No descriptions were imported."
