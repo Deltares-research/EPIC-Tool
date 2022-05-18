@@ -26,13 +26,13 @@ class TestYesNoJustifyQuestionImporter:
         KeyAgencyActionsQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "keyagencyactionsquestions.xlsx",
             question_type=KeyAgencyActionsQuestion,
-            expected_entries=145,
+            expected_entries=149,
             first_entry_title="Does the national WRM agency have key close links with other relevant agencies?",
         ),
         NationalFrameworkQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "nationalframeworkquestions.xlsx",
             question_type=NationalFrameworkQuestion,
-            expected_entries=39,
+            expected_entries=40,
             first_entry_title="Is there a national strategic water resources management plan in place?",
         ),
     }

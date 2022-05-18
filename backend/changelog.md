@@ -1,3 +1,9 @@
+## v0.22.0 (2022-05-17)
+
+### Feat
+
+- **xlsx/domain_importer.py;models.py;program_serializer.py**: Added new fields for Program
+
 ## v0.21.1 (2022-05-13)
 
 ### Fix
