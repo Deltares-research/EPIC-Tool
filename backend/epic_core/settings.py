@@ -26,9 +26,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = Path(".django_secrets").read_text().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(Path(".django_debug").read_text().strip())
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8000",
+]
 
 
 # Application definition
@@ -72,10 +75,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8000",
-]
+CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
 CORS_URLS_REGEX = r"^/api/.*$"
 
 ROOT_URLCONF = "epic_core.urls"
@@ -96,6 +96,8 @@ TEMPLATES = [
     },
 ]
 
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 WSGI_APPLICATION = "epic_core.wsgi.application"
 
 

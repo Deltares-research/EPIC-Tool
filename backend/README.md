@@ -43,6 +43,12 @@ Installing django is pretty simple. For the next steps we assume poetry has been
     >> Path('.django_secrets').write_text(secrets.token_hex(16))
     ```
     > A new file is now generated containing your unique token key expected by /epic_core/settings.py. In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
+    > Define also the debug value: 'False' for production, 'True' for development:
+    ```cli
+    python
+    >> from pathlib import Path
+    >> Path('.django_debug').write_text("True")
+    ```
 * Run our custom command to create the database and add an admin user:
     ```
     python manage.py epic_setup
