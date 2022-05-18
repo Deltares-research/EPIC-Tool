@@ -19,6 +19,8 @@ class ProgramSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "reference_description",
+            "reference_link",
             "agencies",
             "group",
             "questions",
@@ -36,4 +38,11 @@ class SimpleProgramSerializer(serializers.ModelSerializer):
         """
 
         model = Program
-        fields = ("url", "id", "name", "description")
+        fields = (
+            "url",
+            "id",
+            "name",
+            "description",
+            "reference_description",
+            "reference_link",
+        )

@@ -507,42 +507,57 @@ class TestGroupViewSet:
 @pytest.mark.django_db
 class TestProgramViewSet:
     url_root = "/api/program/"
+    basic_user_fixture = [
+        pytest.param(
+            "Palpatine",
+            id="Non admins user.",
+        ),
+        pytest.param(
+            "admin",
+            id="Admins user.",
+        ),
+    ]
 
-    @pytest.mark.parametrize(
-        "epic_username",
-        [
-            pytest.param(
-                "Palpatine",
-                id="Non admins user.",
-            ),
-            pytest.param(
-                "admin",
-                id="Admins user.",
-            ),
-        ],
-    )
-    @pytest.mark.parametrize(
-        "url_suffix, expected_entries",
-        [
-            pytest.param("", 5, id="GET"),
-            pytest.param("1/", 7, id="RETRIEVE (Program 'a' with 9 fields)"),
-        ],
-    )
+    @pytest.mark.parametrize("epic_username", basic_user_fixture)
+    def test_GET_program(
+        self,
+        epic_username: str,
+        api_client: APIClient,
+    ):
+        # Run request.
+        set_user_auth_token(api_client, epic_username)
+        response = api_client.get(self.url_root)
+
+        # Verify final exepctations.
+        assert response.status_code == 200
+        assert len(response.data) == 5
+
+    @pytest.mark.parametrize("epic_username", basic_user_fixture)
     def test_RETRIEVE_program(
         self,
         epic_username: str,
-        url_suffix: str,
-        expected_entries: int,
         api_client: APIClient,
     ):
-        full_url = self.url_root + url_suffix
+        exported_data = {
+            "url": "http://testserver/api/program/1/",
+            "id": 1,
+            "name": "a",
+            "description": "May the Force be with you",
+            "reference_description": None,
+            "reference_link": "",
+            "agencies": [1, 2],
+            "group": 1,
+            "questions": [1, 2, 3, 4, 5, 6],
+        }
+        full_url = self.url_root + "1/"
         # Run request.
         set_user_auth_token(api_client, epic_username)
         response = api_client.get(full_url)
 
         # Verify final exepctations.
         assert response.status_code == 200
-        assert len(response.data) == expected_entries
+        assert len(response.data) == 9  # 9 fields
+        assert response.data == exported_data
 
     @pytest.mark.parametrize(
         "url_suffix, expected_entries",
