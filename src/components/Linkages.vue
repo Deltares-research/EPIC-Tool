@@ -5,6 +5,17 @@
     <br>
     <h3>{{ question }}</h3>
     <br>
+    <v-dialog v-model="showDialog" width="800">
+      <v-card>
+        <v-card-title class="text-h5 grey lighten-2">{{ title }}</v-card-title>
+        <v-card-text>{{ description }}</v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="showDialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-card :elevation="2" color="blue-grey lighten-4" v-for="area in this.$store.state.areas" :key="area.id">
       <v-container fluid class="fill-height">
         <v-row no-gutters v-for="(group,index) in area.groups" :key="group.id">
@@ -24,7 +35,7 @@
                   <v-checkbox :input-value="isSelected(program.id)"
                               @click="selectProgram(program.id)"></v-checkbox>
                 </v-list-item-action>
-                <v-btn color="black" x-small text @click="showProgramDescription(program.name)">{{ program.name }}
+                <v-btn color="black" x-small text @click="showProgramDescription(program)">{{ program.name }}
                 </v-btn>
               </v-list-item>
             </v-list-item-group>
@@ -67,12 +78,19 @@ export default Vue.extend({
     isSelected(programId) {
       return this.selectedPrograms.has(programId);
     },
+    showProgramDescription: function (program) {
+      this.showDialog = true;
+      this.title = program.name;
+      this.description = program.description;
+    }
   },
   data: () => ({
     active: false,
     title: "",
+    showDialog: false,
     answer: "",
     question: "",
+    description: "",
     selectedPrograms: new Set(),
   }),
 })

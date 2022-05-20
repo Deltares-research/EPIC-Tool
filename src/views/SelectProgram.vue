@@ -3,7 +3,7 @@
     <h2 style="color:darkred">Program selection</h2>
     <br>
     <h3>Please select 1 or more programs</h3>
-    <p>Current selection is: {{ selectedProgramsText }}</p>
+    <p>Current selection is: {{ this.$store.state.selectedProgramsText }}</p>
     <br>
     <v-dialog v-model="showDialog" width="500">
       <v-card>
@@ -65,9 +65,7 @@
       </v-col>
       <v-col md="3"></v-col>
       <v-col md="1">
-        <v-btn to="Questionnaire" text color="primary" :disabled="this.$store.state.programSelection.size===0">Start
-          <v-icon>mdi-step-forward</v-icon>
-        </v-btn>
+        <v-btn to="Questionnaire" text color="primary" :disabled="this.$store.state.programSelection.size===0">Start<v-icon>mdi-step-forward</v-icon></v-btn>
       </v-col>
     </v-row>
     <v-row no-gutters>
@@ -117,11 +115,10 @@ export default {
       showDialog: false,
       title: "",
       description: "",
-      selectedProgramsText: "",
     }
   },
   methods: {
-    updateSelectedProgramsText: function () {
+    updateSelectedProgramsText: async function () {
       let selectedProgramsText = "";
       for (let program of this.$store.state.programs) {
         if (!this.$store.state.programSelection.has(program.id)) continue;
@@ -131,7 +128,8 @@ export default {
         }
         selectedProgramsText = selectedProgramsText + ", " + program.name;
       }
-      this.selectedProgramsText = selectedProgramsText;
+      this.$store.state.selectedProgramsText = selectedProgramsText;
+      await this.$store.dispatch('updateProgress');
     },
     isAgencySelected: function (agency) {
       if (this.$store.state.selectedAgency === undefined) return false;
