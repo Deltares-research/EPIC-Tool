@@ -44,12 +44,12 @@ import * as util from '../assets/js/utils'
 export default Vue.extend({
   name: 'NationalFrameworks',
   methods: {
-    loadNextQuestion: function () {
-      this.submitAnswer();
+    loadNextQuestion: async function () {
+      await this.submitAnswer();
       this.page++;
     },
-    loadPreviousQuestion: function () {
-      this.submitAnswer();
+    loadPreviousQuestion: async function () {
+      await this.submitAnswer();
       this.page--;
     },
     submitAnswer: async function () {

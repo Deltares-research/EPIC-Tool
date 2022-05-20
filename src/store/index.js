@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import * as util from "@/assets/js/utils";
 
 Vue.use(Vuex)
 
@@ -10,11 +11,28 @@ export default new Vuex.Store({
         areas: [],
         groups: [],
         programs: [],
+        progress: 0,
+        selectedProgramsText: "",
         programSelection: new Set(),
         currentProgram: {},
+        completedPrograms: new Set(),
+        completedAreas: new Set(),
         initialized: false,
     },
+
     mutations: {
+        updateCompletedAreas(state, completedAreas) {
+            state.completedAreas.clear();
+            completedAreas.forEach(program => {
+                state.completedAreas.add(program);
+            })
+        },
+        updateCompletedPrograms(state, completedPrograms) {
+            state.completedPrograms.clear();
+            completedPrograms.forEach(program => {
+                state.completedPrograms.add(program);
+            })
+        },
         toggleAgencySelection(state, agency) {
             if (state.selectedAgency.programs !== undefined) {
                 for (const program of state.selectedAgency.programs) {
@@ -63,6 +81,19 @@ export default new Vuex.Store({
             state.programSelection = new Set();
         },
     },
-    actions: {},
+    actions: {
+        async updateProgress(context){
+            let totalProgress = 0;
+            const completedPrograms = new Set();
+            for (let program of context.state.programSelection) {
+                const progress = await util.loadProgress(program, context.state.token);
+                if (progress === 1) completedPrograms.add(program);
+                totalProgress = totalProgress + progress;
+            }
+            totalProgress = totalProgress / context.state.programSelection.size;
+            context.state.progress = (totalProgress * 100).toFixed(0);
+            context.commit("updateCompletedPrograms", completedPrograms);
+        }
+    },
     modules: {}
 })

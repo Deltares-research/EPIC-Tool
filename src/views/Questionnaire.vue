@@ -1,18 +1,20 @@
 <template>
   <div>
-    <p>Progress 45% 2 minutes left</p>
-    <v-progress-linear value="45"></v-progress-linear>
     <br>
-    <v-tabs v-model="selectedAreaIndex">
+    <p>Progress {{ this.$store.state.progress }}%</p>
+    <v-progress-linear :value="this.$store.state.progress"></v-progress-linear>
+    <br>
+    <v-tabs v-model="selectedAreaIndex" >
       <v-tab v-for="(area) in this.$store.state.areas" :key="area.id" @change="updateVisiblePrograms(area.id)"
              :disabled="getVisiblePrograms(area.id).length===0">
         {{ area.name }}
+        <v-icon v-if="isAreaCompleted(area.id)" right>mdi-checkbox-marked-circle</v-icon>
       </v-tab>
     </v-tabs>
-    <v-tabs v-model="selectedProgramIndex">
-      <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)">{{
-          program.name
-        }}
+    <v-tabs v-model="selectedProgramIndex" >
+      <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)">
+        {{ program.name }}
+        <v-icon v-if="isProgramCompleted(program.id)" right>mdi-checkbox-marked-circle</v-icon>
       </v-tab>
     </v-tabs>
     <br>
@@ -32,99 +34,50 @@
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
+          <program-description-navigation
+              @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
           <program-description ref="programDescription"></program-description>
-          <v-card-actions>
-            <v-row>
-              <v-col md="6">
-              </v-col>
-              <v-col md="6" class="text-right">
-                <v-btn text color="primary" @click="fromProgramDescriptionToNationalFramework">National framework
-                  <v-icon>mdi-step-forward</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-actions>
+          <program-description-navigation
+              @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
         </v-stepper-content>
         <v-stepper-content step="2">
+          <national-framework-navigation
+              @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
+              @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"/>
           <national-frameworks ref="nationalFramework"></national-frameworks>
-          <v-row>
-            <v-col md="6">
-              <v-btn text color="primary" @click="fromNationalFrameworkToProgramDescription">
-                <v-icon>mdi-step-backward</v-icon>
-                Program description
-              </v-btn>
-            </v-col>
-            <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="fromNationalFrameworkToKeyAgency">Key agency actions
-                <v-icon>mdi-step-forward</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
+          <national-framework-navigation
+              @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
+              @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"/>
         </v-stepper-content>
         <v-stepper-content step="3">
+          <key-agency-navigation @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
+                                 @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
           <key-agency-actions ref="keyAgency"/>
-          <v-row>
-            <v-col md="6">
-              <v-btn text color="primary" @click="fromKeyAgencyToNationalFramework">
-                <v-icon>mdi-step-backward</v-icon>
-                National framework
-              </v-btn>
-            </v-col>
-            <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="fromKeyAgencyToEvolution">Evolution
-                <v-icon>mdi-step-forward</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
+          <key-agency-navigation @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
+                                 @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
         </v-stepper-content>
         <v-stepper-content step="4">
+          <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
+                                @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
           <evolution ref="evolution"></evolution>
-          <v-row>
-            <v-col md="6">
-              <v-btn text color="primary" @click="fromEvolutionKeyAgency">
-                <v-icon>mdi-step-backward</v-icon>
-                Key agency actions
-              </v-btn>
-            </v-col>
-            <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="fromEvolutionToLinkages">Linkages
-                <v-icon>mdi-step-forward</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
+          <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
+                                @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
         </v-stepper-content>
         <v-stepper-content step="5">
+          <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
+                               @fromLinkagesToReferences="fromLinkagesToReferences"/>
           <linkages ref="linkages"></linkages>
-          <v-row>
-            <v-col md="6">
-              <v-btn text color="primary" @click="fromLinkagesToEvolution">
-                <v-icon>mdi-step-backward</v-icon>
-                Key agency actions
-              </v-btn>
-            </v-col>
-            <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="fromLinkagesToReferences">References
-                <v-icon>mdi-step-forward</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
+          <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
+                               @fromLinkagesToReferences="fromLinkagesToReferences"/>
         </v-stepper-content>
         <v-stepper-content step="6">
-          <v-card class="mb-12" color="grey lighten-1" height="200px"></v-card>
-          <v-row>
-            <v-col md="6">
-              <v-btn text color="primary" @click="e1 = 5">
-                <v-icon>mdi-step-backward</v-icon>
-                Linkages
-              </v-btn>
-            </v-col>
-            <v-col md="6" class="text-right">
-              <v-btn text color="primary" @click="gotoNextProgram">
-                {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
-                <v-icon>mdi-step-forward</v-icon>
-              </v-btn>
-            </v-col>
-          </v-row>
+          <references-navigation @back="e1=5" @forward="gotoNextProgram">
+            {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
+          </references-navigation>
+          <references/>
+          <references-navigation @back="e1=5" @forward="gotoNextProgram">
+            {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
+          </references-navigation>
         </v-stepper-content>
       </v-stepper-items>
 
@@ -132,7 +85,14 @@
   </div>
 </template>
 <script>
+import References from "@/components/References";
+import LinkagesNavigation from '../components/LinkagesNavigation'
+import ProgramDescriptionNavigation from '../components/ProgramDescriptionNavigation'
+import NationalFrameworkNavigation from "@/components/NationalFrameworkNavigation";
+import KeyAgencyNavigation from "@/components/KeyAgencyNavigation";
 import ProgramDescription from '../components/ProgramDescription.vue'
+import EvolutionNavigation from "@/components/EvolutionNavigation";
+import ReferencesNavigation from "@/components/ReferencesNavigation";
 import Linkages from '../components/Linkages'
 import NationalFrameworks from '../components/NationalFrameworks'
 import Evolution from '../components/Evolution'
@@ -141,6 +101,13 @@ import KeyAgencyActions from "@/components/KeyAgencyActions";
 export default {
   name: 'Questionnaire',
   components: {
+    References,
+    KeyAgencyNavigation,
+    ReferencesNavigation,
+    NationalFrameworkNavigation,
+    LinkagesNavigation,
+    EvolutionNavigation,
+    ProgramDescriptionNavigation,
     KeyAgencyActions,
     ProgramDescription,
     Linkages,
@@ -148,6 +115,7 @@ export default {
     Evolution
   },
   async mounted() {
+    await this.updateProgress();
     this.selectedAreaIndex = this.getFirstAreaToDisplay();
     this.visiblePrograms = this.getVisiblePrograms(this.$store.state.areas[this.selectedAreaIndex].id);
     this.$store.state.currentProgram = this.visiblePrograms[0];
@@ -165,52 +133,80 @@ export default {
     }
   },
   methods: {
+    isAreaCompleted(areaId) {
+      return this.$store.state.completedAreas.has(areaId);
+    },
+    isProgramCompleted(programId) {
+      return this.$store.state.completedPrograms.has(programId);
+    },
+    async updateProgress() {
+      await this.$store.dispatch('updateProgress');
+      let completedAreas = new Set();
+      for (let i = 0; i < this.$store.state.areas.length; i++) {
+        let area = this.$store.state.areas[i];
+        let visiblePrograms = this.getVisiblePrograms(area.id);
+        if (visiblePrograms.length === 0) continue;
+        let unCompletedPrograms = visiblePrograms.filter(program => !this.isProgramCompleted(program.id));
+        if (unCompletedPrograms.length !== 0) continue;
+        completedAreas.add(area.id);
+      }
+      this.$store.commit("updateCompletedAreas", completedAreas);
+    },
     fromProgramDescriptionToNationalFramework: async function () {
-      this.e1 = 2;
       await this.$refs.nationalFramework.load();
+      this.e1 = 2;
     },
     fromNationalFrameworkToKeyAgency: async function () {
       await this.$refs.nationalFramework.submitAnswer();
       await this.$refs.keyAgency.load();
       this.e1 = 3;
+      await this.updateProgress();
     },
     fromKeyAgencyToEvolution: async function () {
       await this.$refs.keyAgency.submitAnswer();
       await this.$refs.evolution.load();
+      await this.updateProgress();
       this.e1 = 4;
     },
     fromEvolutionToLinkages: async function () {
       await this.$refs.evolution.submitAnswer();
       await this.$refs.linkages.load();
+      await this.updateProgress();
       this.e1 = 5;
+
     },
     fromLinkagesToReferences: async function () {
       await this.$refs.linkages.submitAnswer();
+      await this.updateProgress();
       this.e1 = 6;
     },
     fromNationalFrameworkToProgramDescription: async function () {
       await this.$refs.nationalFramework.submitAnswer();
       await this.$refs.programDescription.load();
+      await this.updateProgress();
       this.e1 = 1;
     },
     fromKeyAgencyToNationalFramework: async function () {
       await this.$refs.keyAgency.submitAnswer();
       await this.$refs.nationalFramework.load();
+      await this.updateProgress();
       this.e1 = 2;
     },
     fromEvolutionKeyAgency: async function () {
       await this.$refs.evolution.submitAnswer();
       await this.$refs.keyAgency.load();
+      await this.updateProgress();
       this.e1 = 3;
     },
     fromLinkagesToEvolution: async function () {
       await this.$refs.linkages.submitAnswer();
       await this.$refs.evolution.load();
+      await this.updateProgress();
       this.e1 = 4;
     },
     gotoNextProgram: async function () {
       if (this.nextProgram === null) {
-        this.$router.push("EndPage");
+        await this.$router.push("EndPage");
         return;
       }
       this.$store.state.currentProgram = this.nextProgram;
@@ -275,6 +271,7 @@ export default {
         await this.$refs.linkages.submitAnswer();
         await this.$refs.linkages.load();
       }
+      await this.updateProgress();
     },
     updateSelectedProgram: async function (program) {
       this.$store.state.currentProgram = program;

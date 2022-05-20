@@ -14,6 +14,25 @@ export async function loadQuestions(programId, questionType, token) {
     return await response.json();
 }
 
+export async function loadProgress(programId, token) {
+    const options = {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Token ' + token,
+        },
+    }
+    let answer = 'http://localhost:8000/api/program/' + programId + '/progress/?format=json';
+    let response = await fetch(answer, options);
+    if (response.status !== 200) {
+        return {};
+    }
+    const progress = await response.json();
+    return progress.progress;
+}
+
 export async function loadAnswer(questionId, token) {
     const options = {
         method: 'GET',
@@ -31,6 +50,7 @@ export async function loadAnswer(questionId, token) {
     }
     return await response.json();
 }
+
 export async function saveSelectedChoiceAnswer(answerId, justifyAnswer, selectedAnswer, token) {
     const newAnswer = {};
     newAnswer.justify_answer = justifyAnswer;
@@ -47,10 +67,11 @@ export async function saveSelectedChoiceAnswer(answerId, justifyAnswer, selected
     }
     let input = 'http://localhost:8000/api/answer/' + answerId + '/';
     let res = await fetch(input, options);
-    if(res.status != 200){
+    if (res.status != 200) {
         alert("Error when trying to save answer")
     }
 }
+
 export async function saveSelectedProgramsAnswer(answerId, selectedPrograms, token) {
     const newAnswer = {};
     newAnswer.justify_answer = "";
