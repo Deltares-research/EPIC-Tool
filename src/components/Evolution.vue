@@ -70,7 +70,8 @@ export default Vue.extend({
           continue
         }
         let justification = i === this.dimensions.length - 1 ? this.displayedJustification : "";
-        await util.saveSelectedChoiceAnswer(this.answers[i][0].id, justification, choice, this.$store.state.token)
+        await util.saveSelectedChoiceAnswer(this.answers[i][0].id, justification, choice, this.$store.state.token);
+        this.$emit("updateProgress");
       }
     },
     load: async function () {
@@ -83,6 +84,7 @@ export default Vue.extend({
       }
       this.selected = [this.answers.length];
       for (let i = 0; i < this.answers.length; i++) {
+        if (this.answers[i][0] === undefined) return;
         this.selected[i] = this.answers[i][0].selected_choice;
       }
       this.displayedJustification = this.answers[this.answers.length - 1][0].justify_answer;
