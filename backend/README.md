@@ -32,7 +32,7 @@ If you wish to collaborate on this project you may want to get familiar with our
 
 You should have now all the dependencies, including django and djangorestframework, installed in our environment.
 
-## Django deployment.
+## Django (development) deployment.
 Installing django is pretty simple. For the next steps we assume poetry has been installed as described in the previous steps.
 * Navigate with the commandline to the \backend directory.
 * Create a secret key through Python CLI
@@ -51,15 +51,108 @@ Installing django is pretty simple. For the next steps we assume poetry has been
     ```
 * Run our custom command to create the database and add an admin user:
     ```
-    python manage.py epic_setup
+    poetry python manage.py epic_setup --test
     ```
-    > The command line will prompt you to add the username, e-mail and password for your admin user.
-    > An output in the command line will show you where the server is deployed. By default you should be able to check its functioning here: http://127.0.0.1:8000/ 
+    > This will import all initial data and generate a test admin user (admin-admin) and several test 'EpicUsers'.
+    > An output in the command line will show you where the (local) server is deployed. By default you should be able to check its functioning here: http://127.0.0.1:8000/ 
 
 ## Creating new models.
-During development it is naturall to create new tables or define new columns on a database entry. The most important is to manage the Django migrations with the following steps:
+During development it is natural to create new tables or define new columns on a database entry. The most important is to manage the Django migrations with the following steps:
 ```cli
 python manage.py makemigrations
 python manage.py migrate
 ```
 Also, keep in mind that if a new entity needs to be modified through the Django Admin page it will also have to be added into the admin.py page.
+
+
+## EpicTool backend deployment.
+To deploy the backend in an open environment we recommend following [Django guidelines](https://docs.djangoproject.com/en/4.0/howto/deployment/wsgi/gunicorn/) by using [gunicorn](https://docs.gunicorn.org/en/latest/install.html) and [NGINX].
+
+For this part we will assume a deployment in a UNIX environment.
+
+### Setting up the EpicApp:
+
+#### Pre-requirements.
+* Unix system
+* NGINX (we assume in this guideline it's already configured).
+It could be possible that the current UNIX version does not have the latest python and/or SQLite versions. Please ensure you have installed Python (at least) 3.8 and SQLite (at least) 3.9.
+To check it do the following:
+```cli
+python3
+>> import sqlite3
+>> sqlite3.sqlite_version
+```
+> The first line will prompt us into the python3 CLI. Right below the executed line we will be able to see the current version of our Python3.
+> The third line will display the associated version of SQLite with our Python build.
+> If it does not much the expected value then you should consider recompiling your python checkout.
+
+### Installing Django
+
+* Checkout the /backend directory of the EPIC-Tool repository somewhere recognizable. Such as /var/www/epictool-site/.
+
+* For the first deployment we recommend executing our shell script.
+
+    ```cli
+    cd /var/www/epictool-site/
+    ./initial_deployment.sh
+    ```
+    > This script will do the following:
+    > * Generate the .django_screts and .django_debug (to False)
+    > * Install the epic_app with all its dependencies.
+    > * Import the initial data for the EpicApp.
+    > * Collect and correctly place the static files (css and related).
+    > * Run the server through 'gunicorn' in the background.
+
+* Alternatively, run the previous script step by step unless they are not required in your environment (for instance when you already have the .django_secrets file or you already have users' inputs in the database):
+    ```cli
+    python3 -c "import secrets; from pathlib import Path; Path('.django_secrets').write_text(secrets.token_hex(16))"
+    python3 -c "from pathlib import Path; Path('.django_debug').write_text('False')"
+    poetry install
+    poetry run python3 manage.py collectstatic --noinput
+    ```
+    * If we wish to regenerate the database and import all data:
+    ```cli
+    poetry run python3 manage.py epic_setup
+    ```
+    * Run the server:
+    ```cli 
+    poetry run gunicorn epic_core.wsgi
+    ```
+
+* We might still need to generate a superuser:
+    ```
+    poetry run python manage.py createsuperuser
+    ```
+    * If desired you can change the password after creating the user by running: 
+    ```
+    poetry run python manage.py changepassword <admin username>
+    ```
+### Gunicorn run:
+If we have not executed the custom script, then we need to run on a separate process gunicorn, we only need to execute the following command line as a background activity:
+    ```cli
+    poetry run gunicorn epic_core.wsgi
+    ```
+
+### NGINX configuration:
+Although we are already 'serving' our Django applicaiton, this does not mean that it is accessible outside our local machine.
+Most likely you will require to do a redirection of the requests to the backend. For that it's necessary adding the following lines into your 'nginx' .conf file:
+```conf
+server {
+    ...
+    location ^~ /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+        proxy_set_header Host      $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location ^~ /admin/ {
+        proxy_pass http://127.0.0.1:8000/admin/;
+        proxy_set_header Host      $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+Now our NGINX server will be able to redirect our http calls to our application. As a last step, restart the NGINX server:
+    ```cli
+    sudo systemctl restart nginx
+    ```
