@@ -29,8 +29,11 @@ SECRET_KEY = Path(".django_secrets").read_text().strip()
 DEBUG = bool(Path(".django_debug").read_text().strip())
 
 ALLOWED_HOSTS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8000",
+    "ighcrm-ontwikkel.avi.directory.intra",
+    "ighcrm.avi.directory.intra",
+    "epicresponsetool.deltares.nl",
+    "localhost",
+    "127.0.0.1",
 ]
 
 
@@ -74,8 +77,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
 ]
-
-CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
+_http_hosts = ["http://" + a_h for a_h in ALLOWED_HOSTS]
+_https_hosts = ["https://" + a_h for a_h in ALLOWED_HOSTS]
+CORS_ALLOWED_ORIGINS = _http_hosts + _https_hosts
 CORS_URLS_REGEX = r"^/api/.*$"
 
 ROOT_URLCONF = "epic_core.urls"
@@ -146,6 +150,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
+STATIC_ROOT = "/var/www/html/ighcrm/static/"
 STATIC_URL = "static/"
 
 # Default primary key field type
