@@ -94,9 +94,8 @@ python3
 * Navigate to the fresh checkout
 
     ```cli
-    /var/www/epictool-site/.
+    /var/www/epictool-site/
     ```
-
 * Create a secret key through Python CLI
     ```cli
     python
