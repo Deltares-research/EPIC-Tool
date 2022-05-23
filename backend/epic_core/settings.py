@@ -29,8 +29,10 @@ SECRET_KEY = Path(".django_secrets").read_text().strip()
 DEBUG = bool(Path(".django_debug").read_text().strip())
 
 ALLOWED_HOSTS = [
-    "http://localhost:80",
-    "http://127.0.0.1:80",
+    "ighcrm-ontwikkel.avi.directory.intra",
+    "ighcrm.avi.directory.intra",
+    "epicresponsetool.deltares.nl",
+    "localhost",
 ]
 
 
@@ -74,8 +76,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
 ]
-
-CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
+_http_hosts = ["http://" + a_h for a_h in ALLOWED_HOSTS]
+_https_hosts = ["https://" + a_h for a_h in ALLOWED_HOSTS]
+CORS_ALLOWED_ORIGINS = _http_hosts + _https_hosts
 CORS_URLS_REGEX = r"^/api/.*$"
 
 ROOT_URLCONF = "epic_core.urls"
