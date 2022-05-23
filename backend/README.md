@@ -78,7 +78,6 @@ For this part we will assume a deployment in a UNIX environment.
 It could be possible that the current UNIX version does not have the latest python and/or SQLite versions. Please ensure you have installed Python (at least) 3.8 and SQLite (at least) 3.9.
 To check it do the following:
 ```cli
-
 python3
 >> import sqlite3
 >> sqlite3.sqlite_version
@@ -98,11 +97,11 @@ python3
     ./deploy
     ```
     > This script will do the following:
-    >> Generate the .django_screts and .django_debug (to False)
-    >> Install the epic_app with all its dependencies.
-    >> Import the initial data for the EpicApp.
-    >> Collect and correctly place the static files (css and related).
-    >> Run the server through 'gunicorn' in the background.
+    > * Generate the .django_screts and .django_debug (to False)
+    > * Install the epic_app with all its dependencies.
+    > * Import the initial data for the EpicApp.
+    > * Collect and correctly place the static files (css and related).
+    > * Run the server through 'gunicorn' in the background.
 
 * Alternatively, run the previous script step by step to:
     ```cli
