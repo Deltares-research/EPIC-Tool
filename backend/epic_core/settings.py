@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     "ighcrm.avi.directory.intra",
     "epicresponsetool.deltares.nl",
     "localhost",
+    "127.0.0.1",
 ]
 
 
