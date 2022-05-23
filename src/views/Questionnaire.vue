@@ -4,14 +4,14 @@
     <p>Progress {{ this.$store.state.progress }}%</p>
     <v-progress-linear :value="this.$store.state.progress"></v-progress-linear>
     <br>
-    <v-tabs v-model="selectedAreaIndex" >
+    <v-tabs v-model="selectedAreaIndex">
       <v-tab v-for="(area) in this.$store.state.areas" :key="area.id" @change="updateVisiblePrograms(area.id)"
              :disabled="getVisiblePrograms(area.id).length===0">
         {{ area.name }}
         <v-icon v-if="isAreaCompleted(area.id)" right>mdi-checkbox-marked-circle</v-icon>
       </v-tab>
     </v-tabs>
-    <v-tabs v-model="selectedProgramIndex" >
+    <v-tabs v-model="selectedProgramIndex">
       <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)">
         {{ program.name }}
         <v-icon v-if="isProgramCompleted(program.id)" right>mdi-checkbox-marked-circle</v-icon>
@@ -44,7 +44,7 @@
           <national-framework-navigation
               @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
               @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"/>
-          <national-frameworks ref="nationalFramework"></national-frameworks>
+          <national-frameworks ref="nationalFramework" @updateProgress="updateProgress"></national-frameworks>
           <national-framework-navigation
               @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
               @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"/>
@@ -52,21 +52,21 @@
         <v-stepper-content step="3">
           <key-agency-navigation @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
                                  @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
-          <key-agency-actions ref="keyAgency"/>
+          <key-agency-actions ref="keyAgency" @updateProgress="updateProgress"/>
           <key-agency-navigation @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
                                  @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
         </v-stepper-content>
         <v-stepper-content step="4">
           <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
                                 @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
-          <evolution ref="evolution"></evolution>
+          <evolution ref="evolution" @updateProgress="updateProgress"></evolution>
           <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
                                 @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
         </v-stepper-content>
         <v-stepper-content step="5">
           <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
                                @fromLinkagesToReferences="fromLinkagesToReferences"/>
-          <linkages ref="linkages"></linkages>
+          <linkages ref="linkages" @updateProgress="updateProgress"></linkages>
           <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
                                @fromLinkagesToReferences="fromLinkagesToReferences"/>
         </v-stepper-content>
@@ -74,7 +74,7 @@
           <references-navigation @back="e1=5" @forward="gotoNextProgram">
             {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
           </references-navigation>
-          <references/>
+          <references ref="references"/>
           <references-navigation @back="e1=5" @forward="gotoNextProgram">
             {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
           </references-navigation>
@@ -160,48 +160,41 @@ export default {
       await this.$refs.nationalFramework.submitAnswer();
       await this.$refs.keyAgency.load();
       this.e1 = 3;
-      await this.updateProgress();
     },
     fromKeyAgencyToEvolution: async function () {
       await this.$refs.keyAgency.submitAnswer();
       await this.$refs.evolution.load();
-      await this.updateProgress();
       this.e1 = 4;
     },
     fromEvolutionToLinkages: async function () {
       await this.$refs.evolution.submitAnswer();
       await this.$refs.linkages.load();
-      await this.updateProgress();
       this.e1 = 5;
 
     },
     fromLinkagesToReferences: async function () {
       await this.$refs.linkages.submitAnswer();
-      await this.updateProgress();
+      await this.$refs.references.load();
       this.e1 = 6;
     },
     fromNationalFrameworkToProgramDescription: async function () {
       await this.$refs.nationalFramework.submitAnswer();
       await this.$refs.programDescription.load();
-      await this.updateProgress();
       this.e1 = 1;
     },
     fromKeyAgencyToNationalFramework: async function () {
       await this.$refs.keyAgency.submitAnswer();
       await this.$refs.nationalFramework.load();
-      await this.updateProgress();
       this.e1 = 2;
     },
     fromEvolutionKeyAgency: async function () {
       await this.$refs.evolution.submitAnswer();
       await this.$refs.keyAgency.load();
-      await this.updateProgress();
       this.e1 = 3;
     },
     fromLinkagesToEvolution: async function () {
       await this.$refs.linkages.submitAnswer();
       await this.$refs.evolution.load();
-      await this.updateProgress();
       this.e1 = 4;
     },
     gotoNextProgram: async function () {
@@ -270,6 +263,9 @@ export default {
       if (this.e1 === 5) {
         await this.$refs.linkages.submitAnswer();
         await this.$refs.linkages.load();
+      }
+      if (this.e1 === 6) {
+        await this.$refs.references.load();
       }
       await this.updateProgress();
     },

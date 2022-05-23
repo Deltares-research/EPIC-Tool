@@ -13,7 +13,7 @@ export default {
     load: function () {
       let program = this.$store.state.currentProgram;
       this.title = program.name;
-      this.description = program.description;
+      this.description = program.reference_description;
     }
   },
   data: () => ({

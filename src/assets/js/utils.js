@@ -1,3 +1,5 @@
+let server = process.env.VUE_APP_BACKEND_URL;
+
 export async function loadQuestions(programId, questionType, token) {
     const options = {
         method: 'GET',
@@ -8,7 +10,7 @@ export async function loadQuestions(programId, questionType, token) {
             'Authorization': 'Token ' + token,
         },
     }
-    let input = 'http://localhost:8000/api/program/' + programId + '/question-' + questionType + '/?format=json';
+    let input = server + '/api/program/' + programId + '/question-' + questionType + '/?format=json';
     let response = await fetch(input, options);
     if (response.status !== 200) return [];
     return await response.json();
@@ -24,7 +26,7 @@ export async function loadProgress(programId, token) {
             'Authorization': 'Token ' + token,
         },
     }
-    let answer = 'http://localhost:8000/api/program/' + programId + '/progress/?format=json';
+    let answer = server + '/api/program/' + programId + '/progress/?format=json';
     let response = await fetch(answer, options);
     if (response.status !== 200) {
         return {};
@@ -43,7 +45,7 @@ export async function loadAnswer(questionId, token) {
             'Authorization': 'Token ' + token,
         },
     }
-    let answer = 'http://localhost:8000/api/question/' + questionId + '/answers/?format=json';
+    let answer = server + '/api/question/' + questionId + '/answers/?format=json';
     let response = await fetch(answer, options);
     if (response.status !== 200) {
         return {};
@@ -65,7 +67,7 @@ export async function saveSelectedChoiceAnswer(answerId, justifyAnswer, selected
         },
         body: JSON.stringify(newAnswer),
     }
-    let input = 'http://localhost:8000/api/answer/' + answerId + '/';
+    let input = server + '/api/answer/' + answerId + '/';
     let res = await fetch(input, options);
     if (res.status != 200) {
         alert("Error when trying to save answer")
@@ -86,7 +88,7 @@ export async function saveSelectedProgramsAnswer(answerId, selectedPrograms, tok
         },
         body: JSON.stringify(newAnswer),
     }
-    let input = 'http://localhost:8000/api/answer/' + answerId + '/';
+    let input = server + '/api/answer/' + answerId + '/';
     await fetch(input, options);
 }
 
@@ -104,6 +106,6 @@ export async function saveYesNoAnswer(answerId, justifyAnswer, shortAnswer, toke
         },
         body: JSON.stringify(newAnswer),
     }
-    let input = 'http://localhost:8000/api/answer/' + answerId + '/';
+    let input = server + '/api/answer/' + answerId + '/';
     await fetch(input, options);
 }
