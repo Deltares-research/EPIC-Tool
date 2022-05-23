@@ -91,37 +91,39 @@ python3
 
 * Checkout the /backend directory of the EPIC-Tool repository somewhere recognizable. Such as /var/www/epictool-site/.
 
-* Navigate to the fresh checkout
+* Execute our shell script.
 
     ```cli
-    /var/www/epictool-site/
+    cd /var/www/epictool-site/
+    ./deploy
     ```
-* Create a secret key through Python CLI
+    > This script will do the following:
+    >> Generate the .django_screts and .django_debug (to False)
+    >> Install the epic_app with all its dependencies.
+    >> Import the initial data for the EpicApp.
+    >> Collect and correctly place the static files (css and related).
+    >> Run the server through 'gunicorn' in the background.
+
+* Alternatively, run the previous script step by step to:
     ```cli
-    python
-    >> import secrets
-    >> from pathlib import Path
-    >> Path('.django_secrets').write_text(secrets.token_hex(16))
+    python3 -c "import secrets; from pathlib import Path; Path('.django_secrets').write_text(secrets.token_hex(16))"
+    python3 -c "from pathlib import Path; Path('.django_debug').write_text('False')"
+    poetry install
+    poetry run python3 manage.py epic_setup
+    poetry run python3 manage.py collectstatic --noinput
+    poetry run gunicorn epic_core.wsgi &
     ```
-    > A new file is now generated containing your unique token key expected by /epic_core/settings.py. In case this key is not valid please contact carles.sorianoperez@deltares.nl to provide a valid one.
-    > Define also the debug value: 'False' for production:
-    ```cli
-    python
-    >> from pathlib import Path
-    >> Path('.django_debug').write_text("False")
+
+* We will still need to generate a superuser:
     ```
-* Run our custom command to create the database and then add an admin user:
-    ```
-    poetry run python manage.py epic_setup
     poetry run python manage.py createsuperuser
     ```
-    > The last line will prompt us to a few dialogue in order to create a new admin user.
     > If desired you can change the password after creating the user by running: 
     ```
     poetry run python manage.py changepassword <admin username>
     ```
 ### Gunicorn run:
-Assuming we have correctly installed gunicorn, we only need to execute the following command line as a background activity:
+If we have not executed the custom script, then we need to run on a separate process gunicorn, we only need to execute the following command line as a background activity:
     ```cli
     poetry run gunicorn epic_setup.wsgi
     ```
