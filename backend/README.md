@@ -90,7 +90,7 @@ python3
 
 * Checkout the /backend directory of the EPIC-Tool repository somewhere recognizable. Such as /var/www/epictool-site/.
 
-* Execute our shell script.
+* For the first deployment we recommend executing our shell script.
 
     ```cli
     cd /var/www/epictool-site/
@@ -103,28 +103,34 @@ python3
     > * Collect and correctly place the static files (css and related).
     > * Run the server through 'gunicorn' in the background.
 
-* Alternatively, run the previous script step by step to:
+* Alternatively, run the previous script step by step unless they are not required in your environment (for instance when you already have the .django_secrets file or you already have users' inputs in the database):
     ```cli
     python3 -c "import secrets; from pathlib import Path; Path('.django_secrets').write_text(secrets.token_hex(16))"
     python3 -c "from pathlib import Path; Path('.django_debug').write_text('False')"
     poetry install
-    poetry run python3 manage.py epic_setup
     poetry run python3 manage.py collectstatic --noinput
-    poetry run gunicorn epic_core.wsgi &
+    ```
+    * If we wish to regenerate the database and import all data:
+    ```cli
+    poetry run python3 manage.py epic_setup
+    ```
+    * Run the server:
+    ```cli 
+    poetry run gunicorn epic_core.wsgi
     ```
 
-* We will still need to generate a superuser:
+* We might still need to generate a superuser:
     ```
     poetry run python manage.py createsuperuser
     ```
-    > If desired you can change the password after creating the user by running: 
+    * If desired you can change the password after creating the user by running: 
     ```
     poetry run python manage.py changepassword <admin username>
     ```
 ### Gunicorn run:
 If we have not executed the custom script, then we need to run on a separate process gunicorn, we only need to execute the following command line as a background activity:
     ```cli
-    poetry run gunicorn epic_setup.wsgi
+    poetry run gunicorn epic_core.wsgi
     ```
 
 ### NGINX configuration:
