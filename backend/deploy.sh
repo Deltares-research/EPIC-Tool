@@ -5,4 +5,4 @@ python3 -c "import secrets; from pathlib import Path; Path('.django_secrets').wr
 python3 -c "from pathlib import Path; Path('.django_debug').write_text('False')"
 poetry run python3 manage.py epic_setup
 poetry run python3 manage.py collectstatic --noinput
-poetry run gunicorn epic_setup.wsgi &
+poetry run gunicorn epic_core.wsgi &
