@@ -29,8 +29,8 @@ SECRET_KEY = Path(".django_secrets").read_text().strip()
 DEBUG = bool(Path(".django_debug").read_text().strip())
 
 ALLOWED_HOSTS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8000",
+    "http://localhost:80",
+    "http://127.0.0.1:80",
 ]
 
 
