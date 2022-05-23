@@ -32,7 +32,7 @@ If you wish to collaborate on this project you may want to get familiar with our
 
 You should have now all the dependencies, including django and djangorestframework, installed in our environment.
 
-## Django (development) deployment.
+## EpicTool (development) deployment.
 Installing django is pretty simple. For the next steps we assume poetry has been installed as described in the previous steps.
 * Navigate with the commandline to the \backend directory.
 * Create a secret key through Python CLI
@@ -65,26 +65,28 @@ python manage.py migrate
 Also, keep in mind that if a new entity needs to be modified through the Django Admin page it will also have to be added into the admin.py page.
 
 
-## EpicTool backend deployment.
-To deploy the backend in an open environment we recommend following [Django guidelines](https://docs.djangoproject.com/en/4.0/howto/deployment/wsgi/gunicorn/) by using [gunicorn](https://docs.gunicorn.org/en/latest/install.html) and [NGINX].
+## EpicTool (production) deployment.
+To deploy the backend in an open environment we recommend following [Django guidelines](https://docs.djangoproject.com/en/4.0/howto/deployment/wsgi/gunicorn/) by using [gunicorn](https://docs.gunicorn.org/en/latest/install.html) and [NGINX](https://www.nginx.com/).
 
-For this part we will assume a deployment in a UNIX environment.
+The following requirements should be met:
 
-### Setting up the EpicApp:
+* UNIX system.
+* NGINX. Already installed and configured.
+* SQLite. At least version 3.9
+* Python. At least version 3.8
 
-#### Pre-requirements.
-* Unix system
-* NGINX (we assume in this guideline it's already configured).
-It could be possible that the current UNIX version does not have the latest python and/or SQLite versions. Please ensure you have installed Python (at least) 3.8 and SQLite (at least) 3.9.
+
+#### Checking requirements 
+It could be possible that your UNIX system does not have the latest python and/or SQLite versions. Please ensure you have installed Python (at least) 3.8 and SQLite (at least) 3.9.
 To check it do the following:
 ```cli
 python3
 >> import sqlite3
 >> sqlite3.sqlite_version
 ```
-> The first line will prompt us into the python3 CLI. Right below the executed line we will be able to see the current version of our Python3.
-> The third line will display the associated version of SQLite with our Python build.
-> If it does not much the expected value then you should consider recompiling your python checkout.
+> * The first line will prompt us into the python3 CLI. Right below the executed line we will be able to see the current version of our Python3.
+> * The third line will display the associated version of SQLite with our Python build.
+>   * If it does not return the expected value then we recommend recompiling your python binaries.
 
 ### Installing Django
 
