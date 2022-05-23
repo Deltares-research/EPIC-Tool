@@ -1,3 +1,13 @@
+## v0.23.0 (2022-05-23)
+
+### Fix
+
+- **deploy.sh**: Corrected typo
+
+### Feat
+
+- **epic_setup.py**: Now we can generate a 'clean' start without dummy users
+
 ## v0.22.0 (2022-05-17)
 
 ### Feat
