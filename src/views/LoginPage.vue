@@ -28,7 +28,7 @@
           <v-row style="margin: 1px;color: darkred" v-if="error">
             <v-col md="3"></v-col>
             <v-col md="6" class="text-right">
-              <h3 >Invalid username or password, please try again!</h3>
+              <h3>Invalid username or password, please try again!</h3>
             </v-col>
           </v-row>
           <v-row style="margin: 1px">
@@ -71,7 +71,8 @@ export default {
         method: 'POST',
         body: JSON.stringify(credentials),
       }
-      let url = 'http://localhost:8000/api/token-auth/';
+      let server = process.env.VUE_APP_BACKEND_URL
+      let url = server + '/api/token-auth/';
       let response = await fetch(url, body);
       if (response.status !== 200) {
         this.error = true;

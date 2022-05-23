@@ -65,7 +65,9 @@
       </v-col>
       <v-col md="3"></v-col>
       <v-col md="1">
-        <v-btn to="Questionnaire" text color="primary" :disabled="this.$store.state.programSelection.size===0">Start<v-icon>mdi-step-forward</v-icon></v-btn>
+        <v-btn to="Questionnaire" text color="primary" :disabled="this.$store.state.programSelection.size===0">Start
+          <v-icon>mdi-step-forward</v-icon>
+        </v-btn>
       </v-col>
     </v-row>
     <v-row no-gutters>
@@ -96,13 +98,15 @@ export default {
         'Authorization': 'Token ' + token,
       },
     }
-    let response = await fetch('http://localhost:8000/api/agency/?format=json', options);
+    let server = process.env.VUE_APP_BACKEND_URL;
+    let response = await fetch(server + '/api/agency/?format=json', options);
     this.agencies = await response.json();
     this.agencies.sort((a, b) => a.id - b.id);
 
-    this.updateSelectedProgramsText();
+    await this.updateSelectedProgramsText();
     if (this.$store.state.initialized) return;
-    response = await fetch('http://localhost:8000/api/area/?format=json', options);
+    console.log(server)
+    response = await fetch(server + '/api/area/?format=json', options);
     let areas = await response.json();
     this.$store.commit("updateAreas", areas);
     this.$store.commit("init");
