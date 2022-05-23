@@ -53,7 +53,8 @@ export default Vue.extend({
   name: 'SelectProgram',
   methods: {
     submitAnswer: async function () {
-      await util.saveSelectedProgramsAnswer(this.answer[0].id, [...this.selectedPrograms], this.$store.state.token)
+      await util.saveSelectedProgramsAnswer(this.answer[0].id, [...this.selectedPrograms], this.$store.state.token);
+      this.$emit("updateProgress");
     },
     load: async function () {
       let program = this.$store.state.currentProgram;

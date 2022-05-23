@@ -47,13 +47,29 @@ export default Vue.extend({
     loadNextQuestion: async function () {
       await this.submitAnswer();
       this.page++;
+      await await this.loadAnswer();
     },
     loadPreviousQuestion: async function () {
       await this.submitAnswer();
       this.page--;
+      await this.loadAnswer();
     },
     submitAnswer: async function () {
-      await util.saveYesNoAnswer(this.answer[0].id, this.displayedJustification, this.yesNoValue === this.items[0] ? "Y" : "N", this.$store.state.token)
+      await util.saveYesNoAnswer(this.answer[0].id, this.displayedJustification, this.yesNoValue === this.items[0] ? "Y" : "N", this.$store.state.token);
+      this.$emit("updateProgress");
+    }, loadAnswer: async function () {
+      this.displayedQuestion = this.questions[this.page - 1].title;
+      this.displayDescription = this.questions[this.page - 1].description;
+
+      this.answer = await util.loadAnswer(this.questions[this.page - 1].id, this.$store.state.token);
+      if (this.answer[0].id === undefined) return;
+
+      this.displayedJustification = this.answer[0].justify_answer;
+      if (this.answer[0].short_answer === "Y") {
+        this.yesNoValue = this.items[0];
+      } else {
+        this.yesNoValue = this.items[1];
+      }
     },
     load: async function () {
       let program = this.$store.state.currentProgram;
@@ -65,20 +81,8 @@ export default Vue.extend({
         this.displayDescription = "";
         return;
       }
-
       this.page = 1;
-      this.displayedQuestion = this.questions[0].title;
-      this.displayDescription = this.questions[0].description;
-
-      this.answer = await util.loadAnswer(this.questions[this.page - 1].id, this.$store.state.token);
-      if (this.answer[0].id === undefined) return;
-
-      this.displayedJustification = this.answer[0].justify_answer;
-      if (this.answer[0].short_answer === "Y") {
-        this.yesNoValue = this.items[0];
-      } else {
-        this.yesNoValue = this.items[1];
-      }
+      await this.loadAnswer();
     }
   },
   data: () => ({
