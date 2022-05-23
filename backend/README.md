@@ -94,7 +94,7 @@ python3
 
     ```cli
     cd /var/www/epictool-site/
-    ./deploy
+    ./initial_deployment.sh
     ```
     > This script will do the following:
     > * Generate the .django_screts and .django_debug (to False)
