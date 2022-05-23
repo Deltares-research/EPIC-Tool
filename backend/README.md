@@ -153,6 +153,6 @@ server {
 }
 ```
 Now our NGINX server will be able to redirect our http calls to our application. As a last step, restart the NGINX server:
-    ```cli
-    sudo systemctl restart nginx
-    ```
+```cli
+sudo systemctl restart nginx
+```
