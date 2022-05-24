@@ -26,7 +26,7 @@ class TestYesNoJustifyQuestionImporter:
         KeyAgencyActionsQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "keyagencyactionsquestions.xlsx",
             question_type=KeyAgencyActionsQuestion,
-            expected_entries=158,
+            expected_entries=159,
             first_entry_title="Does the national WRM agency prepares a periodic National Strategic WRM Plan together with relevant agencies such as DRM, Agriculture, natural resources management and hydromet as well as other stakeholders?",
         ),
         NationalFrameworkQuestionImporter: dict(
