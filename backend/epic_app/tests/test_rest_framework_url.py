@@ -384,20 +384,17 @@ class TestEpicOrganizationViewSet:
         assert len(response.data) == len(Program.objects.all())
 
     def test_RETRIEVE_pdf_report_As_Advisor_epic_user(
-        self, _report_fixture: dict, admin_api_client: APIClient
+        self, _report_fixture: dict, api_client: APIClient
     ):
         # The results of this endpoint are better tested through the serializer.
         full_url = self.url_root + "report-pdf/"
 
         # Run request
-        response: FileResponse = admin_api_client.get(full_url)
+        set_user_auth_token(api_client, "Dooku")
+        response: FileResponse = api_client.get(full_url)
 
         # Verify final expectations
         assert response.status_code == 200
-        basic_report = test_data_dir / "basic_report.pdf"
-        assert basic_report.exists()
-        # report_as_bytes = basic_report.read_bytes()
-        # assert report_as_bytes == b"".join(response.streaming_content)
         output_file = test_data_dir / response.filename
         if output_file.exists():
             output_file.unlink()
