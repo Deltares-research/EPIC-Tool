@@ -398,14 +398,13 @@ class TestEpicOrganizationViewSet:
         assert basic_report.exists()
         # report_as_bytes = basic_report.read_bytes()
         # assert report_as_bytes == b"".join(response.streaming_content)
-
-        def save_to_pdf(fr: FileResponse):
-            fs = b"".join(fr.streaming_content)
-            dumb_pdf = Path("dumb.pdf")
-            with open(dumb_pdf, "wb") as f:
-                f.write(fs)
-
-        save_to_pdf(response)
+        output_file = test_data_dir / response.filename
+        if output_file.exists():
+            output_file.unlink()
+        fs = b"".join(response.streaming_content)
+        with open(output_file, "wb") as f:
+            f.write(fs)
+        assert output_file.exists()
 
 
 @pytest.mark.django_db
