@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Callable, Optional, Type
 
 import pytest
@@ -379,6 +380,103 @@ class TestEpicOrganizationViewSet:
         # Verify final expectations
         assert response.status_code == 200
         assert len(response.data) == len(Program.objects.all())
+
+    def test_RETRIEVE_pdf_report_As_Advisor_epic_user(
+        self, _report_fixture: dict, admin_api_client: APIClient
+    ):
+        # The results of this endpoint are better tested through the serializer.
+        full_url = self.url_root + "report/"
+
+        # Run request
+        response = admin_api_client.get(full_url)
+
+        # Verify final expectations
+        import io
+
+        from django.http import FileResponse
+        from reportlab.graphics import renderPDF
+        from reportlab.graphics.charts.barcharts import VerticalBarChart
+        from reportlab.graphics.shapes import Drawing
+        from reportlab.lib import colors
+        from reportlab.lib.units import cm
+        from reportlab.pdfgen import canvas
+
+        def draw_charts(input_data) -> Drawing:
+            drawing = Drawing(400, 200)
+            id_keys = [
+                id_k for id_k in input_data.keys() if not "_justify" in str(id_k)
+            ]
+            if not id_keys:
+                return
+            id_values = [input_data[id_k] for id_k in id_keys]
+
+            bc = VerticalBarChart()
+            bc.x = 50
+            bc.y = 50
+            bc.height = 125
+            bc.width = 300
+            bc.data = [id_values]
+            # bc.strokeColor = colors.black
+            bc.valueAxis.valueMin = 0
+            bc.valueAxis.valueMax = sum(id_values)
+            bc.valueAxis.valueStep = 1
+            #
+            bc.categoryAxis.categoryNames = list(map(str, id_keys))
+            drawing.add(bc)
+            return drawing
+
+        def some_view(request):
+            # Create a file-like buffer to receive PDF data.
+            buffer = io.BytesIO()
+
+            # Create the PDF object, using the buffer as its "file."
+            p = canvas.Canvas(buffer)
+
+            # Draw things on the PDF. Here's where the PDF generation happens.
+            # See the ReportLab documentation for the full list of functionality.
+
+            for p_entry in response.data:
+                for q_entry in p_entry["questions"]:
+                    textobject = p.beginText(2 * cm, 29.7 * cm - 2 * cm)
+                    textobject.textLine("Program: {}".format(p_entry["name"]))
+                    q_summary = q_entry["question_answers"]["summary"]
+                    textobject.textLine("Question: {}".format(q_entry["title"]))
+                    if not q_entry["question_answers"]["answers"]:
+                        textobject.textLine("No recorded answers.")
+                    else:
+                        for k_j in q_summary.keys():
+                            if "justify" in str(k_j):
+                                textobject.textLine(
+                                    "Justify {}:".format(str(k_j).split("_")[0])
+                                )
+                                textobject.textLines(q_summary[k_j])
+                    p.drawText(textobject)
+                    dc = draw_charts(q_summary)
+                    if dc:
+                        renderPDF.draw(dc, p, 50, 500)
+                    p.showPage()
+                if any(p_entry["questions"]):
+                    p.showPage()
+            # Close the PDF object cleanly, and we're done.
+            p.save()
+
+            # FileResponse sets the Content-Disposition header so that browsers
+            # present the option to save the file.
+            buffer.seek(0)
+            return FileResponse(buffer, as_attachment=True, filename="hello.pdf")
+
+        fr = some_view(None)
+        # fr.file_to_stream.
+        def save_to_pdf(fr: FileResponse):
+            import shutil
+
+            fs = fr.file_to_stream
+            fs.seek(0)
+            dumb_pdf = Path("dumb.pdf")
+            with open(dumb_pdf, "wb") as f:
+                shutil.copyfileobj(fs, f, length=131072)
+
+        save_to_pdf(fr)
 
 
 @pytest.mark.django_db
