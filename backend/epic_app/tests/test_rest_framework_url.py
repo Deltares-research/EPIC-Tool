@@ -4,6 +4,7 @@ from typing import Callable, Optional, Type
 
 import pytest
 from django.contrib.auth.models import User
+from django.http import FileResponse
 from rest_framework.test import APIClient
 
 from epic_app.models.epic_answers import (
@@ -23,6 +24,7 @@ from epic_app.models.epic_questions import (
 )
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
+from epic_app.tests import test_data_dir
 from epic_app.tests.epic_db_fixture import epic_test_db
 from epic_app.utils import get_submodel_type_list
 
@@ -385,98 +387,25 @@ class TestEpicOrganizationViewSet:
         self, _report_fixture: dict, admin_api_client: APIClient
     ):
         # The results of this endpoint are better tested through the serializer.
-        full_url = self.url_root + "report/"
+        full_url = self.url_root + "report-pdf/"
 
         # Run request
-        response = admin_api_client.get(full_url)
+        response: FileResponse = admin_api_client.get(full_url)
 
         # Verify final expectations
-        import io
+        assert response.status_code == 200
+        basic_report = test_data_dir / "basic_report.pdf"
+        assert basic_report.exists()
+        # report_as_bytes = basic_report.read_bytes()
+        # assert report_as_bytes == b"".join(response.streaming_content)
 
-        from django.http import FileResponse
-        from reportlab.graphics import renderPDF
-        from reportlab.graphics.charts.barcharts import VerticalBarChart
-        from reportlab.graphics.shapes import Drawing
-        from reportlab.lib import colors
-        from reportlab.lib.units import cm
-        from reportlab.pdfgen import canvas
-
-        def draw_charts(input_data) -> Drawing:
-            drawing = Drawing(400, 200)
-            id_keys = [
-                id_k for id_k in input_data.keys() if not "_justify" in str(id_k)
-            ]
-            if not id_keys:
-                return
-            id_values = [input_data[id_k] for id_k in id_keys]
-
-            bc = VerticalBarChart()
-            bc.x = 50
-            bc.y = 50
-            bc.height = 125
-            bc.width = 300
-            bc.data = [id_values]
-            # bc.strokeColor = colors.black
-            bc.valueAxis.valueMin = 0
-            bc.valueAxis.valueMax = sum(id_values)
-            bc.valueAxis.valueStep = 1
-            #
-            bc.categoryAxis.categoryNames = list(map(str, id_keys))
-            drawing.add(bc)
-            return drawing
-
-        def some_view(request):
-            # Create a file-like buffer to receive PDF data.
-            buffer = io.BytesIO()
-
-            # Create the PDF object, using the buffer as its "file."
-            p = canvas.Canvas(buffer)
-
-            # Draw things on the PDF. Here's where the PDF generation happens.
-            # See the ReportLab documentation for the full list of functionality.
-
-            for p_entry in response.data:
-                for q_entry in p_entry["questions"]:
-                    textobject = p.beginText(2 * cm, 29.7 * cm - 2 * cm)
-                    textobject.textLine("Program: {}".format(p_entry["name"]))
-                    q_summary = q_entry["question_answers"]["summary"]
-                    textobject.textLine("Question: {}".format(q_entry["title"]))
-                    if not q_entry["question_answers"]["answers"]:
-                        textobject.textLine("No recorded answers.")
-                    else:
-                        for k_j in q_summary.keys():
-                            if "justify" in str(k_j):
-                                textobject.textLine(
-                                    "Justify {}:".format(str(k_j).split("_")[0])
-                                )
-                                textobject.textLines(q_summary[k_j])
-                    p.drawText(textobject)
-                    dc = draw_charts(q_summary)
-                    if dc:
-                        renderPDF.draw(dc, p, 50, 500)
-                    p.showPage()
-                if any(p_entry["questions"]):
-                    p.showPage()
-            # Close the PDF object cleanly, and we're done.
-            p.save()
-
-            # FileResponse sets the Content-Disposition header so that browsers
-            # present the option to save the file.
-            buffer.seek(0)
-            return FileResponse(buffer, as_attachment=True, filename="hello.pdf")
-
-        fr = some_view(None)
-        # fr.file_to_stream.
         def save_to_pdf(fr: FileResponse):
-            import shutil
-
-            fs = fr.file_to_stream
-            fs.seek(0)
+            fs = b"".join(fr.streaming_content)
             dumb_pdf = Path("dumb.pdf")
             with open(dumb_pdf, "wb") as f:
-                shutil.copyfileobj(fs, f, length=131072)
+                f.write(fs)
 
-        save_to_pdf(fr)
+        save_to_pdf(response)
 
 
 @pytest.mark.django_db
