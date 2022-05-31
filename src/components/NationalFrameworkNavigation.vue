@@ -3,11 +3,12 @@
     <v-col md="6">
       <v-btn text color="primary" @click='$emit("fromNationalFrameworkToProgramDescription")'>
         <v-icon>mdi-step-backward</v-icon>
-        Program description
+        <slot name="previousStep"/>
       </v-btn>
     </v-col>
     <v-col md="6" class="text-right">
-      <v-btn text color="primary" @click='$emit("fromNationalFrameworkToKeyAgency")'>Key agency actions
+      <v-btn text color="primary" @click='$emit("fromNationalFrameworkToKeyAgency")'>
+        <slot name="nextStep"/>
         <v-icon>mdi-step-forward</v-icon>
       </v-btn>
     </v-col>

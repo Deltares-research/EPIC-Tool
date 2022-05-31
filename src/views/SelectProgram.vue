@@ -2,8 +2,7 @@
   <div>
     <h2 style="color:darkred">Program selection</h2>
     <br>
-    <h3>Please select 1 or more programs</h3>
-    <p>Current selection is: {{ this.$store.state.selectedProgramsText }}</p>
+    <h3>Click on your agency or select manually the programs to assess</h3>
     <br>
     <v-dialog v-model="showDialog" width="500">
       <v-card>
@@ -25,13 +24,25 @@
       </v-col>
     </v-row>
     <br>
+    <v-row style="margin: 1px">
+      <v-col md="3"></v-col>
+      <v-col md="5">
+      </v-col>
+      <v-col md="3"></v-col>
+      <v-col md="1">
+        <v-btn to="Questionnaire" text color="primary" :disabled="this.$store.state.programSelection.size===0">Start
+          <v-icon>mdi-step-forward</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
     <v-card :elevation="2" color="blue-grey lighten-4" v-for="area in this.$store.state.areas" :key="area.id">
       <v-container fluid class="fill-height">
         <v-row no-gutters v-for="(group,index) in area.groups" :key="group.id">
           <v-col md="2">
-            <h3 v-if="index===0">{{ area.name }}</h3></v-col>
+            <h3 v-if="index===0">{{ area.name }}</h3>
+          </v-col>
           <v-col md="4">
-            <v-list-item dense @click="showGroup(group.id)">
+            <v-list-item dense style="font-size: 1px" @click="showGroup(group.id)">
               <v-list-item-content>
                 <v-list-item-title>{{ group.name }}</v-list-item-title>
               </v-list-item-content>
@@ -56,30 +67,6 @@
         </v-row>
       </v-container>
     </v-card>
-    <v-row style="margin: 1px">
-      <v-col md="3"></v-col>
-      <v-col md="5">
-        <v-img
-            src="../../public/arrow.png"
-        ></v-img>
-      </v-col>
-      <v-col md="3"></v-col>
-      <v-col md="1">
-        <v-btn to="Questionnaire" text color="primary" :disabled="this.$store.state.programSelection.size===0">Start
-          <v-icon>mdi-step-forward</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row no-gutters>
-      <v-col md="5"></v-col>
-      <v-col md="2">
-        <v-img max-width="200px"
-               src="../../public/people.png"
-        ></v-img>
-      </v-col>
-      <v-col md="5">
-      </v-col>
-    </v-row>
   </div>
 
 </template>
@@ -103,7 +90,6 @@ export default {
     this.agencies = await response.json();
     this.agencies.sort((a, b) => a.id - b.id);
 
-    await this.updateSelectedProgramsText();
     if (this.$store.state.initialized) return;
     console.log(server)
     response = await fetch(server + '/api/area/?format=json', options);
@@ -122,34 +108,24 @@ export default {
     }
   },
   methods: {
-    updateSelectedProgramsText: async function () {
-      let selectedProgramsText = "";
-      for (let program of this.$store.state.programs) {
-        if (!this.$store.state.programSelection.has(program.id)) continue;
-        if (selectedProgramsText === "") {
-          selectedProgramsText = program.name;
-          continue;
-        }
-        selectedProgramsText = selectedProgramsText + ", " + program.name;
-      }
-      this.$store.state.selectedProgramsText = selectedProgramsText;
-      await this.$store.dispatch('updateProgress');
-    },
     isAgencySelected: function (agency) {
       if (this.$store.state.selectedAgency === undefined) return false;
       return this.$store.state.selectedAgency.id === agency.id;
     },
     selectProgramsForAgency: function (agency) {
       this.$store.commit("toggleAgencySelection", agency);
+      this.$store.state.programSelection.forEach(programId => {
+        let program = this.$store.state.programs.filter(program => program.id === programId);
+        this.groupSelection.add(program[0].group);
+      })
       this.updateCheckBox++;
-      this.updateSelectedProgramsText();
     },
     getCheckBoxValue: function (programId) {
       return this.$store.state.programSelection.has(programId);
     },
     selectProgram: function (programId) {
       this.$store.commit("toggleSelection", programId);
-      this.updateSelectedProgramsText();
+      this.updateCheckBox++;
     },
     isGroupSelected: function (groupId) {
       return this.groupSelection.has(groupId);

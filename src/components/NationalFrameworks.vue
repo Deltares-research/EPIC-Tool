@@ -1,6 +1,21 @@
 <template>
   <div>
-    <h2 style="color: darkred">Linkage with National Frameworks</h2>
+    <v-row>
+      <v-col md="6">
+        <v-btn text color="primary" @click='$emit("fromNationalFrameworkToProgramDescription")'>
+          <v-icon>mdi-step-backward</v-icon>
+          {{ this.previousStepMessage() }}
+        </v-btn>
+      </v-col>
+      <v-col md="6" class="text-right">
+        <v-btn text color="primary" @click='$emit("fromNationalFrameworkToKeyAgency")'>
+          {{ this.nextStepMessage() }}
+          <v-icon>mdi-step-forward</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+    <h5>{{ page }} of {{ this.questions.length }} questions</h5>
+    <h2 style="color: darkred">National Frameworks</h2>
     <h3 style="color: darkred">{{ title }}</h3>
     <v-textarea rows=6 :value="displayDescription" readonly outlined></v-textarea>
     <v-row>
@@ -18,17 +33,6 @@
     </v-row>
     <h3>Please justify your answer</h3>
     <v-textarea rows=4 outlined v-model="displayedJustification"></v-textarea>
-    <v-row>
-      <v-col md="4">
-      </v-col>
-      <v-col md="1">
-        <v-btn :disabled="page===1" color="info" @click="loadPreviousQuestion">Previous question</v-btn>
-      </v-col>
-      <v-col md="1"></v-col>
-      <v-col md="1">
-        <v-btn :disabled="page>=questions.length" color="info" @click="loadNextQuestion">Next question</v-btn>
-      </v-col>
-    </v-row>
     <br/>
     <br/>
     <br/>
@@ -44,11 +48,25 @@ import * as util from '../assets/js/utils'
 export default Vue.extend({
   name: 'NationalFrameworks',
   methods: {
+    nextStepMessage() {
+      let nextQuestion = this.page + 1;
+      return this.page - 1 < this.questions.length - 1 ? "Question " + nextQuestion : "Key Agency Actions";
+    }, previousStepMessage() {
+      let previousQuestion = this.page - 1;
+      return this.hasPreviousQuestion() ? "Question " + previousQuestion : "Program description";
+    },
+    hasNextQuestion() {
+      return this.page - 1 < this.questions.length - 1;
+    },
+    hasPreviousQuestion() {
+      return this.page > 1;
+    },
     loadNextQuestion: async function () {
       await this.submitAnswer();
       this.page++;
-      await await this.loadAnswer();
-    },
+
+      await this.loadAnswer();
+
     loadPreviousQuestion: async function () {
       await this.submitAnswer();
       this.page--;
