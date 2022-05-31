@@ -64,9 +64,8 @@ export default Vue.extend({
     loadNextQuestion: async function () {
       await this.submitAnswer();
       this.page++;
-
       await this.loadAnswer();
-
+    },
     loadPreviousQuestion: async function () {
       await this.submitAnswer();
       this.page--;

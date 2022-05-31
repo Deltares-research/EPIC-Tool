@@ -284,7 +284,7 @@ export default {
       if (this.e1 === 6) {
         await this.$refs.references.load();
       }
-
+    },
     updateSelectedProgram: async function (program) {
       this.$store.state.currentProgram = program;
       this.nextProgram = this.getNextProgram();
