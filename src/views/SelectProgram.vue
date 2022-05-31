@@ -2,7 +2,7 @@
   <div>
     <h2 style="color:darkred">Program selection</h2>
     <br>
-    <h3>Click on your agency or select manually the programs to asses</h3>
+    <h3>Click on your agency or select manually the programs to assess</h3>
     <br>
     <v-dialog v-model="showDialog" width="500">
       <v-card>
