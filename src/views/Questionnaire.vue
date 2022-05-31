@@ -6,13 +6,13 @@
     <br>
     <v-tabs v-model="selectedAreaIndex">
       <v-tab v-for="(area) in this.$store.state.areas" :key="area.id" @change="updateVisiblePrograms(area.id)"
-             :disabled="getVisiblePrograms(area.id).length===0">
+             :disabled="disableArea(area.id)">
         {{ area.name }}
         <v-icon v-if="isAreaCompleted(area.id)" right>mdi-checkbox-marked-circle</v-icon>
       </v-tab>
     </v-tabs>
     <v-tabs v-model="selectedProgramIndex">
-      <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)">
+      <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)" :disabled="disableEvents">
         {{ program.name }}
         <v-icon v-if="isProgramCompleted(program.id)" right>mdi-checkbox-marked-circle</v-icon>
       </v-tab>
@@ -41,20 +41,16 @@
               @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
         </v-stepper-content>
         <v-stepper-content step="2">
-          <national-framework-navigation
-              @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
-              @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"/>
-          <national-frameworks ref="nationalFramework" @updateProgress="updateProgress"></national-frameworks>
-          <national-framework-navigation
-              @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
-              @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"/>
+
+          <national-frameworks ref="nationalFramework"
+                               @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
+                               @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"></national-frameworks>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <key-agency-navigation @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
-                                 @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
-          <key-agency-actions ref="keyAgency" @updateProgress="updateProgress"/>
-          <key-agency-navigation @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
-                                 @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
+          <key-agency-actions ref="keyAgency" @updateProgress="updateProgress"
+                              @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
+                              @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
+
         </v-stepper-content>
         <v-stepper-content step="4">
           <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
@@ -80,7 +76,6 @@
           </references-navigation>
         </v-stepper-content>
       </v-stepper-items>
-
     </v-stepper>
   </div>
 </template>
@@ -88,8 +83,6 @@
 import References from "@/components/References";
 import LinkagesNavigation from '../components/LinkagesNavigation'
 import ProgramDescriptionNavigation from '../components/ProgramDescriptionNavigation'
-import NationalFrameworkNavigation from "@/components/NationalFrameworkNavigation";
-import KeyAgencyNavigation from "@/components/KeyAgencyNavigation";
 import ProgramDescription from '../components/ProgramDescription.vue'
 import EvolutionNavigation from "@/components/EvolutionNavigation";
 import ReferencesNavigation from "@/components/ReferencesNavigation";
@@ -102,9 +95,7 @@ export default {
   name: 'Questionnaire',
   components: {
     References,
-    KeyAgencyNavigation,
     ReferencesNavigation,
-    NationalFrameworkNavigation,
     LinkagesNavigation,
     EvolutionNavigation,
     ProgramDescriptionNavigation,
@@ -129,6 +120,7 @@ export default {
       selectedAreaId: "",
       selectedProgramIndex: 0,
       visiblePrograms: [],
+      disableEvents: false,
       nextProgram: null
     }
   },
@@ -157,11 +149,19 @@ export default {
       this.e1 = 2;
     },
     fromNationalFrameworkToKeyAgency: async function () {
+      if (this.$refs.nationalFramework.hasNextQuestion()) {
+        await this.$refs.nationalFramework.loadNextQuestion();
+        return;
+      }
       await this.$refs.nationalFramework.submitAnswer();
       await this.$refs.keyAgency.load();
       this.e1 = 3;
     },
     fromKeyAgencyToEvolution: async function () {
+      if (this.$refs.keyAgency.hasNextQuestion()) {
+        await this.$refs.keyAgency.loadNextQuestion();
+        return
+      }
       await this.$refs.keyAgency.submitAnswer();
       await this.$refs.evolution.load();
       this.e1 = 4;
@@ -178,11 +178,19 @@ export default {
       this.e1 = 6;
     },
     fromNationalFrameworkToProgramDescription: async function () {
+      if (this.$refs.nationalFramework.hasPreviousQuestion()) {
+        await this.$refs.nationalFramework.loadPreviousQuestion();
+        return;
+      }
       await this.$refs.nationalFramework.submitAnswer();
       await this.$refs.programDescription.load();
       this.e1 = 1;
     },
     fromKeyAgencyToNationalFramework: async function () {
+      if (this.$refs.keyAgency.hasPreviousQuestion()) {
+        await this.$refs.keyAgency.loadPreviousQuestion();
+        return;
+      }
       await this.$refs.keyAgency.submitAnswer();
       await this.$refs.nationalFramework.load();
       this.e1 = 2;
@@ -238,10 +246,19 @@ export default {
       return null;
     },
     updateVisiblePrograms: async function (areaId) {
-      this.visiblePrograms = this.getVisiblePrograms(areaId);
-      await this.updateSelectedProgram(this.visiblePrograms[0]);
-      this.selectedProgramIndex = 0;
-      await this.forceUpdate();
+      if (this.disableEvents) {
+        return;
+      }
+      try {
+        this.disableEvents = true;
+        this.visiblePrograms = this.getVisiblePrograms(areaId);
+        await this.updateSelectedProgram(this.visiblePrograms[0]);
+        this.selectedProgramIndex = 0;
+        await this.forceUpdate();
+      } finally {
+        this.disableEvents = false;
+      }
+
     },
     forceUpdate: async function () {
       if (this.e1 === 1) {
@@ -267,12 +284,15 @@ export default {
       if (this.e1 === 6) {
         await this.$refs.references.load();
       }
-      await this.updateProgress();
-    },
+
     updateSelectedProgram: async function (program) {
       this.$store.state.currentProgram = program;
       this.nextProgram = this.getNextProgram();
       await this.forceUpdate();
+    },
+    disableArea: function (areaId) {
+      if (this.disableEvents) return true;
+      return this.getVisiblePrograms(areaId).length === 0;
     },
     getVisiblePrograms: function (areaId) {
       let programs = [];

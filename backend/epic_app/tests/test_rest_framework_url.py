@@ -1,8 +1,10 @@
 import json
+from pathlib import Path
 from typing import Callable, Optional, Type
 
 import pytest
 from django.contrib.auth.models import User
+from django.http import FileResponse
 from rest_framework.test import APIClient
 
 from epic_app.models.epic_answers import (
@@ -22,6 +24,7 @@ from epic_app.models.epic_questions import (
 )
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Program
+from epic_app.tests import test_data_dir
 from epic_app.tests.epic_db_fixture import epic_test_db
 from epic_app.utils import get_submodel_type_list
 
@@ -379,6 +382,26 @@ class TestEpicOrganizationViewSet:
         # Verify final expectations
         assert response.status_code == 200
         assert len(response.data) == len(Program.objects.all())
+
+    def test_RETRIEVE_pdf_report_As_Advisor_epic_user(
+        self, _report_fixture: dict, api_client: APIClient
+    ):
+        # The results of this endpoint are better tested through the serializer.
+        full_url = self.url_root + "report-pdf/"
+
+        # Run request
+        set_user_auth_token(api_client, "Dooku")
+        response: FileResponse = api_client.get(full_url)
+
+        # Verify final expectations
+        assert response.status_code == 200
+        output_file = test_data_dir / response.filename
+        if output_file.exists():
+            output_file.unlink()
+        fs = b"".join(response.streaming_content)
+        with open(output_file, "wb") as f:
+            f.write(fs)
+        assert output_file.exists()
 
 
 @pytest.mark.django_db

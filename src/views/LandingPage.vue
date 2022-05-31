@@ -64,9 +64,6 @@
           <v-col md="3">
           </v-col>
           <v-col md="6">
-            <v-img
-                src="../../public/arrow.png"
-            ></v-img>
           </v-col>
           <v-col md="3" class="text-right">
             <v-btn to="SelectProgram" text color="primary" @click="e1 = 2">Select program(s)
@@ -77,9 +74,6 @@
         <v-row no-gutters>
           <v-col md="5"></v-col>
           <v-col md="2">
-            <v-img max-width="200px"
-                   src="../../public/people.png"
-            ></v-img>
           </v-col>
           <v-col md="5"></v-col>
         </v-row>

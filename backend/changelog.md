@@ -1,3 +1,10 @@
+## v0.24.0 (2022-05-25)
+
+### Feat
+
+- **epic_app/tests/test_rest_framework_url.py**: Enabled retrieve call for a pdf report; adapted test
+- **commands/**: Added commands to generate dummy users and do a simple import of all the domain xlsx files
+
 ## v0.23.0 (2022-05-23)
 
 ### Fix
