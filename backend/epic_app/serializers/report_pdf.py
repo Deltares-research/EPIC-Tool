@@ -176,7 +176,7 @@ class EpicPdfReport:
         for k_j in q_summary.keys():
             if "justify" not in str(k_j):
                 continue
-            j_line = "Justify {}:".format(str(k_j).split("_")[0])
+            j_line = "<b>Justify {}:</b>".format(str(k_j).split("_")[0])
             self._append_line(j_line)
             for line in q_summary[k_j]:
                 self._append_line(line)
@@ -186,10 +186,10 @@ class EpicPdfReport:
             self._append_line("No questions available.")
             return
         for q_entry in questions_data:
-            self._append_line(q_entry["title"], EpicStyles.h2)
             if not q_entry["question_answers"]["answers"]:
-                self._append_line("No recorded answers.")
+                # self._append_line("No recorded answers.")
                 continue
+            self._append_line(q_entry["title"], EpicStyles.h2)
             self._append_charts(q_entry["question_answers"]["summary"])
             self._append_justifications(q_entry["question_answers"])
 
