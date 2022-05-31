@@ -108,9 +108,20 @@ class EpicOrganizationViewSet(viewsets.ReadOnlyModelViewSet):
         self, request: Request, pk: str = None
     ) -> models.QuerySet:
         answer_report = self.get_answers_report(request, pk)
+
+        def get_organization() -> List[str]:
+            if bool(request.user.is_staff or request.user.is_superuser):
+                return [eo.name for eo in EpicOrganization.objects.all()]
+            return [request.user.epicuser.organization.name]
+
         # Create a file-like buffer to receive PDF data.
         buffer = io.BytesIO()
-        EpicPdfReport().generate_report(buffer, answer_report.data)
+        pdf_report = EpicPdfReport()
+        pdf_report.report_subtitle = "EPIC report for {}".format(
+            (", ").join(get_organization())
+        )
+        pdf_report.report_author = request.user.username
+        pdf_report.generate_report(buffer, answer_report.data)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename="answers_report.pdf")
 
