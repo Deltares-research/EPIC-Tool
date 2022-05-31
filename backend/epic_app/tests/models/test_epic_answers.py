@@ -20,6 +20,7 @@ from epic_app.models.epic_questions import (
     Question,
 )
 from epic_app.models.epic_user import EpicUser
+from epic_app.models.models import Program
 from epic_app.tests.epic_db_fixture import epic_test_db
 
 
@@ -381,7 +382,9 @@ class TestMultipleChoiceAnswer:
         mca.save()
 
         # Define expectations
-        expected_result = {p_id: 1 for p_id in selected_programs}
+        expected_result = {
+            Program.objects.get(id=p_id).name: 1 for p_id in selected_programs
+        }
         expected_result["no_valid_response"] = 0 if any(selected_programs) else 1
 
         # Run test

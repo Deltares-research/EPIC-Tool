@@ -152,7 +152,7 @@ class TestAnswerListReportSerializer:
             "answers": [
                 TestAnswerReportSerializer.expected_answer_dict[MultipleChoiceAnswer]
             ],
-            "summary": {"2": 1, "4": 1, "no_valid_response": 0},
+            "summary": {"b": 1, "d": 1, "no_valid_response": 0},
         },
     }
 
