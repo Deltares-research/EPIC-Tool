@@ -127,7 +127,7 @@ class TestAnswerListReportSerializer:
                 "No_justify": [
                     "Laboris proident enim dolore ullamco voluptate nisi labore laborum ut qui adipisicing occaecat exercitation culpa."
                 ],
-                "no_valid_response": 0,
+                "no_valid_response": 2,
             },
         },
         SingleChoiceAnswer: {
@@ -145,14 +145,14 @@ class TestAnswerListReportSerializer:
                 "Engaged_justify": [],
                 "Nascent": 0,
                 "Nascent_justify": [],
-                "no_valid_response": 0,
+                "no_valid_response": 2,
             },
         },
         MultipleChoiceAnswer: {
             "answers": [
                 TestAnswerReportSerializer.expected_answer_dict[MultipleChoiceAnswer]
             ],
-            "summary": {"b": 1, "d": 1, "no_valid_response": 0},
+            "summary": {"b": 1, "d": 1, "no_valid_response": 2},
         },
     }
 

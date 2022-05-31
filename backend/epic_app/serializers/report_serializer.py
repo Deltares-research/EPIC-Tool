@@ -14,7 +14,7 @@ from epic_app.utils import get_instance_as_submodel_type
 
 class AnswerListReportSerializer(serializers.ListSerializer):
     def _get_answers_summary(
-        self, answers_list: Union[models.QuerySet, List[Answer]]
+        self, answers_list: Union[models.QuerySet, List[Answer]], expected_answers: int
     ) -> Dict[str, Any]:
         if not answers_list or len(answers_list) == 0:
             return {}
@@ -24,13 +24,20 @@ class AnswerListReportSerializer(serializers.ListSerializer):
         subtype_answer_list = subtype.objects.filter(
             id__in=[al.id for al in answers_list]
         )
-        return subtype.get_detailed_summary(subtype_answer_list)
+        detailed_summary = subtype.get_detailed_summary(
+            subtype_answer_list,
+        )
+        missing_answers = expected_answers - len(answers_list)
+        detailed_summary["no_valid_response"] = (
+            missing_answers + detailed_summary["no_valid_response"]
+        )
+        return detailed_summary
 
     def to_representation(self, data):
         organization_users = self.context["users"].all()
         user_ids = [eu.id for eu in organization_users]
         filtered_data = Answer.objects.filter(question=data.instance, user__in=user_ids)
-        answers_summary = self._get_answers_summary(filtered_data)
+        answers_summary = self._get_answers_summary(filtered_data, len(user_ids))
 
         serialized_answers = super(AnswerListReportSerializer, self).to_representation(
             filtered_data

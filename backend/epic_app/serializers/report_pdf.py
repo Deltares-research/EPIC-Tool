@@ -22,7 +22,7 @@ PAGE_WIDTH = defaultPageSize[0]
 class EpicStyles:
     h1 = PS(
         fontName="Times-Bold",
-        fontSize=14,
+        fontSize=16,
         name="TOCHeading1",
         leftIndent=20,
         firstLineIndent=-20,
@@ -30,17 +30,17 @@ class EpicStyles:
         leading=16,
     )
     h2 = PS(
-        fontSize=12,
+        fontSize=14,
         name="TOCHeading2",
-        leftIndent=40,
+        leftIndent=20,
         firstLineIndent=-20,
         spaceBefore=0,
         leading=12,
     )
     h3 = PS(
-        fontSize=10,
+        fontSize=12,
         name="TOCHeading3",
-        leftIndent=60,
+        leftIndent=20,
         firstLineIndent=-20,
         spaceBefore=0,
         leading=12,
@@ -48,7 +48,7 @@ class EpicStyles:
     h4 = PS(
         fontSize=10,
         name="TOCHeading4",
-        leftIndent=100,
+        leftIndent=20,
         firstLineIndent=-20,
         spaceBefore=0,
         leading=12,
@@ -151,7 +151,7 @@ class EpicPdfReport:
         # bc.strokeColor = colors.black
         bc.valueAxis.valueMin = 0
         bc.valueAxis.valueMax = sum(id_values)
-        bc.valueAxis.valueStep = 1
+        bc.valueAxis.valueStep = min((sum(id_values) / 10), 1)
         #
         bc.categoryAxis.categoryNames = list(map(str, id_keys))
         bc.categoryAxis.labels.angle = 30
