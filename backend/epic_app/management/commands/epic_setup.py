@@ -19,15 +19,21 @@ from epic_app.tests import test_data_dir
 
 
 class Command(BaseCommand):
-    help = "Sets the default EPIC database with a predefined admin user. If the database already exists then it removes it (and its migrations) and creates one from zero."
+    help = "Sets the default EPIC database. If the database already exists then it removes it (and its migrations) and creates one from zero. Use flag --test to generate dummy EpicUsers and an admin."
     # epic_setup.py -> commands -> management -> epic_app
     epic_app_dir: Path = Path(__file__).parent.parent.parent
     root_dir: Path = epic_app_dir.parent
     default_data_dir: Optional[Path] = None
+    test_setup: bool = False
 
     def add_arguments(self, parser):
         parser.add_argument(
             "default_files", type=Path, default=test_data_dir / "xlsx", nargs="?"
+        )
+        parser.add_argument(
+            "--test",
+            action="store_true",
+            help="Sets some dummy users for testing purposes",
         )
 
     def _remove_migrations(self):
@@ -157,7 +163,8 @@ class Command(BaseCommand):
             )
         try:
             self._import_files(self.default_data_dir)
-            self._create_dummy_users()
+            if self.test_setup:
+                self._create_dummy_users()
         except Exception as e_info:
             call_command("flush")
             self.stdout.write(
@@ -178,6 +185,7 @@ class Command(BaseCommand):
         try:
             self._cleanup_db()
             self.default_data_dir = options["default_files"]
+            self.test_setup = options["test"]
             self._migrate_db()
         except Exception as e_info:
             self.stdout.write(
