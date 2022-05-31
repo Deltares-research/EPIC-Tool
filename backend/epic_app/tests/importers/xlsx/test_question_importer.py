@@ -26,14 +26,14 @@ class TestYesNoJustifyQuestionImporter:
         KeyAgencyActionsQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "keyagencyactionsquestions.xlsx",
             question_type=KeyAgencyActionsQuestion,
-            expected_entries=149,
-            first_entry_title="Does the national WRM agency have key close links with other relevant agencies?",
+            expected_entries=159,
+            first_entry_title="Does the national WRM agency prepares a periodic National Strategic WRM Plan together with relevant agencies such as DRM, Agriculture, natural resources management and hydromet as well as other stakeholders?",
         ),
         NationalFrameworkQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "nationalframeworkquestions.xlsx",
             question_type=NationalFrameworkQuestion,
-            expected_entries=40,
-            first_entry_title="Is there a national strategic water resources management plan in place?",
+            expected_entries=105,
+            first_entry_title="Is there a water resources law including IWRM priciples, mandating the implementation of the law to a WRM agency, establishing a high level inter ministerial collaboration body, and basin agencies to implement river basin planning?",
         ),
     }
 

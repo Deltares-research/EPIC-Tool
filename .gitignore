@@ -2,6 +2,7 @@
 node_modules
 /dist
 .django_secrets
+.django_debug
 
 # Cached files
 __pycache__

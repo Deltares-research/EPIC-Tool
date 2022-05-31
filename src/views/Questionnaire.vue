@@ -41,6 +41,7 @@
               @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
         </v-stepper-content>
         <v-stepper-content step="2">
+
           <national-frameworks ref="nationalFramework"
                                @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
                                @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"></national-frameworks>
@@ -49,6 +50,7 @@
           <key-agency-actions ref="keyAgency" @updateProgress="updateProgress"
                               @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
                               @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
+
         </v-stepper-content>
         <v-stepper-content step="4">
           <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
@@ -282,7 +284,7 @@ export default {
       if (this.e1 === 6) {
         await this.$refs.references.load();
       }
-    },
+
     updateSelectedProgram: async function (program) {
       this.$store.state.currentProgram = program;
       this.nextProgram = this.getNextProgram();
