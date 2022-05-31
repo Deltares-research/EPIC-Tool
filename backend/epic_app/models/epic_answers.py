@@ -197,7 +197,7 @@ class MultipleChoiceAnswer(Answer):
     @staticmethod
     def get_detailed_summary(answers_list: List[YesNoAnswer]) -> Dict[str, Any]:
         all_sp = {
-            p.id: p_count
+            p.name: p_count
             for p, p_count in dict(
                 Counter(
                     itertools.chain.from_iterable(
