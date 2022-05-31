@@ -2,7 +2,7 @@
   <v-app>
     <v-app-bar dense app>
       <v-btn to="/" text>Home</v-btn>
-      <v-btn to="/SelectProgram" text>Select program(s)</v-btn>
+      <v-btn to="/SelectProgram" text>Select programs</v-btn>
       <v-btn to="/Questionnaire" text>Questionnaire</v-btn>
       <v-btn to="/EndPage" text>Finalize Questionnaire</v-btn>
       <v-spacer></v-spacer>

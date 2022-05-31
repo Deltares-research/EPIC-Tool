@@ -12,7 +12,6 @@ export default new Vuex.Store({
         groups: [],
         programs: [],
         progress: 0,
-        selectedProgramsText: "",
         programSelection: new Set(),
         currentProgram: {},
         completedPrograms: new Set(),
