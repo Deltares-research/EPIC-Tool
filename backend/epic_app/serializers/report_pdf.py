@@ -3,7 +3,8 @@ from io import BytesIO
 from typing import Any, List, Optional
 
 from reportlab.graphics.charts.barcharts import VerticalBarChart
-from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.shapes import Drawing, Rect
+from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle as PS
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
@@ -133,7 +134,6 @@ class EpicPdfReport:
         canvas.restoreState()
 
     def _get_charts(self, input_data: dict) -> List[Any]:
-        drawing = Drawing(400, 200)
         id_keys = [id_k for id_k in input_data.keys() if not "_justify" in str(id_k)]
         if not id_keys:
             return []
@@ -145,19 +145,26 @@ class EpicPdfReport:
         bc.height = 125
         bc.width = 300
         bc.data = [id_values]
-        # bc.strokeColor = colors.black
-        bc.valueAxis.valueMin = 0
-        bc.valueAxis.valueMax = sum(id_values)
-        bc.valueAxis.valueStep = min((sum(id_values) / 10), 1)
         #
         bc.categoryAxis.categoryNames = list(map(str, id_keys))
         bc.categoryAxis.labels.angle = 30
         bc.categoryAxis.labels.boxAnchor = "ne"
         bc.categoryAxis.labels.dx = 8
         bc.categoryAxis.labels.dy = -2
-        drawing.add(bc)
 
         # Add to report.
+        max_key = len(max(id_keys, key=len))
+        drawing_width = 450
+        drawing_height = 200
+        if max_key > len("no_valid_response"):
+            bc.categoryAxis.labels.angle = 60
+            bc.categoryAxis.labels.dx = -8
+            drawing_height = 400
+            bc.y = 250
+
+        drawing = Drawing(drawing_width, drawing_height)
+        drawing.add(bc)
+
         chart_story = self._get_line("Answers:", EpicStyles.h3)
         chart_story.append(drawing)
         return chart_story
@@ -169,14 +176,18 @@ class EpicPdfReport:
 
     def _get_justifications(self, q_qa: dict) -> List[Any]:
         q_summary = q_qa["summary"]
-        story = self._get_line("Justifications:", EpicStyles.h3)
+        j_story = []
         for k_j in q_summary.keys():
             if "justify" not in str(k_j):
                 continue
             j_line = "<b>Justify {}:</b>".format(str(k_j).split("_")[0])
-            story.extend(self._get_line(j_line))
+            j_story.extend(self._get_line(j_line))
             for line in q_summary[k_j]:
-                story.extend(self._get_line(line))
+                j_story.extend(self._get_line(line))
+        if not j_story:
+            return []
+        story = self._get_line("Justifications:", EpicStyles.h3)
+        story.extend(j_story)
         return story
 
     def _get_questions(self, questions_data: dict) -> List[Any]:
