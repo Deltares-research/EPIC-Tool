@@ -80,7 +80,7 @@ class EpicPdfReport:
     report_description = "An automatic generated report containing all the questions and answers taken by the users of the organization."
 
     # Create the PDF object, using the buffer as its "file."
-    def _init_abstract(self):
+    def _append_abstract(self):
         intro = (
             f"{self.report_description} <br />"
             f"<b>Report requested by:</b> {self.report_author}.<br />"
@@ -90,7 +90,7 @@ class EpicPdfReport:
         self._append_line("Abstract", EpicStyles.h1)
         self._append_line(intro)
 
-    def _init_toc(self):
+    def _append_toc(self):
         # TODO: clickable TOC https://www.reportlab.com/snippets/13/
         self._flowables.append(PageBreak())
         self._toc = TableOfContents()
@@ -102,6 +102,34 @@ class EpicPdfReport:
         ]
         self._flowables.append(self._toc)
         self._flowables.append(PageBreak())
+
+    # def _append_summary(self, input_data: dict):
+    #     c_list = [
+    #         q_entry["question_answers"]
+    #         for p_entry in input_data
+    #         for q_entry in p_entry["questions"]
+    #         if q_entry["question_answers"]["answers"]
+    #     ]
+    #     t_answers = len(c_list)
+    #     a_sample = next(
+    #         (
+    #             q_ans["answers"]
+    #             for q_ans in c_list
+    #             if any("_justify" in qsum for qsum in q_ans["summary"].keys())
+    #         ),
+    #         None,
+    #     )
+    #     t_participants = 0
+    #     if a_sample:
+    #         for ans in a_sample:
+    #             t_participants += ans
+    #     summary = (
+    #         f"Total of participants: {t_participants} <br />"
+    #         f"Number of questions taken: {t_answers}"
+    #     )
+    #     self._flowables.append(PageBreak())
+    #     self._append_line("Summary", EpicStyles.h1)
+    #     self._append_line(summary)
 
     def _first_page(self, canvas, doc):
         subject = (
@@ -187,7 +215,6 @@ class EpicPdfReport:
             return
         for q_entry in questions_data:
             if not q_entry["question_answers"]["answers"]:
-                # self._append_line("No recorded answers.")
                 continue
             self._append_line(q_entry["title"], EpicStyles.h2)
             self._append_charts(q_entry["question_answers"]["summary"])
@@ -202,8 +229,9 @@ class EpicPdfReport:
 
     def generate_report(self, buffer: BytesIO, report_data: dict):
         self._flowables = [Spacer(1, 2 * inch)]
-        self._init_abstract()
-        self._init_toc()
+        self._append_abstract()
+        self._append_toc()
+        # self._append_summary(report_data)
         self._append_programs(report_data)
         EpicReportDocTemplate(buffer).multiBuild(
             self._flowables,
