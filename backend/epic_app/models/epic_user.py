@@ -5,8 +5,7 @@ from typing import List
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.crypto import get_random_string
-
-from epic_app.models.models import Program
+from rest_framework.authtoken.models import Token
 
 
 class EpicOrganization(models.Model):
@@ -60,3 +59,10 @@ class EpicUser(User):
         blank=True,
         null=True,
     )
+
+    def save(self, *args, **kwargs) -> None:
+        """
+        Override just to ensure we generate a token per created user.
+        """
+        super().save(*args, **kwargs)
+        Token.objects.get_or_create(user=self)

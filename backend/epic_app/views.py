@@ -5,11 +5,6 @@ from typing import List, Type, Union
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import FileResponse, HttpResponseForbidden
-from reportlab.graphics import renderPDF
-from reportlab.graphics.charts.barcharts import VerticalBarChart
-from reportlab.graphics.shapes import Drawing
-from reportlab.lib.units import cm
-from reportlab.pdfgen import canvas
 from rest_framework import permissions, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -27,6 +22,7 @@ from epic_app.models.epic_questions import (
 )
 from epic_app.models.epic_user import EpicOrganization, EpicUser
 from epic_app.models.models import Agency, Area, Group, Program
+from epic_app.serializers.report_pdf import EpicPdfReport
 from epic_app.utils import get_submodel_type, get_submodel_type_list
 
 
@@ -113,65 +109,19 @@ class EpicOrganizationViewSet(viewsets.ReadOnlyModelViewSet):
     ) -> models.QuerySet:
         answer_report = self.get_answers_report(request, pk)
 
-        def draw_charts(input_data) -> Drawing:
-            drawing = Drawing(400, 200)
-            id_keys = [
-                id_k for id_k in input_data.keys() if not "_justify" in str(id_k)
-            ]
-            if not id_keys:
-                return
-            id_values = [input_data[id_k] for id_k in id_keys]
-
-            bc = VerticalBarChart()
-            bc.x = 50
-            bc.y = 50
-            bc.height = 125
-            bc.width = 300
-            bc.data = [id_values]
-            # bc.strokeColor = colors.black
-            bc.valueAxis.valueMin = 0
-            bc.valueAxis.valueMax = sum(id_values)
-            bc.valueAxis.valueStep = 1
-            #
-            bc.categoryAxis.categoryNames = list(map(str, id_keys))
-            drawing.add(bc)
-            return drawing
+        def get_organization() -> List[str]:
+            if bool(request.user.is_staff or request.user.is_superuser):
+                return [eo.name for eo in EpicOrganization.objects.all()]
+            return [request.user.epicuser.organization.name]
 
         # Create a file-like buffer to receive PDF data.
         buffer = io.BytesIO()
-
-        # Create the PDF object, using the buffer as its "file."
-        p = canvas.Canvas(buffer)
-
-        # Draw things on the PDF. Here's where the PDF generation happens.
-        # See the ReportLab documentation for the full list of functionality.
-        for p_entry in answer_report.data:
-            for q_entry in p_entry["questions"]:
-                textobject = p.beginText(2 * cm, 29.7 * cm - 2 * cm)
-                textobject.textLine("Program: {}".format(p_entry["name"]))
-                q_summary = q_entry["question_answers"]["summary"]
-                textobject.textLine("Question: {}".format(q_entry["title"]))
-                if not q_entry["question_answers"]["answers"]:
-                    textobject.textLine("No recorded answers.")
-                else:
-                    for k_j in q_summary.keys():
-                        if "justify" in str(k_j):
-                            textobject.textLine(
-                                "Justify {}:".format(str(k_j).split("_")[0])
-                            )
-                            textobject.textLines(q_summary[k_j])
-                p.drawText(textobject)
-                dc = draw_charts(q_summary)
-                if dc:
-                    renderPDF.draw(dc, p, 50, 500)
-                p.showPage()
-            if any(p_entry["questions"]):
-                p.showPage()
-        # Close the PDF object cleanly, and we're done.
-        p.save()
-
-        # FileResponse sets the Content-Disposition header so that browsers
-        # present the option to save the file.
+        pdf_report = EpicPdfReport()
+        pdf_report.report_subtitle = "EPIC report for {}".format(
+            (", ").join(get_organization())
+        )
+        pdf_report.report_author = request.user.username
+        pdf_report.generate_report(buffer, answer_report.data)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename="answers_report.pdf")
 

@@ -2,6 +2,7 @@ import json
 
 import pytest
 from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.response import Response as RfResponse
 from rest_framework.test import APIRequestFactory
@@ -70,6 +71,7 @@ class TestEpicUser:
         assert created_user.is_staff is False
         assert created_user.is_advisor is False
         assert created_user in epic_organization.organization_users.all()
+        assert Token.objects.filter(user=created_user).exists()
 
 
 @pytest.mark.django_db
