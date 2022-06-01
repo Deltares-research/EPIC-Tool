@@ -1,3 +1,11 @@
+## v0.26.0 (2022-06-01)
+
+### Feat
+
+- **report_pdf.py**: Now the linkages report contains names instead of id's
+- **report_pdf.py**: Improved report layout
+- **report_pdf.py**: Improved report layout
+
 ## v0.25.0 (2022-05-31)
 
 ### Feat
