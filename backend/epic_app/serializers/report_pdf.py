@@ -100,34 +100,6 @@ class EpicPdfReport:
 
         return [PageBreak(), self._toc, PageBreak()]
 
-    # def _append_summary(self, input_data: dict):
-    #     c_list = [
-    #         q_entry["question_answers"]
-    #         for p_entry in input_data
-    #         for q_entry in p_entry["questions"]
-    #         if q_entry["question_answers"]["answers"]
-    #     ]
-    #     t_answers = len(c_list)
-    #     a_sample = next(
-    #         (
-    #             q_ans["answers"]
-    #             for q_ans in c_list
-    #             if any("_justify" in qsum for qsum in q_ans["summary"].keys())
-    #         ),
-    #         None,
-    #     )
-    #     t_participants = 0
-    #     if a_sample:
-    #         for ans in a_sample:
-    #             t_participants += ans
-    #     summary = (
-    #         f"Total of participants: {t_participants} <br />"
-    #         f"Number of questions taken: {t_answers}"
-    #     )
-    #     self._flowables.append(PageBreak())
-    #     self._append_line("Summary", EpicStyles.h1)
-    #     self._append_line(summary)
-
     def _first_page(self, canvas, doc):
         subject = (
             self.report_subtitle + "\n" + self.report_description
@@ -234,7 +206,6 @@ class EpicPdfReport:
         report_story = [Spacer(1, 2 * inch)]
         report_story.extend(self._get_abstract())
         report_story.extend(self._get_toc())
-        # self._append_summary(report_data)
         report_story.extend(self._get_programs(report_data))
         EpicReportDocTemplate(buffer).multiBuild(
             report_story,
