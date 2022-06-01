@@ -6,6 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "acceptance": "vue-cli-service build --mode acceptance",
+    "preprod": "vue-cli-service build --mode preprod",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

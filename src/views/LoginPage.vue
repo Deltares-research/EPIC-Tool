@@ -80,7 +80,7 @@ export default {
       }
       let jsonResponse = await response.json();
       this.$store.state.token = jsonResponse.token;
-      this.$router.push('/');
+      await this.$router.push('/');
     }
   }
 }
