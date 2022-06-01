@@ -79,7 +79,7 @@ MIDDLEWARE = [
 ]
 _http_hosts = ["http://" + a_h for a_h in ALLOWED_HOSTS]
 _https_hosts = ["https://" + a_h for a_h in ALLOWED_HOSTS]
-CORS_ALLOWED_ORIGINS = _http_hosts + _https_hosts
+CORS_ALLOWED_ORIGINS = ['http://localhost:8080']
 CORS_URLS_REGEX = r"^/api/.*$"
 
 ROOT_URLCONF = "epic_core.urls"
