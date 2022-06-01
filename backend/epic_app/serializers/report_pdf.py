@@ -3,14 +3,12 @@ from io import BytesIO
 from typing import Any, List, Optional
 
 from reportlab.graphics.charts.barcharts import VerticalBarChart
-from reportlab.graphics.shapes import Drawing
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.graphics.shapes import Drawing, Rect
+from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle as PS
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import cm, inch
+from reportlab.lib.units import inch
 from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer
-from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
-from reportlab.platypus.frames import Frame
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.rl_config import defaultPageSize
@@ -80,19 +78,19 @@ class EpicPdfReport:
     report_description = "An automatic generated report containing all the questions and answers taken by the users of the organization."
 
     # Create the PDF object, using the buffer as its "file."
-    def _append_abstract(self):
+    def _get_abstract(self) -> List[Any]:
         intro = (
             f"{self.report_description} <br />"
             f"<b>Report requested by:</b> {self.report_author}.<br />"
             f"<b>Report generated on:</b> {datetime.now()} using the python library 'ReportLab'."
         )
-        self._flowables.append(PageBreak())
-        self._append_line("Abstract", EpicStyles.h1)
-        self._append_line(intro)
+        abs_story = [PageBreak()]
+        abs_story.extend(self._get_line("Abstract", EpicStyles.h1))
+        abs_story.extend(self._get_line(intro))
+        return abs_story
 
-    def _append_toc(self):
+    def _get_toc(self) -> List[Any]:
         # TODO: clickable TOC https://www.reportlab.com/snippets/13/
-        self._flowables.append(PageBreak())
         self._toc = TableOfContents()
         self._toc.levelStyles = [
             EpicStyles.h1,
@@ -100,36 +98,8 @@ class EpicPdfReport:
             EpicStyles.h3,
             EpicStyles.h4,
         ]
-        self._flowables.append(self._toc)
-        self._flowables.append(PageBreak())
 
-    # def _append_summary(self, input_data: dict):
-    #     c_list = [
-    #         q_entry["question_answers"]
-    #         for p_entry in input_data
-    #         for q_entry in p_entry["questions"]
-    #         if q_entry["question_answers"]["answers"]
-    #     ]
-    #     t_answers = len(c_list)
-    #     a_sample = next(
-    #         (
-    #             q_ans["answers"]
-    #             for q_ans in c_list
-    #             if any("_justify" in qsum for qsum in q_ans["summary"].keys())
-    #         ),
-    #         None,
-    #     )
-    #     t_participants = 0
-    #     if a_sample:
-    #         for ans in a_sample:
-    #             t_participants += ans
-    #     summary = (
-    #         f"Total of participants: {t_participants} <br />"
-    #         f"Number of questions taken: {t_answers}"
-    #     )
-    #     self._flowables.append(PageBreak())
-    #     self._append_line("Summary", EpicStyles.h1)
-    #     self._append_line(summary)
+        return [PageBreak(), self._toc, PageBreak()]
 
     def _first_page(self, canvas, doc):
         subject = (
@@ -163,11 +133,10 @@ class EpicPdfReport:
         )
         canvas.restoreState()
 
-    def _append_charts(self, input_data: dict):
-        drawing = Drawing(400, 200)
+    def _get_charts(self, input_data: dict) -> List[Any]:
         id_keys = [id_k for id_k in input_data.keys() if not "_justify" in str(id_k)]
         if not id_keys:
-            return
+            return []
         id_values = [input_data[id_k] for id_k in id_keys]
 
         bc = VerticalBarChart()
@@ -176,65 +145,81 @@ class EpicPdfReport:
         bc.height = 125
         bc.width = 300
         bc.data = [id_values]
-        # bc.strokeColor = colors.black
-        bc.valueAxis.valueMin = 0
-        bc.valueAxis.valueMax = sum(id_values)
-        bc.valueAxis.valueStep = min((sum(id_values) / 10), 1)
         #
         bc.categoryAxis.categoryNames = list(map(str, id_keys))
         bc.categoryAxis.labels.angle = 30
         bc.categoryAxis.labels.boxAnchor = "ne"
         bc.categoryAxis.labels.dx = 8
         bc.categoryAxis.labels.dy = -2
-        drawing.add(bc)
 
         # Add to report.
-        self._append_line("Answers:", EpicStyles.h3)
-        self._flowables.append(drawing)
+        max_key = len(max(id_keys, key=len))
+        drawing_width = 450
+        drawing_height = 200
+        if max_key > len("no_valid_response"):
+            bc.categoryAxis.labels.angle = 60
+            bc.categoryAxis.labels.dx = -8
+            drawing_height = 400
+            bc.y = 250
 
-    def _append_line(self, line: str, style: Optional[Any] = None):
+        drawing = Drawing(drawing_width, drawing_height)
+        drawing.add(bc)
+
+        chart_story = self._get_line("Answers:", EpicStyles.h3)
+        chart_story.append(drawing)
+        return chart_story
+
+    def _get_line(self, line: str, style: Optional[Any] = None) -> List[Any]:
         if not style:
             style = self.styles["Normal"]
-        self._flowables.append(Paragraph(line, style))
-        self._flowables.append(Spacer(1, 0.2 * inch))
+        return [Paragraph(line, style), Spacer(1, 0.2 * inch)]
 
-    def _append_justifications(self, q_qa: dict):
+    def _get_justifications(self, q_qa: dict) -> List[Any]:
         q_summary = q_qa["summary"]
-        self._append_line("Justifications:", EpicStyles.h3)
+        j_story = []
         for k_j in q_summary.keys():
             if "justify" not in str(k_j):
                 continue
             j_line = "<b>Justify {}:</b>".format(str(k_j).split("_")[0])
-            self._append_line(j_line)
+            j_story.extend(self._get_line(j_line))
             for line in q_summary[k_j]:
-                self._append_line(line)
+                j_story.extend(self._get_line(line))
+        if not j_story:
+            return []
+        story = self._get_line("Justifications:", EpicStyles.h3)
+        story.extend(j_story)
+        return story
 
-    def _append_questions(self, questions_data: dict):
-        if not questions_data:
-            self._append_line("No questions available.")
-            return
+    def _get_questions(self, questions_data: dict) -> List[Any]:
+        story = []
         for q_entry in questions_data:
             if not q_entry["question_answers"]["answers"]:
                 continue
-            self._append_line(q_entry["title"], EpicStyles.h2)
-            self._append_charts(q_entry["question_answers"]["summary"])
-            self._append_justifications(q_entry["question_answers"])
+            story.extend(self._get_line(q_entry["title"], EpicStyles.h2))
+            story.extend(self._get_charts(q_entry["question_answers"]["summary"]))
+            story.extend(self._get_justifications(q_entry["question_answers"]))
+        return story
 
-    def _append_programs(self, report_data: dict):
+    def _get_programs(self, report_data: dict) -> List[Any]:
+        story = []
         for p_entry in report_data:
             program_name = p_entry["name"]
-            self._append_line(f"Program: {program_name}", EpicStyles.h1)
-            self._append_questions(p_entry["questions"])
-            self._flowables.append(PageBreak())
+            # Don't include empty chapters without questions.
+            q_stories = self._get_questions(p_entry["questions"])
+            if not q_stories:
+                continue
+            story.extend(self._get_line(f"Program: {program_name}", EpicStyles.h1))
+            story.extend(q_stories)
+            story.append(PageBreak())
+        return story
 
     def generate_report(self, buffer: BytesIO, report_data: dict):
-        self._flowables = [Spacer(1, 2 * inch)]
-        self._append_abstract()
-        self._append_toc()
-        # self._append_summary(report_data)
-        self._append_programs(report_data)
+        report_story = [Spacer(1, 2 * inch)]
+        report_story.extend(self._get_abstract())
+        report_story.extend(self._get_toc())
+        report_story.extend(self._get_programs(report_data))
         EpicReportDocTemplate(buffer).multiBuild(
-            self._flowables,
+            report_story,
             onFirstPage=self._first_page,
             onLaterPages=self._later_pages,
         )

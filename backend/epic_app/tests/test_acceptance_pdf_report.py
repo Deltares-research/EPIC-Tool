@@ -61,12 +61,10 @@ def _report_fixture(full_epic_domain_data: pytest.fixture):
         name="Deltares Test Organization"
     )
     org_users = test_org.generate_users(12)
-    select_programs_a = set(random.choices(Program.objects.all(), k=4))
-    select_programs_b = set(random.choices(Program.objects.all(), k=4))
-    select_programs_c = []
-    select_programs_c.extend(select_programs_a)
-    select_programs_c.extend(select_programs_b)
-    select_programs_c = set(select_programs_c)
+    program_list = set(Program.objects.all())
+    select_programs_a = set(random.choices(list(program_list), k=6))
+    select_programs_b = set(random.choices(list(program_list - select_programs_a), k=6))
+    select_programs_c = set(list(select_programs_a) + list(select_programs_b))
 
     def answer_yes_no(sel_user: EpicUser, yn_question: YesNoQuestion):
         YesNoAnswer.objects.create(

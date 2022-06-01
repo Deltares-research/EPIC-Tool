@@ -1,3 +1,9 @@
+## v0.27.0 (2022-06-01)
+
+### Feat
+
+- **report_pdf.py**: Fixed layout
+
 ## v0.26.0 (2022-06-01)
 
 ### Feat
