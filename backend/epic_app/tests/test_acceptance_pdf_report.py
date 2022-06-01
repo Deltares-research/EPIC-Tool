@@ -40,20 +40,6 @@ def set_user_auth_token(api_client: APIClient, username: str) -> str:
     api_client.credentials(HTTP_AUTHORIZATION=token_str)
 
 
-justify_answer_list = [
-    "Duis esse excepteur elit ad fugiat id quis enim dolore non aliquip et nulla dolor.",
-    "Consequat officia veniam veniam deserunt reprehenderit occaecat incididunt et aute irure reprehenderit.",
-    "Exercitation aute duis enim exercitation cillum.",
-    "Commodo culpa incididunt non aliqua laboris dolor nostrud incididunt sunt dolor incididunt esse consectetur laborum.",
-    "Sint est id qui proident et minim pariatur dolore.",
-    "Veniam fugiat in non fugiat nulla consequat incididunt tempor pariatur do pariatur.",
-    "Adipisicing nostrud quis qui eiusmod eiusmod enim aliqua ullamco irure in.",
-    "Sit mollit qui nulla mollit elit pariatur officia nisi nulla do qui velit eiusmod.",
-    "Velit in anim sit deserunt.",
-    "Ea veniam incididunt sunt et do anim culpa anim commodo dolore minim fugiat elit enim.",
-]
-
-
 @pytest.fixture(autouse=False)
 @pytest.mark.django_db
 def _report_fixture(full_epic_domain_data: pytest.fixture):
