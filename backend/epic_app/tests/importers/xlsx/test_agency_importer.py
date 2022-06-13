@@ -29,7 +29,7 @@ class TestEpicAgencyImporter:
         EpicAgencyImporter().import_file(test_file)
 
         # Verify final expectations
-        assert len(Agency.objects.all()) == 6
+        assert len(Agency.objects.all()) == 7
 
         # Verify the initial data has been removed.
         assert dummy_agency not in Agency.objects.all()
