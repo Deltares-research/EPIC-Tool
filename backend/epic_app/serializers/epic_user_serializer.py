@@ -32,7 +32,12 @@ class EpicUserSerializer(serializers.ModelSerializer):
             "is_advisor",
             "password",
         )
-        extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {
+            "username": {"read_only": True},
+            "organization": {"read_only": True},
+            "is_advisor": {"read_only": True},
+            "password": {"write_only": True},
+        }
 
     def create(self, validated_data):
         validated_data["password"] = make_password(validated_data.get("password"))
