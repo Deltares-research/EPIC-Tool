@@ -26,14 +26,14 @@ class TestYesNoJustifyQuestionImporter:
         KeyAgencyActionsQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "keyagencyactionsquestions.xlsx",
             question_type=KeyAgencyActionsQuestion,
-            expected_entries=159,
-            first_entry_title="Does the national WRM agency prepares a periodic National Strategic WRM Plan together with relevant agencies such as DRM, Agriculture, natural resources management and hydromet as well as other stakeholders?",
+            expected_entries=156,
+            first_entry_title="Does the national WRM agency prepare a periodic National Strategic WRM Plan? Does the WRM Agency prepare the National Strategic WRM Plan together with relevant agencies such as DRM, agriculture, natural resources management and hydro-met as well as other stakeholders?",
         ),
         NationalFrameworkQuestionImporter: dict(
             test_file=test_data_dir / "xlsx" / "nationalframeworkquestions.xlsx",
             question_type=NationalFrameworkQuestion,
             expected_entries=105,
-            first_entry_title="Is there a water resources law including IWRM priciples, mandating the implementation of the law to a WRM agency, establishing a high level inter ministerial collaboration body, and basin agencies to implement river basin planning?",
+            first_entry_title="Is there a water resources law? Please describe below to what extent does the water resources law includes IWRM principles, mandates the implementation of the law to a WRM agency, establishes a high level inter-ministerial collaboration body, and mandates the establishment of basin agencies to implement river basin planning.",
         ),
     }
 
@@ -87,4 +87,4 @@ class TestEvolutionQuestionImporter:
 
         EvolutionQuestionImporter().import_file(test_file)
 
-        assert len(EvolutionQuestion.objects.all()) == 46
+        assert len(EvolutionQuestion.objects.all()) == 55
