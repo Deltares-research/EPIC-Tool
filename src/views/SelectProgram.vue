@@ -68,7 +68,6 @@
       </v-container>
     </v-card>
   </div>
-
 </template>
 <script>
 
@@ -91,7 +90,6 @@ export default {
     this.agencies.sort((a, b) => a.id - b.id);
 
     if (this.$store.state.initialized) return;
-    console.log(server)
     response = await fetch(server + '/api/area/?format=json', options);
     let areas = await response.json();
     this.$store.commit("updateAreas", areas);

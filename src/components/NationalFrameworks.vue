@@ -27,7 +27,7 @@
             :items="items"
             v-model="yesNoValue"
             filled
-            label="Select yes or no"
+            label="Select one of the options"
         ></v-select>
       </v-col>
     </v-row>
@@ -72,7 +72,7 @@ export default Vue.extend({
       await this.loadAnswer();
     },
     submitAnswer: async function () {
-      await util.saveYesNoAnswer(this.answer[0].id, this.displayedJustification, this.yesNoValue === this.items[0] ? "Y" : "N", this.$store.state.token);
+      await util.saveYesNoAnswer(this.answer[0].id, this.displayedJustification, this.yesNoValue, this.$store.state.token);
       this.$emit("updateProgress");
     }, loadAnswer: async function () {
       this.displayedQuestion = this.questions[this.page - 1].title;
@@ -82,10 +82,23 @@ export default Vue.extend({
       if (this.answer[0].id === undefined) return;
 
       this.displayedJustification = this.answer[0].justify_answer;
-      if (this.answer[0].short_answer === "Y") {
-        this.yesNoValue = this.items[0];
-      } else {
-        this.yesNoValue = this.items[1];
+      if (this.answer[0].selected_choice === "") {
+        this.yesNoValue = "";
+      }
+      if (this.answer[0].selected_choice === "STRONGLYDISAGREE") {
+        this.yesNoValue = "Strongly disagree";
+      }
+      if (this.answer[0].selected_choice === "DISAGREE") {
+        this.yesNoValue = "Disagree";
+      }
+      if (this.answer[0].selected_choice === "NEITHERAGREENORDISAGREE") {
+        this.yesNoValue = "Neither agree nor disagree";
+      }
+      if (this.answer[0].selected_choice === "AGREE") {
+        this.yesNoValue = "Agree";
+      }
+      if (this.answer[0].selected_choice === "STRONGLYAGREE") {
+        this.yesNoValue = "Strongly agree";
       }
     },
     load: async function () {
@@ -103,7 +116,7 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    items: ['Yes', 'No'],
+    items: ['Strongly agree', 'Agree', 'Neither agree nor disagree', 'Disagree', 'Strongly disagree'],
     yesNoValue: "",
     title: "",
     page: 1,
