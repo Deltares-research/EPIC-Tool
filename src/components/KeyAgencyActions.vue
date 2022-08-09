@@ -21,7 +21,7 @@
       <v-col md="4">
         <v-select
             :items="items"
-            v-model="yesNoValue"
+            v-model="selectedAgreement"
             filled
             label="Select yes or no"
         ></v-select>
@@ -68,7 +68,7 @@ export default Vue.extend({
       await this.loadAnswer();
     },
     submitAnswer: async function () {
-      await util.saveYesNoAnswer(this.answer[0].id, this.displayedJustification, this.yesNoValue, this.$store.state.token);
+      await util.saveAgreementAnswer(this.answer[0].id, this.displayedJustification, this.selectedAgreement, this.$store.state.token);
       this.$emit("updateProgress");
     },
     loadAnswer: async function () {
@@ -80,22 +80,22 @@ export default Vue.extend({
 
       this.displayedJustification = this.answer[0].justify_answer;
       if (this.answer[0].selected_choice === "") {
-        this.yesNoValue = "";
+        this.selectedAgreement = "";
       }
       if (this.answer[0].selected_choice === "STRONGLYDISAGREE") {
-        this.yesNoValue = "Strongly disagree";
+        this.selectedAgreement = "Strongly disagree";
       }
       if (this.answer[0].selected_choice === "DISAGREE") {
-        this.yesNoValue = "Disagree";
+        this.selectedAgreement = "Disagree";
       }
       if (this.answer[0].selected_choice === "NEITHERAGREENORDISAGREE") {
-        this.yesNoValue = "Neither agree nor disagree";
+        this.selectedAgreement = "Neither agree nor disagree";
       }
       if (this.answer[0].selected_choice === "AGREE") {
-        this.yesNoValue = "Agree";
+        this.selectedAgreement = "Agree";
       }
       if (this.answer[0].selected_choice === "STRONGLYAGREE") {
-        this.yesNoValue = "Strongly agree";
+        this.selectedAgreement = "Strongly agree";
       }
     },
     load: async function () {
@@ -115,7 +115,7 @@ export default Vue.extend({
   },
   data: () => ({
     items: ['Strongly agree', 'Agree', 'Neither agree nor disagree', 'Disagree', 'Strongly disagree'],
-    yesNoValue: "",
+    selectedAgreement: "",
     title: "",
     page: 1,
     questions: [],

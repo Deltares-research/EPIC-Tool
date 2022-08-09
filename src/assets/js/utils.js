@@ -53,7 +53,7 @@ export async function loadAnswer(questionId, token) {
     return await response.json();
 }
 
-export async function saveSelectedChoiceAnswer(answerId, justifyAnswer, selectedAnswer, token) {
+export async function saveEvolutionAnswer(answerId, justifyAnswer, selectedAnswer, token) {
     const newAnswer = {};
     newAnswer.justify_answer = justifyAnswer;
     newAnswer.selected_choice = selectedAnswer;
@@ -92,7 +92,7 @@ export async function saveSelectedProgramsAnswer(answerId, selectedPrograms, tok
     await fetch(input, options);
 }
 
-export async function saveYesNoAnswer(answerId, justifyAnswer, shortAnswer, token) {
+export async function saveAgreementAnswer(answerId, justifyAnswer, shortAnswer, token) {
     const newAnswer = {};
     newAnswer.justify_answer = justifyAnswer;
     if (shortAnswer === 'Strongly disagree') {
