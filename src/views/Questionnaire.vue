@@ -1,82 +1,87 @@
 <template>
   <div>
-    <br>
-    <p>Progress {{ this.$store.state.progress }}%</p>
-    <v-progress-linear :value="this.$store.state.progress"></v-progress-linear>
-    <br>
-    <v-tabs v-model="selectedAreaIndex">
-      <v-tab v-for="(area) in this.$store.state.areas" :key="area.id" @change="updateVisiblePrograms(area.id)"
-             :disabled="disableArea(area.id)">
-        {{ area.name }}
-        <v-icon v-if="isAreaCompleted(area.id)" right>mdi-checkbox-marked-circle</v-icon>
-      </v-tab>
-    </v-tabs>
-    <v-tabs v-model="selectedProgramIndex">
-      <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)" :disabled="disableEvents">
-        {{ program.name }}
-        <v-icon v-if="isProgramCompleted(program.id)" right>mdi-checkbox-marked-circle</v-icon>
-      </v-tab>
-    </v-tabs>
-    <br>
-    <v-stepper v-model="e1">
-      <v-stepper-header>
-        <v-stepper-step :complete="e1 > 1" step="1">Program description</v-stepper-step>
-        <v-divider></v-divider>
-        <v-stepper-step :complete="e1 > 2" step="2">National framework</v-stepper-step>
-        <v-divider></v-divider>
-        <v-stepper-step :complete="e1 > 3" step="3">Key agency actions</v-stepper-step>
-        <v-divider></v-divider>
-        <v-stepper-step :complete="e1 > 4" step="4">Evolution</v-stepper-step>
-        <v-divider></v-divider>
-        <v-stepper-step :complete="e1 > 5" step="5">Linkages</v-stepper-step>
-        <v-divider></v-divider>
-        <v-stepper-step :complete="e1 > 6" step="6">References</v-stepper-step>
-      </v-stepper-header>
-      <v-stepper-items>
-        <v-stepper-content step="1">
-          <program-description-navigation
-              @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
-          <program-description ref="programDescription"></program-description>
-          <program-description-navigation
-              @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
-        </v-stepper-content>
-        <v-stepper-content step="2">
+    <h3 v-if="this.$store.state.programSelection.size === 0">Please select 1 or more programs in the select programs
+      tab</h3>
+    <div v-if="this.$store.state.programSelection.size > 0">
+      <br>
+      <p>Progress {{ this.$store.state.progress }}%</p>
+      <v-progress-linear :value="this.$store.state.progress"></v-progress-linear>
+      <br>
+      <v-tabs v-model="selectedAreaIndex">
+        <v-tab v-for="(area) in this.$store.state.areas" :key="area.id" @change="updateVisiblePrograms(area.id)"
+               :disabled="disableArea(area.id)">
+          {{ area.name }}
+          <v-icon v-if="isAreaCompleted(area.id)" right>mdi-checkbox-marked-circle</v-icon>
+        </v-tab>
+      </v-tabs>
+      <v-tabs v-model="selectedProgramIndex">
+        <v-tab v-for="program in this.visiblePrograms" :key="program.id" @change="updateSelectedProgram(program)"
+               :disabled="disableEvents">
+          {{ program.name }}
+          <v-icon v-if="isProgramCompleted(program.id)" right>mdi-checkbox-marked-circle</v-icon>
+        </v-tab>
+      </v-tabs>
+      <br>
+      <v-stepper v-model="e1">
+        <v-stepper-header>
+          <v-stepper-step :complete="e1 > 1" step="1">Program description</v-stepper-step>
+          <v-divider></v-divider>
+          <v-stepper-step :complete="e1 > 2" step="2">National framework</v-stepper-step>
+          <v-divider></v-divider>
+          <v-stepper-step :complete="e1 > 3" step="3">Key agency actions</v-stepper-step>
+          <v-divider></v-divider>
+          <v-stepper-step :complete="e1 > 4" step="4">Evolution</v-stepper-step>
+          <v-divider></v-divider>
+          <v-stepper-step :complete="e1 > 5" step="5">Linkages</v-stepper-step>
+          <v-divider></v-divider>
+          <v-stepper-step :complete="e1 > 6" step="6">References</v-stepper-step>
+        </v-stepper-header>
+        <v-stepper-items>
+          <v-stepper-content step="1">
+            <program-description-navigation
+                @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
+            <program-description ref="programDescription"></program-description>
+            <program-description-navigation
+                @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
+          </v-stepper-content>
+          <v-stepper-content step="2">
 
-          <national-frameworks ref="nationalFramework"
-                               @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
-                               @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"></national-frameworks>
-        </v-stepper-content>
-        <v-stepper-content step="3">
-          <key-agency-actions ref="keyAgency" @updateProgress="updateProgress"
-                              @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
-                              @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
+            <national-frameworks ref="nationalFramework" @updateProgress="updateProgress"
+                                 @fromNationalFrameworkToProgramDescription="fromNationalFrameworkToProgramDescription"
+                                 @fromNationalFrameworkToKeyAgency="fromNationalFrameworkToKeyAgency"></national-frameworks>
+          </v-stepper-content>
+          <v-stepper-content step="3">
+            <key-agency-actions ref="keyAgency" @updateProgress="updateProgress"
+                                @fromKeyAgencyToNationalFramework="fromKeyAgencyToNationalFramework"
+                                @fromKeyAgencyToEvolution="fromKeyAgencyToEvolution"/>
 
-        </v-stepper-content>
-        <v-stepper-content step="4">
-          <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
-                                @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
-          <evolution ref="evolution" @updateProgress="updateProgress"></evolution>
-          <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
-                                @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
-        </v-stepper-content>
-        <v-stepper-content step="5">
-          <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
-                               @fromLinkagesToReferences="fromLinkagesToReferences"/>
-          <linkages ref="linkages" @updateProgress="updateProgress"></linkages>
-          <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
-                               @fromLinkagesToReferences="fromLinkagesToReferences"/>
-        </v-stepper-content>
-        <v-stepper-content step="6">
-          <references-navigation @back="e1=5" @forward="gotoNextProgram">
-            {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
-          </references-navigation>
-          <references ref="references"/>
-          <references-navigation @back="e1=5" @forward="gotoNextProgram">
-            {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
-          </references-navigation>
-        </v-stepper-content>
-      </v-stepper-items>
-    </v-stepper>
+          </v-stepper-content>
+          <v-stepper-content step="4">
+            <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
+                                  @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
+            <evolution ref="evolution" @updateProgress="updateProgress"></evolution>
+            <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
+                                  @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
+          </v-stepper-content>
+          <v-stepper-content step="5">
+            <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
+                                 @fromLinkagesToReferences="fromLinkagesToReferences"/>
+            <linkages ref="linkages" @updateProgress="updateProgress"></linkages>
+            <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
+                                 @fromLinkagesToReferences="fromLinkagesToReferences"/>
+          </v-stepper-content>
+          <v-stepper-content step="6">
+            <references-navigation @back="e1=5" @forward="gotoNextProgram">
+              {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
+            </references-navigation>
+            <references ref="references"/>
+            <references-navigation @back="e1=5" @forward="gotoNextProgram">
+              {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
+            </references-navigation>
+          </v-stepper-content>
+        </v-stepper-items>
+      </v-stepper>
+    </div>
   </div>
 </template>
 <script>

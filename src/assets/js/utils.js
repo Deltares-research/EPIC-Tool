@@ -53,7 +53,7 @@ export async function loadAnswer(questionId, token) {
     return await response.json();
 }
 
-export async function saveSelectedChoiceAnswer(answerId, justifyAnswer, selectedAnswer, token) {
+export async function saveEvolutionAnswer(answerId, justifyAnswer, selectedAnswer, token) {
     const newAnswer = {};
     newAnswer.justify_answer = justifyAnswer;
     newAnswer.selected_choice = selectedAnswer;
@@ -92,10 +92,24 @@ export async function saveSelectedProgramsAnswer(answerId, selectedPrograms, tok
     await fetch(input, options);
 }
 
-export async function saveYesNoAnswer(answerId, justifyAnswer, shortAnswer, token) {
+export async function saveAgreementAnswer(answerId, justifyAnswer, shortAnswer, token) {
     const newAnswer = {};
     newAnswer.justify_answer = justifyAnswer;
-    newAnswer.short_answer = shortAnswer;
+    if (shortAnswer === 'Strongly disagree') {
+        newAnswer.selected_choice = "STRONGLYDISAGREE"
+    }
+    if (shortAnswer === 'Disagree') {
+        newAnswer.selected_choice = "DISAGREE"
+    }
+    if (shortAnswer === 'Neither agree nor disagree') {
+        newAnswer.selected_choice = "NEITHERAGREENORDISAGREE"
+    }
+    if (shortAnswer === 'Agree') {
+        newAnswer.selected_choice = "AGREE"
+    }
+    if (shortAnswer === 'Strongly agree') {
+        newAnswer.selected_choice = "STRONGLYAGREE"
+    }
     const options = {
         method: 'PATCH',
         mode: 'cors',

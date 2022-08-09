@@ -39,7 +39,7 @@ export default {
       }
       let input = server + '/api/epicorganization/report-pdf/';
       let res = await fetch(input, options);
-      if (res.status != 200) return;
+      if (res.status !== 200) return;
       let blob = await res.blob();
       var url = window.URL.createObjectURL(blob);
       var a = document.createElement('a');

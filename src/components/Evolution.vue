@@ -70,7 +70,7 @@ export default Vue.extend({
           continue
         }
         let justification = i === this.dimensions.length - 1 ? this.displayedJustification : "";
-        await util.saveSelectedChoiceAnswer(this.answers[i][0].id, justification, choice, this.$store.state.token);
+        await util.saveEvolutionAnswer(this.answers[i][0].id, justification, choice, this.$store.state.token);
         this.$emit("updateProgress");
       }
     },
