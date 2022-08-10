@@ -23,7 +23,7 @@
             :items="items"
             v-model="selectedAgreement"
             filled
-            label="Select yes or no"
+            label="Select one of the options"
         ></v-select>
       </v-col>
     </v-row>
