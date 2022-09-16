@@ -16,6 +16,23 @@ export async function loadQuestions(programId, questionType, token) {
     return await response.json();
 }
 
+export async function loadLinkages(token){
+    const options = {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Token ' + token,
+        },
+    }
+    let url = server + '/api/summary/linkages/';
+    let response = await fetch(url, options);
+    if (response.status !== 200) {
+        return {};
+    }
+    return await response.json();
+}
 export async function loadProgress(programId, token) {
     const options = {
         method: 'GET',

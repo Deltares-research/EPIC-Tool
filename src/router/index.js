@@ -6,6 +6,7 @@ import Questionnaire from "@/views/Questionnaire";
 import EndPage from "@/views/EndPage";
 import Answers from "@/views/Answers";
 import LoginPage from "@/views/LoginPage";
+import LinkagesOverview from "@/views/LinkagesOverview";
 import store from '@/store';  //or use a full path to ./store
 
 Vue.use(VueRouter)
@@ -13,6 +14,11 @@ Vue.use(VueRouter)
 Vue.use(VueRouter)
 
 const routes = [
+    {
+        path: '/LinkagesOverview',
+        name: 'LinkagesOverview',
+        component: LinkagesOverview
+    },
     {
         path: '/LoginPage',
         name: 'LoginPage',
