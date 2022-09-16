@@ -1,13 +1,16 @@
 <template>
   <div>
     <v-row>
-      <v-col md="6">
+      <v-col md="4">
         <v-btn text color="primary" @click='$emit("fromNationalFrameworkToProgramDescription")'>
           <v-icon>mdi-step-backward</v-icon>
           {{ this.previousStepMessage() }}
         </v-btn>
       </v-col>
-      <v-col md="6" class="text-right">
+      <v-col>
+        <h3 style="color: darkred">{{ title }}</h3>
+      </v-col>
+      <v-col md="4" class="text-right">
         <v-btn text color="primary" @click='$emit("fromNationalFrameworkToKeyAgency")'>
           {{ this.nextStepMessage() }}
           <v-icon>mdi-step-forward</v-icon>
@@ -15,14 +18,12 @@
       </v-col>
     </v-row>
     <h5>{{ page }} of {{ this.questions.length }} questions</h5>
-    <h2 style="color: darkred">National Frameworks</h2>
-    <h3 style="color: darkred">{{ title }}</h3>
-    <v-textarea rows=6 :value="displayDescription" readonly outlined></v-textarea>
+    <v-textarea rows=6 :value="displayDescription" readonly outlined dense></v-textarea>
     <v-row>
-      <v-col md="8">
-        <v-textarea rows=2 :value="displayedQuestion" readonly outlined></v-textarea>
+      <v-col md="10">
+        <v-textarea rows=2 :value="displayedQuestion" readonly outlined dense></v-textarea>
       </v-col>
-      <v-col md="4">
+      <v-col md="2">
         <v-select
             :items="items"
             v-model="selectedAgreement"
@@ -31,14 +32,9 @@
         ></v-select>
       </v-col>
     </v-row>
-    <h3>Please justify your answer</h3>
-    <v-textarea rows=4 outlined v-model="displayedJustification"></v-textarea>
-    <br/>
-    <br/>
-    <br/>
+    <h3>Please reflect how the local situation relates to the program description</h3>
+    <v-textarea rows=3 outlined v-model="displayedJustification" dense></v-textarea>
     <h5>{{ page }} of {{ this.questions.length }} questions</h5>
-    <br/>
-    <br/>
   </div>
 </template>
 <script>

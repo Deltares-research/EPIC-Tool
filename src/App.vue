@@ -4,7 +4,27 @@
       <v-btn to="/" text v-if="this.$store.state.token !== ''">Home</v-btn>
       <v-btn to="/SelectProgram" text v-if="this.$store.state.token !== ''">Select programs</v-btn>
       <v-btn to="/Questionnaire" text v-if="this.$store.state.token !== ''">Questionnaire</v-btn>
-      <v-btn @click="getLink" v-if="this.$store.state.token !== ''" text >Report</v-btn>
+      <v-menu offset-y>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn text
+              v-bind="attrs"
+              v-on="on"
+          >
+            Report
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="getLink">
+            <v-list-item-title >Answers</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="getLink">
+            <v-list-item-title >Linkages</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="getLink">
+            <v-list-item-title >Evolution</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
       <v-btn to="/EndPage" text v-if="this.$store.state.token !== ''">Finalize Questionnaire</v-btn>
       <v-spacer></v-spacer>
       <v-btn @click="logout" text v-if="this.$store.state.token !== ''">

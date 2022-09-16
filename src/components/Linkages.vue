@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h2 style="color:darkred">Linkages</h2>
-    <h3 style="color: darkred">{{ title }}</h3>
     <br>
     <h3>{{ question }}</h3>
     <br>

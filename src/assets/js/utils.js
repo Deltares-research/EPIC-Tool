@@ -32,7 +32,7 @@ export async function loadProgress(programId, token) {
         return {};
     }
     const progress = await response.json();
-    return progress.progress;
+    return progress;
 }
 
 export async function loadAnswer(questionId, token) {
