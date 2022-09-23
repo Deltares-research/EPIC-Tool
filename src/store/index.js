@@ -74,6 +74,12 @@ export default new Vuex.Store({
         },
         updateAreas(state, areas) {
             areas.sort((a, b) => a.id - b.id);
+            for (let area of areas) {
+                area.groups.sort((a, b) => a.id - b.id)
+                for (let group of area.groups) {
+                    group.programs.sort((a, b) => a.id - b.id)
+                }
+            }
             state.areas = areas;
             state.groups = [];
             state.programs = [];
