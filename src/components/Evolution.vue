@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h2 style="color: darkred">Evolution</h2>
-    <h3 style="color: darkred">{{ title }}</h3>
     <br>
     <h4>What is the level of development for {{ title }} in your country? </h4>
     <br>

@@ -12,18 +12,29 @@ export default new Vuex.Store({
         groups: [],
         programs: [],
         progress: 0,
+        remainingQuestions: 0,
         programSelection: new Set(),
         currentProgram: {},
         completedPrograms: new Set(),
-        completedAreas: new Set(),
+        unCompleteAreas: new Set(),
+        unCompleteGroups: new Set(),
         initialized: false,
     },
 
     mutations: {
-        updateCompletedAreas(state, completedAreas) {
-            state.completedAreas.clear();
-            completedAreas.forEach(program => {
-                state.completedAreas.add(program);
+        updateCurrentProgram(state, program) {
+            state.currentProgram = program;
+        },
+        updateUnCompletedGroups(state, unCompletedGroups) {
+            state.unCompleteGroups.clear();
+            unCompletedGroups.forEach(group => {
+                state.unCompleteGroups.add(group)
+            })
+        },
+        updateUnCompletedAreas(state, unCompletedAreas) {
+            state.unCompleteAreas.clear();
+            unCompletedAreas.forEach(area => {
+                state.unCompleteAreas.add(area)
             })
         },
         updateCompletedPrograms(state, completedPrograms) {
@@ -81,17 +92,31 @@ export default new Vuex.Store({
         },
     },
     actions: {
-        async updateProgress(context){
+        async updateProgress(context) {
             let totalProgress = 0;
             const completedPrograms = new Set();
-            for (let program of context.state.programSelection) {
-                const progress = await util.loadProgress(program, context.state.token);
-                if (progress === 1) completedPrograms.add(program);
-                totalProgress = totalProgress + progress;
+            let unansweredQuestions = 0;
+            let uncompleteGroups = new Set();
+            let uncompleteAreas = new Set();
+            for (let programId of context.state.programSelection) {
+                const response = await util.loadProgress(programId, context.state.token);
+                if (response.progress === 1) {
+                    completedPrograms.add(programId);
+                } else {
+                    const program = context.state.programs.filter(program => program.id === programId);
+                    const group = context.state.groups.filter(group => group.id === program[0].group);
+                    uncompleteAreas.add(group[0].area);
+                    uncompleteGroups.add(program[0].group);
+                }
+                totalProgress = totalProgress + response.progress;
+                unansweredQuestions = unansweredQuestions + (1 - response.progress) * response.questions_answers.length;
             }
             totalProgress = totalProgress / context.state.programSelection.size;
             context.state.progress = (totalProgress * 100).toFixed(0);
+            context.state.remainingQuestions = Math.round(unansweredQuestions);
             context.commit("updateCompletedPrograms", completedPrograms);
+            context.commit("updateUnCompletedGroups", uncompleteGroups);
+            context.commit("updateUnCompletedAreas", uncompleteAreas);
         }
     },
     modules: {}
