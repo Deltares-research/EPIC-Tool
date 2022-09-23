@@ -7,12 +7,12 @@
     >
       <v-btn class="primary" @click="generateGraph()">Generate evolution graph</v-btn>
     </v-row>
-    <div v-if="dataLoaded">
+    <div v-if="true">
       <h3 style="color: darkred">Graph</h3>
       <v-img
-          max-height="300"
-          max-width="800"
-          :src="imageUrl"
+          max-height="1000px"
+          max-width="1000px"
+          src="http://localhost:8000/eram_visuals.png"
       ></v-img>
       <a :href="pdfUrl" download>Download graph</a>
     </div>
