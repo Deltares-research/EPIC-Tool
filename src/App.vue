@@ -17,7 +17,7 @@
               <v-list-item to="LinkagesOverview">
                 <v-list-item-title>Linkages</v-list-item-title>
               </v-list-item>
-              <v-list-item @click="getLink">
+              <v-list-item  to="EvolutionOverview">
                 <v-list-item-title>Evolution</v-list-item-title>
               </v-list-item>
             </v-list>

@@ -1,28 +1,28 @@
 <template>
-    <v-card>
-      <v-card-title><h3 style="color: darkred">Linkages report</h3>
-      </v-card-title>
-      <v-content>
-        <a @click.prevent="generateReport()" href="#">Download report</a>
-        <v-data-table
-            :headers="headers"
-            :items="linkagesValues"
-            :items-per-page="5"
-            class="elevation-1"
+  <v-card>
+    <v-card-title><h3 style="color: darkred">Linkages report</h3>
+    </v-card-title>
+    <v-content>
+      <a @click.prevent="generateReport()" href="#">Download report</a>
+      <v-data-table
+          :headers="headers"
+          :items="linkagesValues"
+          :items-per-page="5"
+          class="elevation-1"
+      >
+        <template
+            v-for="program in this.programs"
+            v-slot:[`item.${program.id}`]="{ item }"
         >
-          <template
-              v-for="program in this.programs"
-              v-slot:[`item.${program.id}`]="{ item }"
-          >
-            <v-icon :key="item[program.id]" color="blue" v-if="item[program.id]==='1'">
-              mdi-checkbox-marked-circle
-            </v-icon>
-            <slot :name="program.id" :item="item"/>
-          </template>
-        </v-data-table>
+          <v-icon :key="item[program.id]" color="blue" v-if="item[program.id]==='1'">
+            mdi-checkbox-marked-circle
+          </v-icon>
+          <slot :name="program.id" :item="item"/>
+        </template>
+      </v-data-table>
 
-      </v-content>
-    </v-card>
+    </v-content>
+  </v-card>
 </template>
 
 <script>
@@ -31,12 +31,25 @@ import * as util from "@/assets/js/utils";
 export default {
   name: "LinkagesOverview.vue",
   methods: {
-    generateReport: function (){
-      csv=
+    generateReport: function () {
+      let csvData = "program,";
+      for (let i = 0; i < this.programs.length; i++) {
+        csvData = csvData + '"'+this.programs[i].name + '"'+",";
+      }
+      csvData=csvData+"\n";
+      for (let i = 0; i < this.linkagesValues.length; i++) {
+        csvData = csvData + '"'+this.linkagesValues[i].name + '"'+",";
+        for (let j = 0; j < this.programs.length; j++) {
+          const value = this.linkagesValues[i][this.programs[j].id] !== undefined ? "1" : "0";
+          csvData = csvData + value + ",";
+        }
+        csvData = csvData + "\n";
+      }
       var hiddenElement = document.createElement('a');
-      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+      hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csvData);
       hiddenElement.target = '_blank';
-      alert('dd')
+      hiddenElement.download = 'EPIC-Response-linkages-report.csv';
+      hiddenElement.click();
     },
   },
   mounted: async function () {

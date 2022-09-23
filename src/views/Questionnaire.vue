@@ -35,9 +35,6 @@
                 <v-icon v-if="isProgramCompleted(program.id)" right>mdi-checkbox-marked-circle</v-icon>
               </v-tab>
             </v-tabs>
-            <br>
-            <h3 style="color: darkred">Program description {{this.$store.state.currentProgram.name}}</h3>
-            <v-textarea rows="10" :value="this.$store.state.currentProgram.description"></v-textarea>
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>

@@ -13,8 +13,17 @@
       </v-col>
     </v-row>
     <h5>{{ page }} of {{ this.questions.length }} questions</h5>
+    <h3 style="color: darkred">Description</h3>
     <v-textarea rows=6 :value="displayDescription" readonly outlined dense></v-textarea>
-    <v-row>
+    <v-row dense>
+      <v-col md="10">
+        <h3 style="color: darkred">Question</h3>
+      </v-col>
+      <v-col md="2">
+        <h3 style="color: darkred">Answer</h3>
+      </v-col>
+    </v-row>
+    <v-row dense>
       <v-col md="10">
         <v-textarea rows=2 :value="displayedQuestion" readonly outlined dense></v-textarea>
       </v-col>
@@ -30,8 +39,6 @@
     <h3>Please reflect how the local situation relates to the program description</h3>
     <v-textarea rows=3 outlined v-model="displayedJustification" dense></v-textarea>
     <h5>{{ page }} of {{ this.questions.length }} questions</h5>
-    <br/>
-    <br/>
   </div>
 </template>
 <script>
