@@ -7,6 +7,9 @@
     >
       <v-btn class="primary" @click="generateGraph()">Generate evolution graph</v-btn>
     </v-row>
+    <div v-if="loading">
+      <h3>Generating evolution graph..</h3>
+    </div>
     <div v-if="this.dataLoaded">
       <h3 style="color: darkred">Graph</h3>
       <v-img
@@ -40,18 +43,23 @@ export default {
           'Authorization': 'Token ' + token,
         },
       }
-      let server = process.env.VUE_APP_BACKEND_URL;
-      let programResponse = await fetch(server + '/api/summary/evolution-graph/', options);
-      let res = await programResponse.json();
-      this.dataLoaded = true;
-      console.log(res)
-      this.imageUrl = res.summary_graph;
-      this.pdfUrl = res.summary_pdf.replace(server,"");
+      try {
+        let server = process.env.VUE_APP_BACKEND_URL;
+        let programResponse = await fetch(server + '/api/summary/evolution-graph/', options);
+        let res = await programResponse.json();
+        this.dataLoaded = true;
+        console.log(res)
+        this.imageUrl = res.summary_graph;
+        this.pdfUrl = res.summary_pdf.replace(server, "");
+      } finally {
+        this.loading = false;
+      }
     }
 
   },
   data() {
     return {
+      loading: false,
       dataLoaded: false,
       imageUrl: "",
       pdfUrl: "",
