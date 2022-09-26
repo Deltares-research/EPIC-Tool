@@ -14,7 +14,7 @@
           max-width="1000px"
           :src="imageUrl"
       ></v-img>
-      <a :href="pdfUrl" download>Download graph</a>
+      <a :href="pdfUrl" download target="_blank">Download graph</a>
     </div>
   </div>
 </template>
