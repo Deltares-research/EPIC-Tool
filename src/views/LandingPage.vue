@@ -356,7 +356,7 @@
           <v-card height="100px" width="400px" :elevation="10" @click="generateReport()"
                   class="cards d-flex justi fy-center align-center"
                   rounded outlined>
-            <v-card-title>Introducing EddffRAM</v-card-title>
+            <v-card-title>Introducing ERAM</v-card-title>
           </v-card>
         </v-col>
         <v-col md="6" class="d-flex justify-center" style="padding-top: 200px">
