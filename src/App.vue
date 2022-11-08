@@ -6,12 +6,12 @@
           <v-btn to="/" text v-if="this.$store.state.token !== ''">Home</v-btn>
           <v-btn to="/SelectProgram" text v-if="this.$store.state.token !== ''">Select programs</v-btn>
           <v-btn to="/Questionnaire" text v-if="this.$store.state.token !== ''">Questionnaire</v-btn>
-          <v-menu offset-y>
+          <v-menu offset-y v-if="this.$store.state.token !== ''">
             <template v-slot:activator="{ on, attrs }">
               <v-btn text v-bind="attrs" v-on="on">Report</v-btn>
             </template>
             <v-list>
-              <v-list-item @click="getLink">
+              <v-list-item to="Answers" v-if="this.$store.state.advisor">
                 <v-list-item-title>Answers</v-list-item-title>
               </v-list-item>
               <v-list-item to="LinkagesOverview">
@@ -47,29 +47,6 @@ export default {
     answer: {}
   }),
   methods: {
-    getLink: async function () {
-      let server = process.env.VUE_APP_BACKEND_URL;
-      const options = {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Token ' + this.$store.state.token,
-        },
-      }
-      let input = server + '/api/epicorganization/report-pdf/';
-      let res = await fetch(input, options);
-      if (res.status !== 200) return;
-      let blob = await res.blob();
-      var url = window.URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = "report.pdf";
-      document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-      a.click();
-      a.remove();  //afterwards we remove the element again
-    },
     logout: function () {
       this.$store.state.token = "";
       this.$router.push("/LoginPage");

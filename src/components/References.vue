@@ -1,7 +1,10 @@
 <template>
   <div>
-    <a :href="link" target="_blank" v-if="link !== ''">{{ link }}</a>
-    <v-textarea rows=20 v-model="description" dense readonly></v-textarea>
+    <div v-for="(reference,index) in this.$store.state.currentProgram.references" :key="index">
+      <v-textarea rows=3 v-model="reference.description" dense readonly></v-textarea>
+      <a :href="reference.link" target="_blank" >{{ reference.link }}</a>
+    </div>
+    <br>
   </div>
 </template>
 

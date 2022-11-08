@@ -80,6 +80,23 @@ export default {
       }
       let jsonResponse = await response.json();
       this.$store.state.token = jsonResponse.token;
+
+      const options = {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Token ' + this.$store.state.token,
+        },
+      }
+      let input = server + '/api/epicuser/self/';
+      let res = await fetch(input, options);
+      if (res.status !== 200) return;
+      let data = await res.json();
+      this.$store.state.advisor = data.is_advisor;
+
+
       await this.$router.push('/');
     }
   }

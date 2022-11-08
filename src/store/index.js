@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
         selectedAgency: {},
+        advisor: false,
         token: "",
         areas: [],
         groups: [],

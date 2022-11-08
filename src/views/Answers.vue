@@ -1,39 +1,8 @@
 <template>
   <div>
-    <h2 style="color:darkred">Answers</h2>
-    <br>
-    <h3>Create, Read, Update or Delete answers</h3>
-    <h4>answers</h4>
-    <v-row style="margin: 1px">
-      <v-col md="3">id</v-col>
-      <v-col md="3">short answer</v-col>
-      <v-col md="3">long answer</v-col>
-      <v-col md="2">
-      </v-col>
-    </v-row>
-    <v-row style="margin: 1px" v-for="answer in this.answers" :key="answer.id">
-      <v-col md="3">{{ answer.id }}</v-col>
-      <v-col md="3">{{ answer.long_answer }}</v-col>
-      <v-col md="3">{{ answer.long_answer }}</v-col>
-      <v-col md="3">
-        <v-btn @click="deleteAnswer(answer.id)">Delete</v-btn>
-      </v-col>
-      <v-col md="2">
-      </v-col>
-    </v-row>
-    <h3>add a new answer</h3>
-    <v-row>
-      <v-col md="3">
-        <v-text-field label="short answer" v-model="new_short_answer"></v-text-field>
-      </v-col>
-      <v-col md="6">
-        <v-text-field label="long answer" v-model="new_lang_answer"></v-text-field>
-      </v-col>
-      <v-col md="3">
-        <v-btn @click="addAnswer">Add</v-btn>
-      </v-col>
-    </v-row>
-
+    <h2 style="color:darkred">Answers report</h2>
+    <h3>Click on the button to download the report with answers and questions</h3>
+    <v-btn @click="getLink">download report</v-btn>
   </div>
 </template>
 <script>
@@ -41,45 +10,39 @@
 export default {
   name: 'Answers',
   async mounted() {
-    await this.loadAnswers();
   },
   data() {
     return {
+      advisor: false,
       answers: [],
       new_short_answer: null,
       new_lang_answer: null,
     }
   },
   methods: {
-    addAnswer: async function () {
-      let answer = {};
-      answer.short_answer = this.new_short_answer;
-      answer.long_answer = this.new_lang_answer;
-      const putMethod = {
+    getLink: async function () {
+      let server = process.env.VUE_APP_BACKEND_URL;
+      const options = {
+        method: 'GET',
+        mode: 'cors',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': 'Token ' + this.$store.state.token,
         },
-        method: 'POST',
-        body: JSON.stringify(answer),
       }
-      let url = 'http://localhost:8000/answer/';
-      await fetch(url, putMethod);
-      await this.loadAnswers();
+      let input = server + '/api/epicorganization/report-pdf/';
+      let res = await fetch(input, options);
+      if (res.status !== 200) return;
+      let blob = await res.blob();
+      var url = window.URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = "report.pdf";
+      document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+      a.click();
+      a.remove();  //afterwards we remove the element again
     },
-    deleteAnswer: async function (id) {
-      const deleteMethod = {
-        method: 'DELETE',
-      }
-      let url = 'http://localhost:8000/answer/' + id;
-      await fetch(url, deleteMethod);
-      await this.loadAnswers();
-    },
-    loadAnswers: async function () {
-      let rawData = await fetch('http://localhost:8000/answer/?format=json', {mode: 'cors'});
-      this.answers = await rawData.json();
-      console.log(this.answers)
-    }
   },
   components: {}
 }

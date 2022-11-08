@@ -58,8 +58,6 @@
             <program-description-navigation
                 @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
             <program-description ref="programDescription"></program-description>
-            <program-description-navigation
-                @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
           </v-stepper-content>
           <v-stepper-content step="2">
 
