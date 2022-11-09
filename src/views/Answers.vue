@@ -1,26 +1,58 @@
 <template>
   <div>
     <h2 style="color:darkred">Answers report</h2>
-    <h3>Click on the button to download the report with answers and questions</h3>
-    <v-btn @click="getLink">download report</v-btn>
+    <h3 v-if="questions === undefined">Click on the button to generate the report with answers and questions</h3>
+    <div class="text-left">
+    <v-btn v-if="questions === undefined" @click="loadAnswers"   color="primary" class="mx-2">create report</v-btn>
+    <v-btn @click="printDownload"   color="primary" v-if="questions!==undefined">print</v-btn>
+    </div>
+    <br>
+      <report ref="report" :questions="questions" v-if="questions!==undefined"/>
+    <br>
   </div>
 </template>
 <script>
+import Report from "@/components/Report";
 
 export default {
+  components: {
+    Report,
+  },
   name: 'Answers',
   async mounted() {
   },
   data() {
     return {
       advisor: false,
-      answers: [],
+      questions: undefined,
       new_short_answer: null,
       new_lang_answer: null,
     }
   },
   methods: {
-    getLink: async function () {
+    generateReport() {
+      this.$refs.html2Pdf.generatePdf()
+    },
+    printDownload() {
+      let w = window.open()
+      w.document.write(this.$refs.report.$el.innerHTML)
+      w.document.close()
+      w.setTimeout(function () {
+        w.print()
+      }, 1000)
+    },
+    async beforeDownload({html2pdf, options, pdfContent}) {
+      await html2pdf().set(options).from(pdfContent).toPdf().get('pdf').then((pdf) => {
+        const totalPages = pdf.internal.getNumberOfPages()
+        for (let i = 1; i <= totalPages; i++) {
+          pdf.setPage(i)
+          pdf.setFontSize(10)
+          pdf.setTextColor(150)
+          pdf.text('Page ' + i + ' of ' + totalPages, (pdf.internal.pageSize.getWidth() * 0.88), (pdf.internal.pageSize.getHeight() - 0.3))
+        }
+      }).save()
+    },
+    async loadAnswers() {
       let server = process.env.VUE_APP_BACKEND_URL;
       const options = {
         method: 'GET',
@@ -31,20 +63,14 @@ export default {
           'Authorization': 'Token ' + this.$store.state.token,
         },
       }
-      let input = server + '/api/epicorganization/report-pdf/';
+      let input = server + '/api/epicorganization/report/';
       let res = await fetch(input, options);
+      console.log(res.status)
       if (res.status !== 200) return;
-      let blob = await res.blob();
-      var url = window.URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = "report.pdf";
-      document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-      a.click();
-      a.remove();  //afterwards we remove the element again
+      this.questions = await res.json();
+      console.log(this.questions)
     },
-  },
-  components: {}
+  }
 }
 </script>
 

@@ -340,9 +340,14 @@
             <div style="text-align: left;padding: 3px">
               <h2>About the EPIC Response Framework:</h2>
               <br>
-              <h4>The EPIC Response Framework is an innovative governance approach for the combined management of floods and drought.</h4>
-              <h4>For more information on the EPIC Response Program please visit <a href="https://www.deltares.nl/en/news/floods-and-droughts-an-epic-response-to-these-hazards-in-the-era-of-climate-change/">here</a> </h4>
-              <h4>The EPIC Response Assessment Methodology (ERAM) portal offers a step wise approach to assess the status of hydro-climatic risk management systems and identify areas where floods and drought management programs and the collaboration between them could be strengthened.</h4>
+              <h4>The EPIC Response Framework is an innovative governance approach for the combined management of floods
+                and drought.</h4>
+              <h4>For more information on the EPIC Response Program please visit <a
+                  href="https://www.deltares.nl/en/news/floods-and-droughts-an-epic-response-to-these-hazards-in-the-era-of-climate-change/">here</a>
+              </h4>
+              <h4>The EPIC Response Assessment Methodology (ERAM) portal offers a step wise approach to assess the
+                status of hydro-climatic risk management systems and identify areas where floods and drought management
+                programs and the collaboration between them could be strengthened.</h4>
               <h4>The ERAM can be used by practitioners, by sector agencies, and/or at the national level.</h4>
               <h4>Please look at the methodology section for a more in-depth information on the use of ERAM.</h4>
               <br>
@@ -368,55 +373,12 @@
         </v-col>
       </v-row>
     </v-container>
-    <vue-html2pdf
-        :show-layout="false"
-        :float-layout="true"
-        :enable-download="false"
-        :preview-modal="false"
-        filename="hehehe"
-        :paginate-elements-by-height="1100"
-        :pdf-quality="2"
-        pdf-format="a4"
-        pdf-orientation="portrait"
-        pdf-content-width="800px"
-        :manual-pagination="false"
-
-        @progress="onProgress($event)"
-        @startPagination="startPagination()"
-        @hasPaginated="hasPaginated()"
-        @beforeDownload="beforeDownload($event)"
-        @hasDownloaded="hasDownloaded($event)"
-        ref="html2Pdf"
-    >
-      <v-card>
-        <v-card-title>ddd</v-card-title>
-        <v-card-text>
-          <h3>sdfasf</h3>
-          <h4>dddd</h4>
-          <h4>dddd</h4>
-          <h4>dddd</h4>
-        </v-card-text>
-      </v-card>
-      <pdf-content slot="pdf-content" >
-        <v-card>
-          <v-card-title>ddd</v-card-title>
-          <v-card-text>
-            <h3>sdfasf</h3>
-            <h4>dddd</h4>
-            <h4>dddd</h4>
-            <h4>dddd</h4>
-          </v-card-text>
-        </v-card>
-      </pdf-content>
-    </vue-html2pdf>
   </div>
 </template>
 <script>
-import VueHtml2pdf from 'vue-html2pdf';
 
 export default {
   components: {
-    VueHtml2pdf
   },
 
   name: 'LandingPage',
@@ -426,28 +388,14 @@ export default {
     selectedGroup: "",
   }),
   methods: {
-    generateReport: function () {
-      this.$refs.html2Pdf.generatePdf()
+    showPanel: function (selectedGroup) {
+      this.selectedItem = selectedGroup === 'introducing' ? 'background' : 'use';
+      this.selectedGroup = selectedGroup;
+      this.showDialog = true;
     },
-    async beforeDownload({html2pdf, options, pdfContent}) {
-      await html2pdf().set(options).from(pdfContent).toPdf().get('pdf').then((pdf) => {
-        const totalPages = pdf.internal.getNumberOfPages()
-        for (let i = 1; i <= totalPages; i++) {
-          pdf.setPage(i)
-          pdf.setFontSize(10)
-          pdf.setTextColor(150)
-          pdf.text('Page ' + i + ' of ' + totalPages, (pdf.internal.pageSize.getWidth() * 0.88), (pdf.internal.pageSize.getHeight() - 0.3))
-        }
-      }).save()
+    showDescription: function (selectedItem) {
+      this.selectedItem = selectedItem;
     }
-  },
-  showPanel: function (selectedGroup) {
-    this.selectedItem = selectedGroup === 'introducing' ? 'background' : 'use';
-    this.selectedGroup = selectedGroup;
-    this.showDialog = true;
-  },
-  showDescription: function (selectedItem) {
-    this.selectedItem = selectedItem;
   }
 }
 </script>
