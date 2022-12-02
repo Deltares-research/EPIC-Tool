@@ -25,11 +25,11 @@
           <v-btn to="/EndPage" text v-if="this.$store.state.token !== ''">Finalize Questionnaire</v-btn>
         </v-col>
         <v-col md="3">
-          <v-btn text v-if="this.$store.state.selectedAgency.name!==undefined">Agency: {{this.$store.state.selectedAgency.name}}
+          <v-btn text v-if="this.$store.state.selectedAgency.name!==undefined && this.$store.state.token !== ''">Agency: {{this.$store.state.selectedAgency.name}}
           </v-btn>
         </v-col>
           <v-col md="2">
-            <v-btn text v-if="this.$store.state.advisor">advisor</v-btn>
+            <v-btn text v-if="this.$store.state.advisor && this.$store.state.token !== ''">advisor</v-btn>
             <v-btn @click="logout" text v-if="this.$store.state.token !== ''">
             <v-icon>mdi-logout</v-icon>
             Logout
