@@ -44,8 +44,11 @@
           <v-col md="4">
             <v-list-item dense style="font-size: 1px" @click="showGroup(group.id)">
               <v-list-item-content>
-                <v-list-item-title>{{ group.name }}</v-list-item-title>
+                     <v-list-item-title>{{ group.name }}</v-list-item-title>
               </v-list-item-content>
+              <v-list-item-icon>
+                <v-icon v-if="isAnyProgramSelected(group)" color="blue darken-2">mdi-checkbox-marked</v-icon>
+              </v-list-item-icon>
               <v-list-item-icon>
                 <v-icon v-if="!isGroupSelected(group.id)">mdi-plus</v-icon>
                 <v-icon v-if="isGroupSelected(group.id)">mdi-minus</v-icon>
@@ -127,6 +130,13 @@ export default {
     },
     isGroupSelected: function (groupId) {
       return this.groupSelection.has(groupId);
+    },
+    isAnyProgramSelected: function (group) {
+      for (let program of group.programs) {
+        let selected = this.$store.state.programSelection.has(program.id);
+        if (selected) return true;
+      }
+      return false;
     },
     showGroup: function (groupId) {
       const selected = this.groupSelection.has(groupId);

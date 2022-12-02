@@ -1,6 +1,6 @@
 <template>
-  <div v-if="this.questions!==undefined">
-    <div v-for="(question,index) in this.questions" :key="index">
+  <div v-if="this.report!==undefined">
+    <div v-for="(question,index) in this.report" :key="index">
       <v-card elevation="12" outlined>
         <v-card-title style="color: darkred">{{ question.name }}</v-card-title>
         <v-card-text>
@@ -10,13 +10,13 @@
               <h3 style="color: darkred">Question</h3>
               <h3>{{ question.title }}</h3>
               <br>
-              <h3 style="color: cornflowerblue">Answers</h3>
+              <h3 style="color: cornflowerblue">Overview of all the answers given</h3>
               <div v-for="(answer,index) in question.question_answers.answers" :key="index">
-                <h5>{{ getAnswer(answer.selected_choice) }}</h5>
-                <h5>{{ answer.justify_answer }}</h5>
-                <br>
+                    <h5> {{ getAnswer(answer.selected_choice) }}</h5>
+                    <h5>{{ answer.justify_answer }}</h5>
+                    <br>
               </div>
-              <h3 style="color: cornflowerblue">Summary</h3>
+              <h3 style="color: cornflowerblue">Summary of all the answers given</h3>
               <h5>Strongly disagree: {{ question.question_answers.summary.Strongly_disagree }}</h5>
               <h5>Disagree: {{ question.question_answers.summary.Disagree }}</h5>
               <h5>Disagree nor agree: {{ question.question_answers.summary.Neither_agree_nor_disagree }}</h5>
@@ -32,9 +32,11 @@
 </template>
 
 <script>
+
 export default {
   name: "Report.vue",
   props: {
+    report: undefined,
     questions: undefined,
   },
   methods: {

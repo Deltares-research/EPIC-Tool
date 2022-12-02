@@ -36,11 +36,6 @@ const routes = [
         component: LoginPage
     },
     {
-        path: '/Answers',
-        name: 'Answers',
-        component: Answers
-    },
-    {
         path: '/EndPage',
         name: 'EndPage',
         component: EndPage

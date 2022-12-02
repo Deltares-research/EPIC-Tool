@@ -3,8 +3,8 @@
     <h3 v-if="this.$store.state.programSelection.size === 0">Please select 1 or more programs in the select programs
       tab</h3>
     <div v-if="this.$store.state.programSelection.size > 0">
-      <v-expansion-panels class="mb-6">
-        <v-expansion-panel>
+      <v-expansion-panels class="mb-6" v-model="expand" multiple>
+        <v-expansion-panel :value="expand">
           <v-expansion-panel-header expand-icon="mdi-menu-down">
             <p>Estimated remaining time
               {{ this.$store.state.remainingQuestions }} minutes ({{ this.$store.state.progress }}%)</p>
@@ -137,6 +137,7 @@ export default {
   },
   data() {
     return {
+      expand: [0],
       e1: 1,
       selectedAreaIndex: 0,
       selectedGroupIndex: 0,

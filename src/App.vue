@@ -2,7 +2,7 @@
   <v-app>
     <v-app-bar dense app>
       <v-row>
-        <v-col md="11">
+        <v-col md="7">
           <v-btn to="/" text v-if="this.$store.state.token !== ''">Home</v-btn>
           <v-btn to="/SelectProgram" text v-if="this.$store.state.token !== ''">Select programs</v-btn>
           <v-btn to="/Questionnaire" text v-if="this.$store.state.token !== ''">Questionnaire</v-btn>
@@ -24,8 +24,13 @@
           </v-menu>
           <v-btn to="/EndPage" text v-if="this.$store.state.token !== ''">Finalize Questionnaire</v-btn>
         </v-col>
-        <v-col md="1">
-          <v-btn @click="logout" text v-if="this.$store.state.token !== ''">
+        <v-col md="3">
+          <v-btn text v-if="this.$store.state.selectedAgency.name!==undefined">Agency: {{this.$store.state.selectedAgency.name}}
+          </v-btn>
+        </v-col>
+          <v-col md="2">
+            <v-btn text v-if="this.$store.state.advisor">advisor</v-btn>
+            <v-btn @click="logout" text v-if="this.$store.state.token !== ''">
             <v-icon>mdi-logout</v-icon>
             Logout
           </v-btn>

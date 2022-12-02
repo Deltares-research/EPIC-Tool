@@ -3,12 +3,16 @@
     <h2 style="color: black;font-size: xxx-large;text-align: center">Thank you!</h2>
     <h3>You have completed {{this.$store.state.progress}}% of the questions.</h3>
     <p></p>
-    <div style="text-align: center"><v-btn @click="logout" color="primary">exit questionnaire</v-btn></div>
+    <div style="text-align: center">
+      <v-btn to="/EvolutionOverview" color="primary" class="mx-2">goto evolution report</v-btn>
+      <v-btn to="/LinkagesOverview" color="primary" class="mx-2">goto linkages report</v-btn></div>
   </div>
 </template>
 <script>
 export default {
   name: 'EndPage',
+  components: {},
+
   data: () => ({}),
   methods: {
     logout: function () {

@@ -1,13 +1,13 @@
 <template>
   <div>
     <h2 style="color:darkred">Answers report</h2>
-    <h3 v-if="questions === undefined">Click on the button to generate the report with answers and questions</h3>
+    <h3 v-if="report === undefined">Click on the button to generate the report with answers and questions</h3>
     <div class="text-left">
-    <v-btn v-if="questions === undefined" @click="loadAnswers"   color="primary" class="mx-2">create report</v-btn>
-    <v-btn @click="printDownload"   color="primary" v-if="questions!==undefined">print</v-btn>
+      <v-btn v-if="report === undefined" @click="loadAnswers" color="primary" class="mx-2">create report</v-btn>
+      <v-btn @click="printDownload" color="primary" v-if="report!==undefined">print</v-btn>
     </div>
     <br>
-      <report ref="report" :questions="questions" v-if="questions!==undefined"/>
+    <report ref="report" :report="report" :questions="questions" v-if="report!==undefined"/>
     <br>
   </div>
 </template>
@@ -24,6 +24,7 @@ export default {
   data() {
     return {
       advisor: false,
+      report: undefined,
       questions: undefined,
       new_short_answer: null,
       new_lang_answer: null,
@@ -65,10 +66,13 @@ export default {
       }
       let input = server + '/api/epicorganization/report/';
       let res = await fetch(input, options);
-      console.log(res.status)
+      if (res.status !== 200) return;
+      this.report = await res.json();
+
+      input = server + '/api/question/';
+      res = await fetch(input, options);
       if (res.status !== 200) return;
       this.questions = await res.json();
-      console.log(this.questions)
     },
   }
 }
