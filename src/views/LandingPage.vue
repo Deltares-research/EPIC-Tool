@@ -358,7 +358,7 @@
       </v-row>
       <v-row class="text-center">
         <v-col md="6" class="d-flex justify-center" style="padding-top: 200px">
-          <v-card height="100px" width="400px" :elevation="10" @click="generateReport()"
+          <v-card height="100px" width="400px" :elevation="10" @click="showPanel('introducing')"
                   class="cards d-flex justi fy-center align-center"
                   rounded outlined>
             <v-card-title>Introducing ERAM</v-card-title>

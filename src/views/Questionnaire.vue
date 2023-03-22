@@ -90,9 +90,6 @@
               {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
             </references-navigation>
             <references ref="references"/>
-            <references-navigation @back="e1=5" @forward="gotoNextProgram">
-              {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
-            </references-navigation>
           </v-stepper-content>
         </v-stepper-items>
       </v-stepper>

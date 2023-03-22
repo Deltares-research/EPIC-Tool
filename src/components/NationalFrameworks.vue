@@ -21,18 +21,14 @@
     <h3 style="color: darkred">Description</h3>
     <v-textarea rows=6 :value="displayDescription" readonly outlined dense></v-textarea>
     <v-row dense>
-      <v-col md="10">
-        <h3 style="color: darkred">Question</h3>
-      </v-col>
-      <v-col md="2">
-        <h3 style="color: darkred">Answer</h3>
+      <v-col md="12">
+        <h3 style="color: darkred">Please reflect how the local situation relates to the following statement</h3>
+        <v-textarea rows=2 :value="displayedQuestion" readonly outlined dense></v-textarea>
       </v-col>
     </v-row>
     <v-row dense>
-      <v-col md="10">
-        <v-textarea rows=2 :value="displayedQuestion" readonly outlined dense></v-textarea>
-      </v-col>
-      <v-col md="2">
+      <v-col md="3">
+        <h3 style="color: darkred">Response</h3>
         <v-select
             :items="items"
             v-model="selectedAgreement"
@@ -41,8 +37,12 @@
         ></v-select>
       </v-col>
     </v-row>
-    <h3>Please reflect how the local situation relates to the program description</h3>
-    <v-textarea rows=3 outlined v-model="displayedJustification" dense></v-textarea>
+    <v-row dense>
+      <v-col md="12">
+      <h3>Additional Comments</h3>
+      <v-textarea rows=2 outlined v-model="displayedJustification" dense></v-textarea>
+      </v-col>
+    </v-row>
     <h5>{{ page }} of {{ this.questions.length }} questions</h5>
   </div>
 </template>
@@ -54,11 +54,11 @@ export default Vue.extend({
   name: 'NationalFrameworks',
   methods: {
     nextStepMessage() {
-      let nextQuestion = this.page + 1;
-      return this.page - 1 < this.questions.length - 1 ? "Question " + nextQuestion : "Key Agency Actions";
+      //let nextQuestion = this.page + 1;
+      return this.page - 1 < this.questions.length - 1 ? "Next" : "Key Agency Actions";
     }, previousStepMessage() {
-      let previousQuestion = this.page - 1;
-      return this.hasPreviousQuestion() ? "Question " + previousQuestion : "Program description";
+      //let previousQuestion = this.page - 1;
+      return this.hasPreviousQuestion() ? "Back" : "Program description";
     },
     hasNextQuestion() {
       return this.page - 1 < this.questions.length - 1;
