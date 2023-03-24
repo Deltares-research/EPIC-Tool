@@ -340,18 +340,12 @@
             <div style="text-align: left;padding: 3px">
               <h2>About the EPIC Response Framework:</h2>
               <br>
-              <h4>The EPIC Response Framework is an innovative governance approach for the combined management of floods
-                and drought.</h4>
+              <h4>The EPIC Response Framework is a new governance approach for the combined management of floods and drought.</h4>
               <h4>For more information on the EPIC Response Program please visit <a
-                  href="https://www.deltares.nl/en/news/floods-and-droughts-an-epic-response-to-these-hazards-in-the-era-of-climate-change/">here</a>
-              </h4>
-              <h4>The EPIC Response Assessment Methodology (ERAM) portal offers a step wise approach to assess the
-                status of hydro-climatic risk management systems and identify areas where floods and drought management
-                programs and the collaboration between them could be strengthened.</h4>
-              <h4>The ERAM can be used by practitioners, by sector agencies, and/or at the national level.</h4>
+                  href="https://www.deltares.nl/en/news/floods-and-droughts-an-epic-response-to-these-hazards-in-the-era-of-climate-change/">Floods and droughts: an EPIC response to these hazards in the era of climate change - Deltares</a></h4>
+              <h4>The EPIC Response Assessment Methodology (ERAM) prototype gives practitioners access to a step wise approach to assess the status of their hydro-climatic risk management systems and identify areas where floods and drought management programs and the collaboration between them could be strengthened. The ERAM could be used individually by practitioners, at the sector agency level, and/or at the national level.</h4>
               <h4>Please look at the methodology section for a more in-depth information on the use of ERAM.</h4>
-              <br>
-              <h4>For technical question please contact: Ana Nunez Sanchez – ana.nunezsanchez@deltares.nl</h4>
+              <h4>For questions please contact: Ana Nunez Sanchez ana.nunezsanchez@deltares.nl</h4>
             </div>
           </v-card>
         </v-col>
