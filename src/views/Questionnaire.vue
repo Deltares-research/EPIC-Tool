@@ -7,7 +7,7 @@
         <v-expansion-panel :value="expand">
           <v-expansion-panel-header expand-icon="mdi-menu-down">
             <p>Estimated remaining time
-              {{ this.$store.state.remainingQuestions }} minutes ({{ this.$store.state.progress }}%)</p>
+              {{ this.$store.state.remainingTime }} minutes ({{ this.$store.state.progress }}%)</p>
             <br>
           </v-expansion-panel-header>
           <v-expansion-panel-content>

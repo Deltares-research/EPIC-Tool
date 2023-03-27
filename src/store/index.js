@@ -14,6 +14,7 @@ export default new Vuex.Store({
         programs: [],
         progress: 0,
         remainingQuestions: 0,
+        remainingTime: 0,
         programSelection: new Set(),
         currentProgram: {},
         completedPrograms: new Set(),
@@ -121,6 +122,7 @@ export default new Vuex.Store({
             totalProgress = totalProgress / context.state.programSelection.size;
             context.state.progress = (totalProgress * 100).toFixed(0);
             context.state.remainingQuestions = Math.round(unansweredQuestions);
+            context.state.remainingTime = Math.round(unansweredQuestions / 3);
             context.commit("updateCompletedPrograms", completedPrograms);
             context.commit("updateUnCompletedGroups", uncompleteGroups);
             context.commit("updateUnCompletedAreas", uncompleteAreas);
