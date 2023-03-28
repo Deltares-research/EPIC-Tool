@@ -97,7 +97,7 @@ export default Vue.extend({
         this.selectedAgreement = "Disagree";
       }
       if (this.answer[0].selected_choice === "NEITHERAGREENORDISAGREE") {
-        this.selectedAgreement = "Neither agree nor disagree";
+        this.selectedAgreement = "Not-applicable";
       }
       if (this.answer[0].selected_choice === "AGREE") {
         this.selectedAgreement = "Agree";
@@ -121,7 +121,7 @@ export default Vue.extend({
     }
   },
   data: () => ({
-    items: ['Strongly agree', 'Agree', 'Neither agree nor disagree', 'Disagree', 'Strongly disagree'],
+    items: ['Strongly agree', 'Agree', 'Not-applicable', 'Disagree', 'Strongly disagree'],
     selectedAgreement: "",
     title: "",
     page: 1,

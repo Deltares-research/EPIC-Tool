@@ -118,7 +118,7 @@ export async function saveAgreementAnswer(answerId, justifyAnswer, shortAnswer, 
     if (shortAnswer === 'Disagree') {
         newAnswer.selected_choice = "DISAGREE"
     }
-    if (shortAnswer === 'Neither agree nor disagree') {
+    if (shortAnswer === 'Not-applicable') {
         newAnswer.selected_choice = "NEITHERAGREENORDISAGREE"
     }
     if (shortAnswer === 'Agree') {
