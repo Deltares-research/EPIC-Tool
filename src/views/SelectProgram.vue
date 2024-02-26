@@ -2,7 +2,7 @@
   <div>
     <h2 style="color:darkred">Program selection</h2>
     <br>
-    <h3>Click on your agency or select manually the programs to assess</h3>
+    <h3>Click on an agency or select manually the programs to assess</h3>
     <br>
     <v-dialog v-model="showDialog" width="500">
       <v-card>
@@ -12,6 +12,17 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" text @click="showDialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="showHelpDialog" width="500">
+      <v-card>
+        <v-card-title class="text-h5 grey lighten-2">Program selection</v-card-title>
+        <v-card-text> <br> Click on an agency or select manually the programs to assess. </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="showHelpDialog = false">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -104,6 +115,7 @@ export default {
       agencies: [],
       groupSelection: new Set(),
       showDialog: false,
+      showHelpDialog: true,
       title: "",
       description: "",
     }

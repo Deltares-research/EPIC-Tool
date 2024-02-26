@@ -48,10 +48,10 @@
           <v-stepper-step :complete="e1 > 3" step="3">Key agency actions</v-stepper-step>
           <v-divider></v-divider>
           <v-stepper-step :complete="e1 > 4" step="4">Evolution</v-stepper-step>
+          <!-- <v-divider></v-divider>
+          <v-stepper-step :complete="e1 > 5" step="5">Linkages</v-stepper-step> -->
           <v-divider></v-divider>
-          <v-stepper-step :complete="e1 > 5" step="5">Linkages</v-stepper-step>
-          <v-divider></v-divider>
-          <v-stepper-step :complete="e1 > 6" step="6">References</v-stepper-step>
+          <v-stepper-step :complete="e1 > 5" step="5">References</v-stepper-step>
         </v-stepper-header>
         <v-stepper-items>
           <v-stepper-content step="1">
@@ -72,21 +72,21 @@
 
           </v-stepper-content>
           <v-stepper-content step="4">
-            <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
-                                  @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
+            <evolution-navigation @fromEvolutionToKeyAgency="fromEvolutionToKeyAgency"
+                                  @fromEvolutionToReferences="fromEvolutionToReferences"/>
             <evolution ref="evolution" @updateProgress="updateProgress"></evolution>
-            <evolution-navigation @fromEvolutionKeyAgency="fromEvolutionKeyAgency"
-                                  @fromEvolutionToLinkages="fromEvolutionToLinkages"/>
+            <evolution-navigation @fromEvolutionToKeyAgency="fromEvolutionToKeyAgency"
+                                  @fromEvolutionToReferences="fromEvolutionToReferences"/>
           </v-stepper-content>
-          <v-stepper-content step="5">
+          <!-- <v-stepper-content step="5">
             <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
                                  @fromLinkagesToReferences="fromLinkagesToReferences"/>
             <linkages ref="linkages" @updateProgress="updateProgress"></linkages>
             <linkages-navigation @fromLinkagesToEvolution="fromLinkagesToEvolution"
                                  @fromLinkagesToReferences="fromLinkagesToReferences"/>
-          </v-stepper-content>
-          <v-stepper-content step="6">
-            <references-navigation @back="e1=5" @forward="gotoNextProgram">
+          </v-stepper-content> -->
+          <v-stepper-content step="5">
+            <references-navigation @back="e1=4" @forward="gotoNextProgram">
               {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
             </references-navigation>
             <references ref="references"/>
@@ -97,13 +97,14 @@
   </div>
 </template>
 <script>
+// import { VProgressCircular } from 'vuetify/lib'
 import References from "@/components/References";
-import LinkagesNavigation from '../components/LinkagesNavigation'
+// import LinkagesNavigation from '../components/LinkagesNavigation'
 import ProgramDescriptionNavigation from '../components/ProgramDescriptionNavigation'
 import ProgramDescription from '../components/ProgramDescription.vue'
 import EvolutionNavigation from "@/components/EvolutionNavigation";
 import ReferencesNavigation from "@/components/ReferencesNavigation";
-import Linkages from '../components/Linkages'
+// import Linkages from '../components/Linkages'
 import NationalFrameworks from '../components/NationalFrameworks'
 import Evolution from '../components/Evolution'
 import KeyAgencyActions from "@/components/KeyAgencyActions";
@@ -113,14 +114,15 @@ export default {
   components: {
     References,
     ReferencesNavigation,
-    LinkagesNavigation,
+    // LinkagesNavigation,
     EvolutionNavigation,
     ProgramDescriptionNavigation,
     KeyAgencyActions,
     ProgramDescription,
-    Linkages,
+    // Linkages,
     NationalFrameworks,
-    Evolution
+    Evolution,
+    // VProgressCircular
   },
   async mounted() {
     await this.updateProgress();
@@ -180,17 +182,21 @@ export default {
       await this.$refs.evolution.load();
       this.e1 = 4;
     },
-    fromEvolutionToLinkages: async function () {
+    fromEvolutionToReferences: async function () {
       await this.$refs.evolution.submitAnswer();
-      await this.$refs.linkages.load();
-      this.e1 = 5;
-
-    },
-    fromLinkagesToReferences: async function () {
-      await this.$refs.linkages.submitAnswer();
       await this.$refs.references.load();
-      this.e1 = 6;
+      this.e1 = 5;
     },
+    // fromEvolutionToLinkages: async function () {
+    //   await this.$refs.evolution.submitAnswer();
+    //   await this.$refs.linkages.load();
+    //   this.e1 = 5;
+    // },
+    // fromLinkagesToReferences: async function () {
+    //   await this.$refs.linkages.submitAnswer();
+    //   await this.$refs.references.load();
+    //   this.e1 = 6;
+    // },
     fromNationalFrameworkToProgramDescription: async function () {
       if (this.$refs.nationalFramework.hasPreviousQuestion()) {
         await this.$refs.nationalFramework.loadPreviousQuestion();
@@ -209,13 +215,13 @@ export default {
       await this.$refs.nationalFramework.load();
       this.e1 = 2;
     },
-    fromEvolutionKeyAgency: async function () {
+    fromEvolutionToKeyAgency: async function () {
       await this.$refs.evolution.submitAnswer();
       await this.$refs.keyAgency.load();
       this.e1 = 3;
     },
-    fromLinkagesToEvolution: async function () {
-      await this.$refs.linkages.submitAnswer();
+    fromReferencesToEvolution: async function () {
+      await this.$refs.references.submitAnswer();
       await this.$refs.evolution.load();
       this.e1 = 4;
     },
@@ -310,11 +316,11 @@ export default {
         await this.$refs.evolution.submitAnswer();
         await this.$refs.evolution.load();
       }
+      // if (this.e1 === 5) {
+      //   await this.$refs.linkages.submitAnswer();
+      //   await this.$refs.linkages.load();
+      // }
       if (this.e1 === 5) {
-        await this.$refs.linkages.submitAnswer();
-        await this.$refs.linkages.load();
-      }
-      if (this.e1 === 6) {
         await this.$refs.references.load();
       }
     },

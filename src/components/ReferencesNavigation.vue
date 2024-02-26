@@ -3,7 +3,7 @@
     <v-col md="4">
       <v-btn text color="primary" @click='$emit("back")'>
         <v-icon>mdi-step-backward</v-icon>
-        Linkages
+        Evolution
       </v-btn>
     </v-col>
     <v-col md="4"><h3 style="color: darkred">{{ this.$store.state.currentProgram.name }}</h3></v-col>
