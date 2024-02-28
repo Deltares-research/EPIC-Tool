@@ -185,13 +185,13 @@ export default {
         let groupedAreas = Object.groupBy(combinedData, ({ area }) => area);
         console.log('groupedAreas', groupedAreas);
 
-        this.optionPie.series[0].data = groupedAreas.Planning
+        this.optionPie.series[0].data = groupedAreas.Plan
         this.optionPie.series[1].data = groupedAreas.Invest
         this.optionPie.series[2].data = groupedAreas.Control
         this.optionPie.series[3].data = groupedAreas.Respond
         this.optionPie.series[4].data = groupedAreas.Enable
 
-        console.log('groupedAreas.Control', groupedAreas.Control);
+        console.log('groupedAreas.Plan', groupedAreas.Plan);
 
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
@@ -249,14 +249,14 @@ export default {
             type: 'pie',
             radius: [100, 250],
             center: ['50%', '50%'],
-            roseType: 'radius',
+            roseType: 'area',
             avoidLabelOverlap: true,
             itemStyle: {
-              borderWidth: 15,
+              borderWidth: 3,
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "black"
+              color: "#66c2a5"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -270,7 +270,9 @@ export default {
               { value: 26, name: 'rose 6' },
               { value: 22, name: 'rose 7' },
               { value: 18, name: 'rose 8' }
-            ]
+            ],
+            startAngle: 90,
+            endAngle: 42.6315789474
           },
           {
             name: 'Invest',
@@ -278,14 +280,14 @@ export default {
             type: 'pie',
             radius: [100, 250],
             center: ['50%', '50%'],
-            roseType: 'radius',
+            roseType: 'area',
             avoidLabelOverlap: true,
             itemStyle: {
-              borderWidth: 15,
+              borderWidth: 3,
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "red"
+              color: "#a89bb0"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -299,7 +301,9 @@ export default {
               { value: 26, name: 'rose 6' },
               { value: 22, name: 'rose 7' },
               { value: 18, name: 'rose 8' }
-            ]
+            ],
+            startAngle: 42.6315789474,
+            endAngle: 326.842105263
           },
           {
             name: 'Control',
@@ -307,14 +311,14 @@ export default {
             type: 'pie',
             radius: [100, 250],
             center: ['50%', '50%'],
-            roseType: 'radius',
+            roseType: 'area',
             avoidLabelOverlap: true,
             itemStyle: {
-              borderWidth: 15,
+              borderWidth: 3,
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "blue"
+              color: "#c6b18b"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -328,7 +332,9 @@ export default {
               { value: 26, name: 'rose 6' },
               { value: 22, name: 'rose 7' },
               { value: 18, name: 'rose 8' }
-            ]
+            ],
+            startAngle: 326.842105263,
+            endAngle: 279.47368421
           },
           {
             name: 'Respond',
@@ -336,14 +342,14 @@ export default {
             type: 'pie',
             radius: [100, 250],
             center: ['50%', '50%'],
-            roseType: 'radius',
+            roseType: 'area',
             avoidLabelOverlap: true,
             itemStyle: {
-              borderWidth: 15,
+              borderWidth: 3,
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "green"
+              color: "#f8d348"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -357,7 +363,9 @@ export default {
               { value: 26, name: 'rose 6' },
               { value: 22, name: 'rose 7' },
               { value: 18, name: 'rose 8' }
-            ]
+            ],
+            startAngle: 279.47368421,
+            endAngle: 203.684210526
           },
           {
             name: 'Enable',
@@ -365,14 +373,14 @@ export default {
             type: 'pie',
             radius: [100, 250],
             center: ['50%', '50%'],
-            roseType: 'radius',
+            roseType: 'area',
             avoidLabelOverlap: true,
             itemStyle: {
-              borderWidth: 15,
+              borderWidth: 3,
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "pink"
+              color: "#b3b3b3"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -386,7 +394,9 @@ export default {
               { value: 26, name: 'rose 6' },
               { value: 22, name: 'rose 7' },
               { value: 18, name: 'rose 8' }
-            ]
+            ],
+            startAngle: 203.684210526,
+            endAngle: 90
           }
         ]
       }
