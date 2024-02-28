@@ -191,7 +191,7 @@ export default {
         this.optionPie.series[3].data = groupedAreas.Respond
         this.optionPie.series[4].data = groupedAreas.Enable
 
-        console.log('groupedAreas.Plan', groupedAreas.Plan);
+        console.log('groupedAreas.Control', groupedAreas.Control);
 
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
@@ -247,9 +247,9 @@ export default {
             name: 'Plan',
             id: 'Plan',
             type: 'pie',
-            radius: [100, 250],
+            radius: [100, 300],
             center: ['50%', '50%'],
-            roseType: 'area',
+            roseType: 'radius',
             avoidLabelOverlap: true,
             itemStyle: {
               borderWidth: 3,
@@ -272,15 +272,16 @@ export default {
               { value: 18, name: 'rose 8' }
             ],
             startAngle: 90,
-            endAngle: 42.6315789474
+            endAngle: 42.6315789474,
+            minAngle: 9.47368421053
           },
           {
             name: 'Invest',
             id: 'Invest',
             type: 'pie',
-            radius: [100, 250],
+            radius: [100, 300],
             center: ['50%', '50%'],
-            roseType: 'area',
+            roseType: 'radius',
             avoidLabelOverlap: true,
             itemStyle: {
               borderWidth: 3,
@@ -303,15 +304,16 @@ export default {
               { value: 18, name: 'rose 8' }
             ],
             startAngle: 42.6315789474,
-            endAngle: 326.842105263
+            endAngle: 326.842105263,
+            minAngle: 9.47368421053
           },
           {
             name: 'Control',
             id: 'Control',
             type: 'pie',
-            radius: [100, 250],
+            radius: [100, 300],
             center: ['50%', '50%'],
-            roseType: 'area',
+            roseType: 'radius',
             avoidLabelOverlap: true,
             itemStyle: {
               borderWidth: 3,
@@ -334,15 +336,16 @@ export default {
               { value: 18, name: 'rose 8' }
             ],
             startAngle: 326.842105263,
-            endAngle: 279.47368421
+            endAngle: 279.47368421,
+            minAngle: 9.47368421053
           },
           {
             name: 'Respond',
             id: 'Respond',
             type: 'pie',
-            radius: [100, 250],
+            radius: [100, 300],
             center: ['50%', '50%'],
-            roseType: 'area',
+            roseType: 'radius',
             avoidLabelOverlap: true,
             itemStyle: {
               borderWidth: 3,
@@ -365,15 +368,16 @@ export default {
               { value: 18, name: 'rose 8' }
             ],
             startAngle: 279.47368421,
-            endAngle: 203.684210526
+            endAngle: 203.684210526,
+            minAngle: 9.47368421053
           },
           {
             name: 'Enable',
             id: 'Enable',
             type: 'pie',
-            radius: [100, 250],
+            radius: [100, 300],
             center: ['50%', '50%'],
-            roseType: 'area',
+            roseType: 'radius',
             avoidLabelOverlap: true,
             itemStyle: {
               borderWidth: 3,
@@ -396,7 +400,8 @@ export default {
               { value: 18, name: 'rose 8' }
             ],
             startAngle: 203.684210526,
-            endAngle: 90
+            endAngle: 90,
+            minAngle: 9.47368421053
           }
         ]
       }
