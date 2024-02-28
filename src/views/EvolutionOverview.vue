@@ -172,8 +172,20 @@ export default {
             return result;
           }, {});
         });
-
         console.log('this.optionPie.series[0].data', this.optionPie.series[0].data);
+
+        let combinedData = combinedArray.map(function(row) {
+          return row.reduce(function(result, field, index) {
+            result[parameters[index]] = field;
+            return result;
+          }, {});
+
+        });
+
+        let groupedAreas = Object.groupBy(combinedData, ({ area }) => area);
+        console.log('groupedAreas', groupedAreas);
+
+        console.log('groupedAreas.Control', groupedAreas.Control);
 
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
