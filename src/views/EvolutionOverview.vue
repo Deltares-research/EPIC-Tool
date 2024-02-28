@@ -158,17 +158,21 @@ export default {
         console.log('programArray', programArray);
         let averageArray = res.summary_data.map(element => element.average);
         console.log('averageArray', averageArray);
+        let areaArray = res.summary_data.map(element => element.area);
+        console.log('areaArray', areaArray);
         let combinedArray = averageArray.map(function(x, i) {
-          return [x, programArray[i]]
+          return [x, programArray[i], areaArray[i]]
         });
         console.log('combinedArray', combinedArray);
-        let parameters = ["value", "name"];
+        let parameters = ["value", "name", "area"];
+
         this.optionPie.series[0].data = combinedArray.map(function(row) {
           return row.reduce(function(result, field, index) {
             result[parameters[index]] = field;
             return result;
           }, {});
         });
+
         console.log('this.optionPie.series[0].data', this.optionPie.series[0].data);
 
         this.imageUrl = res.summary_graph;
@@ -224,19 +228,30 @@ export default {
           {
             name: 'Nightingale Chart',
             type: 'pie',
-            radius: [60, 300],
+            radius: [100, 250],
             center: ['50%', '50%'],
-            roseType: 'area',
+            roseType: 'radius',
+            avoidLabelOverlap: true,
             itemStyle: {
               borderWidth: 15,
               borderRadius: 5,
               borderColor: '#FFF',
-              borderCap: "square"
+              borderCap: "square",
+              color: "black"
             },
             selectedMode: 'single',
             selectedOffset: '30',
             showEmptyCircle: true,
-            data: []
+            data: [
+              { value: 40, name: 'rose 1' },
+              { value: 38, name: 'rose 2' },
+              { value: 32, name: 'rose 3' },
+              { value: 30, name: 'rose 4' },
+              { value: 60, name: 'rose 5' },
+              { value: 26, name: 'rose 6' },
+              { value: 22, name: 'rose 7' },
+              { value: 18, name: 'rose 8' }
+            ]
           }
         ]
       }
