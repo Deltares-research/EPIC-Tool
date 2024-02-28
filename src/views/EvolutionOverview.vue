@@ -185,6 +185,12 @@ export default {
         let groupedAreas = Object.groupBy(combinedData, ({ area }) => area);
         console.log('groupedAreas', groupedAreas);
 
+        this.optionPie.series[0].data = groupedAreas.Planning
+        this.optionPie.series[1].data = groupedAreas.Invest
+        this.optionPie.series[2].data = groupedAreas.Control
+        this.optionPie.series[3].data = groupedAreas.Respond
+        this.optionPie.series[4].data = groupedAreas.Enable
+
         console.log('groupedAreas.Control', groupedAreas.Control);
 
         this.imageUrl = res.summary_graph;
@@ -238,7 +244,8 @@ export default {
         },
         series: [
           {
-            name: 'Nightingale Chart',
+            name: 'Plan',
+            id: 'Plan',
             type: 'pie',
             radius: [100, 250],
             center: ['50%', '50%'],
@@ -250,6 +257,122 @@ export default {
               borderColor: '#FFF',
               borderCap: "square",
               color: "black"
+            },
+            selectedMode: 'single',
+            selectedOffset: '30',
+            showEmptyCircle: true,
+            data: [
+              { value: 40, name: 'rose 1' },
+              { value: 38, name: 'rose 2' },
+              { value: 32, name: 'rose 3' },
+              { value: 30, name: 'rose 4' },
+              { value: 60, name: 'rose 5' },
+              { value: 26, name: 'rose 6' },
+              { value: 22, name: 'rose 7' },
+              { value: 18, name: 'rose 8' }
+            ]
+          },
+          {
+            name: 'Invest',
+            id: 'Invest',
+            type: 'pie',
+            radius: [100, 250],
+            center: ['50%', '50%'],
+            roseType: 'radius',
+            avoidLabelOverlap: true,
+            itemStyle: {
+              borderWidth: 15,
+              borderRadius: 5,
+              borderColor: '#FFF',
+              borderCap: "square",
+              color: "red"
+            },
+            selectedMode: 'single',
+            selectedOffset: '30',
+            showEmptyCircle: true,
+            data: [
+              { value: 40, name: 'rose 1' },
+              { value: 38, name: 'rose 2' },
+              { value: 32, name: 'rose 3' },
+              { value: 30, name: 'rose 4' },
+              { value: 60, name: 'rose 5' },
+              { value: 26, name: 'rose 6' },
+              { value: 22, name: 'rose 7' },
+              { value: 18, name: 'rose 8' }
+            ]
+          },
+          {
+            name: 'Control',
+            id: 'Control',
+            type: 'pie',
+            radius: [100, 250],
+            center: ['50%', '50%'],
+            roseType: 'radius',
+            avoidLabelOverlap: true,
+            itemStyle: {
+              borderWidth: 15,
+              borderRadius: 5,
+              borderColor: '#FFF',
+              borderCap: "square",
+              color: "blue"
+            },
+            selectedMode: 'single',
+            selectedOffset: '30',
+            showEmptyCircle: true,
+            data: [
+              { value: 40, name: 'rose 1' },
+              { value: 38, name: 'rose 2' },
+              { value: 32, name: 'rose 3' },
+              { value: 30, name: 'rose 4' },
+              { value: 60, name: 'rose 5' },
+              { value: 26, name: 'rose 6' },
+              { value: 22, name: 'rose 7' },
+              { value: 18, name: 'rose 8' }
+            ]
+          },
+          {
+            name: 'Respond',
+            id: 'Respond',
+            type: 'pie',
+            radius: [100, 250],
+            center: ['50%', '50%'],
+            roseType: 'radius',
+            avoidLabelOverlap: true,
+            itemStyle: {
+              borderWidth: 15,
+              borderRadius: 5,
+              borderColor: '#FFF',
+              borderCap: "square",
+              color: "green"
+            },
+            selectedMode: 'single',
+            selectedOffset: '30',
+            showEmptyCircle: true,
+            data: [
+              { value: 40, name: 'rose 1' },
+              { value: 38, name: 'rose 2' },
+              { value: 32, name: 'rose 3' },
+              { value: 30, name: 'rose 4' },
+              { value: 60, name: 'rose 5' },
+              { value: 26, name: 'rose 6' },
+              { value: 22, name: 'rose 7' },
+              { value: 18, name: 'rose 8' }
+            ]
+          },
+          {
+            name: 'Enable',
+            id: 'Enable',
+            type: 'pie',
+            radius: [100, 250],
+            center: ['50%', '50%'],
+            roseType: 'radius',
+            avoidLabelOverlap: true,
+            itemStyle: {
+              borderWidth: 15,
+              borderRadius: 5,
+              borderColor: '#FFF',
+              borderCap: "square",
+              color: "pink"
             },
             selectedMode: 'single',
             selectedOffset: '30',
