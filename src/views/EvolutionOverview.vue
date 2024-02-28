@@ -139,6 +139,9 @@ export default {
             type: 'bar'
           }
         ],
+        itemStyle: {
+          borderCap: 'round'
+        },
         grid: {
           containLabel: true
         }
