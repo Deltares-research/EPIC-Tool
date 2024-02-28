@@ -1,18 +1,35 @@
 <template>
   <div>
-    <h2 style="color: darkred">Test interactive evolution graph</h2>
+    <h2 style="color: darkred">Test interactive pie evolution graph</h2>
     <div style="margin-bottom: 100px;">
       <v-row
           align="center"
           justify="space-around"
       >
-        <v-btn class="primary" @click="fetchGraphData()">Get data for test graph</v-btn>
+        <v-btn class="primary" @click="fetchPieData()">Get data for test pie graph</v-btn>
       </v-row>
       <br>
 
       <v-chart
         class="chart-area"
-        :option="option"
+        :option="optionPie"
+      />
+
+      <br>
+    </div>
+    <h2 style="color: darkred">Test interactive bar evolution graph</h2>
+    <div style="margin-bottom: 100px;">
+      <v-row
+          align="center"
+          justify="space-around"
+      >
+        <v-btn class="primary" @click="fetchGraphData()">Get data for test bar graph</v-btn>
+      </v-row>
+      <br>
+
+      <v-chart
+        class="chart-area"
+        :option="optionBar"
       />
 
       <br>
@@ -43,12 +60,13 @@
   import { use } from 'echarts/core'
   import { CanvasRenderer } from 'echarts/renderers'
   import { BarChart } from 'echarts/charts'
+  import { PieChart } from 'echarts/charts'
   import { TooltipComponent } from 'echarts/components'
   import { LineChart } from 'echarts/charts'
   import { GridComponent } from 'echarts/components'
   import VChart from 'vue-echarts'
 
-  use([ CanvasRenderer, BarChart, LineChart, GridComponent, TooltipComponent ])
+  use([ CanvasRenderer, BarChart, PieChart, LineChart, GridComponent, TooltipComponent ])
 
 export default {
   components: {
@@ -105,10 +123,53 @@ export default {
         this.dataLoaded = true;
 
         console.log(res)
-        this.option.xAxis.data = res.summary_data.map(element => element.program);
-        console.log('this.option.xAxis.data', this.option.xAxis.data);
-        this.option.series[0].data = res.summary_data.map(element => element.average);
-        console.log('this.option.series[0].data', this.option.series[0].data);
+        this.optionBar.xAxis.data = res.summary_data.map(element => element.program);
+        console.log('this.optionBar.xAxis.data', this.optionBar.xAxis.data);
+        this.optionBar.series[0].data = res.summary_data.map(element => element.average);
+        console.log('this.optionBar.series[0].data', this.optionBar.series[0].data);
+
+        this.imageUrl = res.summary_graph;
+        this.pdfUrl = res.summary_pdf.replace(server, "");
+      } finally {
+        this.loading = false;
+      }
+    },
+    fetchPieData: async function () {
+      this.loading = true;
+      this.dataLoaded = false;
+      const token = this.$store.state.token;
+      const options = {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Token ' + token,
+        },
+      }
+      try {
+        let server = process.env.VUE_APP_BACKEND_URL;
+        let programResponse = await fetch(server + '/api/summary/evolution-graph/', options);
+        let res = await programResponse.json();
+        this.dataLoaded = true;
+
+        console.log(res)
+        let programArray = res.summary_data.map(element => element.program);
+        console.log('programArray', programArray);
+        let averageArray = res.summary_data.map(element => element.average);
+        console.log('averageArray', averageArray);
+        let combinedArray = averageArray.map(function(x, i) {
+          return [x, programArray[i]]
+        });
+        console.log('combinedArray', combinedArray);
+        let parameters = ["value", "name"];
+        this.optionPie.series[0].data = combinedArray.map(function(row) {
+          return row.reduce(function(result, field, index) {
+            result[parameters[index]] = field;
+            return result;
+          }, {});
+        });
+        console.log('this.optionPie.series[0].data', this.optionPie.series[0].data);
 
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
@@ -124,7 +185,7 @@ export default {
       dataLoaded: false,
       imageUrl: "",
       pdfUrl: "",
-      option : {
+      optionBar : {
         xAxis: {
           type: 'category',
           data: [],
@@ -145,6 +206,39 @@ export default {
         grid: {
           containLabel: true
         }
+      },
+      optionPie : {
+        tooltip: {
+          trigger: "item"
+        },
+        toolbox: {
+          show: true,
+          feature: {
+            mark: { show: true },
+            dataView: { show: true, readOnly: false },
+            restore: { show: true },
+            saveAsImage: { show: true }
+          }
+        },
+        series: [
+          {
+            name: 'Nightingale Chart',
+            type: 'pie',
+            radius: [60, 300],
+            center: ['50%', '50%'],
+            roseType: 'area',
+            itemStyle: {
+              borderWidth: 15,
+              borderRadius: 5,
+              borderColor: '#FFF',
+              borderCap: "square"
+            },
+            selectedMode: 'single',
+            selectedOffset: '30',
+            showEmptyCircle: true,
+            data: []
+          }
+        ]
       }
     }
   }
