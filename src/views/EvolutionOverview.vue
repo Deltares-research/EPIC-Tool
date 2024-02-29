@@ -64,6 +64,7 @@
   import { TooltipComponent } from 'echarts/components'
   import { LineChart } from 'echarts/charts'
   import { GridComponent } from 'echarts/components'
+
   import VChart from 'vue-echarts'
 
   use([ CanvasRenderer, BarChart, PieChart, LineChart, GridComponent, TooltipComponent ])
@@ -261,6 +262,14 @@ export default {
             selectedMode: 'single',
             selectedOffset: '30',
             showEmptyCircle: true,
+            label: {
+              show: true,
+              position: 'inside',
+              rotate: true,
+              fontSize: 10,
+              height: 1,
+              padding: [ 0, 0, 0, 250 ]
+            },
             data: [
               { value: 40, name: 'rose 1' },
               { value: 38, name: 'rose 2' },
@@ -293,6 +302,14 @@ export default {
             selectedMode: 'single',
             selectedOffset: '30',
             showEmptyCircle: true,
+            label: {
+              show: true,
+              position: 'inside',
+              rotate: true,
+              fontSize: 10,
+              height: 1,
+              padding: [ 0, 0, 0, 250 ]
+            },
             data: [
               { value: 40, name: 'rose 1' },
               { value: 38, name: 'rose 2' },
@@ -325,6 +342,14 @@ export default {
             selectedMode: 'single',
             selectedOffset: '30',
             showEmptyCircle: true,
+            label: {
+              show: true,
+              position: 'inside',
+              rotate: true,
+              fontSize: 10,
+              height: 1,
+              padding: [ 0, 0, 0, 250 ]
+            },
             data: [
               { value: 40, name: 'rose 1' },
               { value: 38, name: 'rose 2' },
@@ -336,7 +361,7 @@ export default {
               { value: 18, name: 'rose 8' }
             ],
             startAngle: 326.842105263,
-            endAngle: 279.47368421,
+            endAngle: 270,
             minAngle: 9.47368421053
           },
           {
@@ -357,6 +382,14 @@ export default {
             selectedMode: 'single',
             selectedOffset: '30',
             showEmptyCircle: true,
+            label: {
+              show: true,
+              position: 'inside',
+              rotate: true,
+              fontSize: 10,
+              height: 1,
+              padding: [ 0, 250, 0, 0 ]
+            },
             data: [
               { value: 40, name: 'rose 1' },
               { value: 38, name: 'rose 2' },
@@ -367,7 +400,7 @@ export default {
               { value: 22, name: 'rose 7' },
               { value: 18, name: 'rose 8' }
             ],
-            startAngle: 279.47368421,
+            startAngle: 270,
             endAngle: 203.684210526,
             minAngle: 9.47368421053
           },
@@ -389,6 +422,14 @@ export default {
             selectedMode: 'single',
             selectedOffset: '30',
             showEmptyCircle: true,
+            label: {
+              show: true,
+              position: 'inside',
+              rotate: true,
+              fontSize: 10,
+              height: 1,
+              padding: [ 0, 250, 0, 0 ],
+            },
             data: [
               { value: 40, name: 'rose 1' },
               { value: 38, name: 'rose 2' },
