@@ -208,6 +208,13 @@ export default {
       dataLoaded: false,
       imageUrl: "",
       pdfUrl: "",
+      padding: {
+        'E': [80, 0, 0 ,0],
+        'P': [0, 80, 0 ,0],
+        'I': [0, 0, 80 ,0],
+        'C': [0, 0, 0 ,80],
+        'R': [80, 0, 0 ,0],
+      },
       optionBar : {
         xAxis: {
           type: 'category',
@@ -443,6 +450,35 @@ export default {
             startAngle: 203.684210526,
             endAngle: 90,
             minAngle: 9.47368421053
+          },
+          {
+            type: 'pie',
+            radius: [99.5, 100],
+            avoidLabelOverlap: true,
+            padAngle: 8,
+            itemStyle: {
+              borderWidth: 3,
+              borderRadius: 5,
+              borderColor: '#000',
+              borderCap: "square",
+              color: '#FFF'
+            },
+            showEmptyCircle: true,
+            label: {
+              show: true,
+              position: 'inner',
+              fontSize: 24,
+              padding: function(seriesIndex) {
+                return (this.padding[seriesIndex.name])
+              }
+            },
+            data: [
+              { value: 13.1578947368333, name: 'E' },
+              { value: 21.052631579, name: 'P' },
+              { value: 15.7894736841667, name: 'I' },
+              { value: 18.4210526316667, name: 'C' },
+              { value: 31.5789473683333, name: 'R' }
+            ]
           }
         ]
       }
