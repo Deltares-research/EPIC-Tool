@@ -1,21 +1,31 @@
 <template>
   <div>
-    <h2 style="color: darkred">Test interactive pie evolution graph</h2>
+    <h2 style="color: darkred" class="ma-5">Evolution Report</h2>
     <div style="margin-bottom: 100px;">
-      <v-row
-          align="center"
-          justify="space-around"
-      >
-        <v-btn class="primary" @click="fetchPieData()">Get data for test pie graph</v-btn>
+      <v-row>
+        <v-col class="centered-column">
+          <v-btn class="primary" @click="fetchPieData()">Generate interactive graph</v-btn>
+        </v-col>
+
+        <v-col>
+        </v-col>
+
       </v-row>
-      <br>
 
-      <v-chart
-        class="chart-area"
-        :option="optionPie"
-      />
+      <v-row
+          class="ma-5"
+      >
+        <v-col>
+          <v-chart
+            class="chart-area"
+            :option="optionPie"
+          />
+        </v-col>
 
-      <br>
+        <v-col>
+        </v-col>
+
+      </v-row>
     </div>
     <h2 style="color: darkred">Test interactive bar evolution graph</h2>
     <div style="margin-bottom: 100px;">
@@ -461,19 +471,7 @@ export default {
               show: true,
               position: 'inner',
               fontSize: 24,
-            //   padding: function(params) {
-            //     // Define different padding values for each data point
-            //     var paddingValues = [
-            //       [0, 0, 0, 10],  // Padding for the first data point
-            //       [0, 10, 0, 0],  // Padding for the second data point
-            //       [10, 0, 0, 0],  // Padding for the third data point
-            //       [0, 0, 10, 0],  // Padding for the fourth data point
-            //       [0, 0, 0, 0]    // Padding for the fifth data point
-            //     ];
-            //     return paddingValues[params.dataIndex] || [0, 0, 0, 0]; // Default to no padding if no value is found
-            //   }
-            // },
-              padding: [0, 0, 0, 0]
+              padding: [0, 100, 0, 0]
             },
             data: [
               { value: 13.1578947368333, name: 'E' },
@@ -481,7 +479,14 @@ export default {
               { value: 15.7894736841667, name: 'I' },
               { value: 18.4210526316667, name: 'C' },
               { value: 31.5789473683333, name: 'R' }
-            ]
+            ],
+            emphasis: {
+              disabled: true,
+            },
+            tooltip: {
+              show: false,
+            },
+            cursor: 'auto'
           }
         ]
       }
@@ -493,9 +498,15 @@ export default {
 
 <style scoped>
   .chart-area {
-    padding-top: 5px;
+    padding-top: 20px;
     padding-bottom: 5px;
     position: flex;
     height: 700px;
+    left: 200px;
+  }
+  .centered-column{
+  position: absolute;
+  left: 325px;
+  
   }
 </style>
