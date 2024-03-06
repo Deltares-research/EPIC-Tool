@@ -208,13 +208,6 @@ export default {
       dataLoaded: false,
       imageUrl: "",
       pdfUrl: "",
-      padding: {
-        'E': [80, 0, 0 ,0],
-        'P': [0, 80, 0 ,0],
-        'I': [0, 0, 80 ,0],
-        'C': [0, 0, 0 ,80],
-        'R': [80, 0, 0 ,0],
-      },
       optionBar : {
         xAxis: {
           type: 'category',
@@ -468,9 +461,19 @@ export default {
               show: true,
               position: 'inner',
               fontSize: 24,
-              padding: function(seriesIndex) {
-                return (this.padding[seriesIndex.name])
-              }
+            //   padding: function(params) {
+            //     // Define different padding values for each data point
+            //     var paddingValues = [
+            //       [0, 0, 0, 10],  // Padding for the first data point
+            //       [0, 10, 0, 0],  // Padding for the second data point
+            //       [10, 0, 0, 0],  // Padding for the third data point
+            //       [0, 0, 10, 0],  // Padding for the fourth data point
+            //       [0, 0, 0, 0]    // Padding for the fifth data point
+            //     ];
+            //     return paddingValues[params.dataIndex] || [0, 0, 0, 0]; // Default to no padding if no value is found
+            //   }
+            // },
+              padding: [0, 0, 0, 0]
             },
             data: [
               { value: 13.1578947368333, name: 'E' },
