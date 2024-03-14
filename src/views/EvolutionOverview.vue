@@ -27,23 +27,6 @@
 
       </v-row>
     </div>
-    <h2 style="color: darkred">Test interactive bar evolution graph</h2>
-    <div style="margin-bottom: 100px;">
-      <v-row
-          align="center"
-          justify="space-around"
-      >
-        <v-btn class="primary" @click="fetchGraphData()">Get data for test bar graph</v-btn>
-      </v-row>
-      <br>
-
-      <v-chart
-        class="chart-area"
-        :option="optionBar"
-      />
-
-      <br>
-    </div>
     <h2 style="color: darkred">Evolution report</h2>
     <v-row
         align="center"
@@ -108,37 +91,6 @@ export default {
         let res = await programResponse.json();
         this.dataLoaded = true;
         console.log(res)
-        this.imageUrl = res.summary_graph;
-        this.pdfUrl = res.summary_pdf.replace(server, "");
-      } finally {
-        this.loading = false;
-      }
-    },
-    fetchGraphData: async function () {
-      this.loading = true;
-      this.dataLoaded = false;
-      const token = this.$store.state.token;
-      const options = {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Token ' + token,
-        },
-      }
-      try {
-        let server = process.env.VUE_APP_BACKEND_URL;
-        let programResponse = await fetch(server + '/api/summary/evolution-graph/', options);
-        let res = await programResponse.json();
-        this.dataLoaded = true;
-
-        console.log(res)
-        this.optionBar.xAxis.data = res.summary_data.map(element => element.program);
-        console.log('this.optionBar.xAxis.data', this.optionBar.xAxis.data);
-        this.optionBar.series[0].data = res.summary_data.map(element => element.average);
-        console.log('this.optionBar.series[0].data', this.optionBar.series[0].data);
-
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
       } finally {
@@ -218,28 +170,6 @@ export default {
       dataLoaded: false,
       imageUrl: "",
       pdfUrl: "",
-      optionBar : {
-        xAxis: {
-          type: 'category',
-          data: [],
-          axisLabel: { interval: 0, rotate: 60 }
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
-            data: [],
-            type: 'bar'
-          }
-        ],
-        itemStyle: {
-          borderCap: 'round'
-        },
-        grid: {
-          containLabel: true
-        }
-      },
       optionPie : {
         tooltip: {
           trigger: "item"
@@ -278,7 +208,7 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 0, 0, 250 ]
+              padding: [ 0, 0, 0, 260 ]
             },
             data: [
               { value: 40, name: 'rose 1' },
@@ -318,7 +248,7 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 0, 0, 250 ]
+              padding: [ 0, 0, 0, 260 ]
             },
             data: [
               { value: 40, name: 'rose 1' },
@@ -358,7 +288,7 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 0, 0, 250 ]
+              padding: [ 0, 0, 0, 260 ]
             },
             data: [
               { value: 40, name: 'rose 1' },
@@ -398,7 +328,7 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 250, 0, 0 ]
+              padding: [ 0, 260, 0, 0 ]
             },
             data: [
               { value: 40, name: 'rose 1' },
@@ -438,7 +368,7 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 250, 0, 0 ],
+              padding: [ 0, 260, 0, 0 ],
             },
             data: [
               { value: 40, name: 'rose 1' },
@@ -467,18 +397,12 @@ export default {
               color: '#FFF'
             },
             showEmptyCircle: true,
-            label: {
-              show: true,
-              position: 'inner',
-              fontSize: 24,
-              padding: [0, 100, 0, 0]
-            },
             data: [
-              { value: 13.1578947368333, name: 'E' },
-              { value: 21.052631579, name: 'P' },
-              { value: 15.7894736841667, name: 'I' },
-              { value: 18.4210526316667, name: 'C' },
-              { value: 31.5789473683333, name: 'R' }
+              { value: 13.1578947368333},
+              { value: 21.052631579},
+              { value: 15.7894736841667},
+              { value: 18.4210526316667},
+              { value: 31.5789473683333}
             ],
             emphasis: {
               disabled: true,
@@ -487,6 +411,35 @@ export default {
               show: false,
             },
             cursor: 'auto'
+          },
+          {
+            type: 'pie',
+            radius: [50, 99],
+            avoidLabelOverlap: true,
+            padAngle: 8,
+            showEmptyCircle: true,
+            label: {
+              show: true,
+              position: 'inner',
+              fontSize: 24,
+              padding: [0, 0, 0, 0]
+            },
+            data: [
+              { value: 13.1578947368333, name: 'P' },
+              { value: 21.052631579, name: 'I' },
+              { value: 15.7894736841667, name: 'C' },
+              { value: 18.4210526316667, name: 'R' },
+              { value: 31.5789473683333, name: 'E' }
+            ],
+            color: '#FFF',
+            emphasis: {
+              disabled: true,
+            },
+            tooltip: {
+              show: false,
+            },
+            cursor: 'auto',
+            silent: 'true'
           }
         ]
       }
@@ -501,7 +454,7 @@ export default {
     padding-top: 20px;
     padding-bottom: 5px;
     position: flex;
-    height: 700px;
+    height: 800px;
     left: 200px;
   }
   .centered-column{
