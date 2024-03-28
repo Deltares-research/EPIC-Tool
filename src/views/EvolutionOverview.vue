@@ -20,6 +20,7 @@
             v-if="this.dataPieLoaded == true"
             class="chart-area"
             :option="optionPie"
+            @click="onChartClick"
           />
 
           <div v-if="loading">
@@ -39,8 +40,9 @@
         </v-col>
 
         <v-col class="custom-center">
-          <v-btn class="primary" v-if="this.dataPieLoaded == true" @click="generateGraph()">Confirm graph</v-btn>
-          <v-btn class="primary" v-if="this.dataPieLoaded == true">Change BLA</v-btn>
+          <v-btn class="primary" style="margin-top: -500px; margin-bottom: 30px; margin-left: -250px;" v-if="this.dataPieLoaded == true" @click="generateGraph()">Confirm graph</v-btn>
+          <h3 style="color: darkred; margin-left: -250px;" v-if="this.dataPieLoaded == true && this.clickedElementName == ''">Click on the graph to change an element</h3>
+          <v-btn class="primary" style="margin-left: -250px;" v-if="this.dataPieLoaded == true && this.clickedElementName !== ''">Change {{clickedElementName}}</v-btn>
         </v-col>
 
       </v-row>
@@ -108,7 +110,7 @@ export default {
         let programResponse = await fetch(server + '/api/summary/evolution-graph/', options);
         let res = await programResponse.json();
         this.dataImgLoaded = true;
-        console.log(res)
+        // console.log(res)
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
       } finally {
@@ -135,17 +137,17 @@ export default {
         let res = await programResponse.json();
         this.dataPieLoaded = true;
 
-        console.log(res)
+        // console.log(res)
         let programArray = res.summary_data.map(element => element.program);
-        console.log('programArray', programArray);
+        // console.log('programArray', programArray);
         let averageArray = res.summary_data.map(element => element.average);
-        console.log('averageArray', averageArray);
+        // console.log('averageArray', averageArray);
         let areaArray = res.summary_data.map(element => element.area);
-        console.log('areaArray', areaArray);
+        // console.log('areaArray', areaArray);
         let combinedArray = averageArray.map(function(x, i) {
           return [x, programArray[i], areaArray[i]]
         });
-        console.log('combinedArray', combinedArray);
+        // console.log('combinedArray', combinedArray);
         let parameters = ["value", "name", "area"];
 
         this.optionPie.series[0].data = combinedArray.map(function(row) {
@@ -154,7 +156,7 @@ export default {
             return result;
           }, {});
         });
-        console.log('this.optionPie.series[0].data', this.optionPie.series[0].data);
+        // console.log('this.optionPie.series[0].data', this.optionPie.series[0].data);
 
         let combinedData = combinedArray.map(function(row) {
           return row.reduce(function(result, field, index) {
@@ -165,7 +167,7 @@ export default {
         });
 
         let groupedAreas = Object.groupBy(combinedData, ({ area }) => area);
-        console.log('groupedAreas', groupedAreas);
+        // console.log('groupedAreas', groupedAreas);
 
         this.optionPie.series[0].data = groupedAreas.Plan
         this.optionPie.series[1].data = groupedAreas.Invest
@@ -173,15 +175,17 @@ export default {
         this.optionPie.series[3].data = groupedAreas.Respond
         this.optionPie.series[4].data = groupedAreas.Enable
 
-        console.log('groupedAreas.Control', groupedAreas.Control);
+        // console.log('groupedAreas.Control', groupedAreas.Control);
 
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
       } finally {
         this.loading = false;
       }
-    }
-
+    },
+    onChartClick(params) {
+      this.clickedElementName = params.name;
+    },
   },
   data() {
     return {
@@ -190,6 +194,7 @@ export default {
       dataPieLoaded: false,
       imageUrl: "",
       pdfUrl: "",
+      clickedElementName: '',
       optionPie : {
         tooltip: {
           trigger: "item"
@@ -198,9 +203,9 @@ export default {
           show: true,
           feature: {
             mark: { show: true },
-            dataView: { show: true, readOnly: false },
-            restore: { show: true },
-            saveAsImage: { show: true }
+            dataView: { show: true, readOnly: true },
+            // restore: { show: true },
+            // saveAsImage: { show: true }
           }
         },
         series: [
@@ -470,19 +475,24 @@ export default {
 </script>
 
 <style scoped>
-  .chart-area {
+.chart-area {
     padding-top: 20px;
     padding-bottom: 5px;
     position: flex;
     height: 800px;
     left: 400px;
   }
-  .centered-column{
+.centered-column{
   position: absolute;
   left: 500px;
   }
 .custom-center {
   display: flex;
   justify-content: center;
+  flex-direction: column;
+  align-items: center; /* Center buttons horizontally */
+}
+.button-container .v-btn {
+  width: 200px; /* Fixed width for buttons */
 }
 </style>
