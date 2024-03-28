@@ -4,7 +4,7 @@
     <div style="margin-bottom: 100px;">
       <v-row>
         <v-col class="centered-column">
-          <v-btn class="primary" @click="fetchPieData()">Generate interactive graph</v-btn>
+          <v-btn class="primary" v-if="this.dataPieLoaded == false" @click="fetchPieData()">Generate interactive graph</v-btn>
         </v-col>
 
         <v-col>
@@ -17,24 +17,42 @@
       >
         <v-col>
           <v-chart
+            v-if="this.dataPieLoaded == true"
             class="chart-area"
             :option="optionPie"
           />
+
+          <div v-if="loading">
+            <h3>Generating evolution graph..</h3>
+          </div>
+          <div v-if="this.dataImgLoaded">
+            <h3 style="color: darkred">Graph</h3>
+            <v-img
+              class="chart-area"
+              max-height="1000px"
+              max-width="1000px"
+              :src="imageUrl"
+            ></v-img>
+            <a :href="pdfUrl" download target="_blank">Download graph</a>
+          </div>
+
         </v-col>
 
-        <v-col>
+        <v-col class="custom-center">
+          <v-btn class="primary" v-if="this.dataPieLoaded == true" @click="generateGraph()">Confirm graph</v-btn>
+          <v-btn class="primary" v-if="this.dataPieLoaded == true">Change BLA</v-btn>
         </v-col>
 
       </v-row>
     </div>
-    <h2 style="color: darkred">Evolution report</h2>
-    <v-row
+    <!-- <h2 style="color: darkred">Evolution report</h2> -->
+    <!-- <v-row
         align="center"
         justify="space-around"
     >
       <v-btn class="primary" @click="generateGraph()">Generate evolution graph</v-btn>
-    </v-row>
-    <div v-if="loading">
+    </v-row> -->
+    <!-- <div v-if="loading">
       <h3>Generating evolution graph..</h3>
     </div>
     <div v-if="this.dataLoaded">
@@ -45,7 +63,7 @@
           :src="imageUrl"
       ></v-img>
       <a :href="pdfUrl" download target="_blank">Download graph</a>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -68,13 +86,13 @@ export default {
   },
   name: "EvolutionOverview",
   mounted() {
-    this.dataLoaded = false;
+    this.dataPieLoaded = false;
+    this.dataImgLoaded = false;
     this.url = "";
   },
   methods: {
     generateGraph: async function () {
       this.loading = true;
-      this.dataLoaded = false;
       const token = this.$store.state.token;
       const options = {
         method: 'GET',
@@ -89,17 +107,18 @@ export default {
         let server = process.env.VUE_APP_BACKEND_URL;
         let programResponse = await fetch(server + '/api/summary/evolution-graph/', options);
         let res = await programResponse.json();
-        this.dataLoaded = true;
+        this.dataImgLoaded = true;
         console.log(res)
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
       } finally {
         this.loading = false;
+        this.dataPieLoaded = false;
       }
     },
     fetchPieData: async function () {
       this.loading = true;
-      this.dataLoaded = false;
+      this.dataImgLoaded = false;
       const token = this.$store.state.token;
       const options = {
         method: 'GET',
@@ -114,7 +133,7 @@ export default {
         let server = process.env.VUE_APP_BACKEND_URL;
         let programResponse = await fetch(server + '/api/summary/evolution-graph/', options);
         let res = await programResponse.json();
-        this.dataLoaded = true;
+        this.dataPieLoaded = true;
 
         console.log(res)
         let programArray = res.summary_data.map(element => element.program);
@@ -167,7 +186,8 @@ export default {
   data() {
     return {
       loading: false,
-      dataLoaded: false,
+      dataImgLoaded: false,
+      dataPieLoaded: false,
       imageUrl: "",
       pdfUrl: "",
       optionPie : {
@@ -455,11 +475,14 @@ export default {
     padding-bottom: 5px;
     position: flex;
     height: 800px;
-    left: 200px;
+    left: 400px;
   }
   .centered-column{
   position: absolute;
-  left: 325px;
-  
+  left: 500px;
   }
+.custom-center {
+  display: flex;
+  justify-content: center;
+}
 </style>
