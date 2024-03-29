@@ -4,7 +4,7 @@
     <div style="margin-bottom: 100px;">
       <v-row>
         <v-col class="centered-column">
-          <v-btn class="primary" v-if="this.dataPieLoaded == false" @click="fetchPieData()">Generate interactive graph</v-btn>
+          <v-btn class="primary" v-if="this.dataPieLoaded == false" @click="fetchPieData()">(Re)Generate interactive graph</v-btn>
         </v-col>
 
         <v-col>
@@ -42,7 +42,7 @@
         <v-col class="custom-center">
           <v-btn class="primary" style="margin-top: -500px; margin-bottom: 30px; margin-left: -250px;" v-if="this.dataPieLoaded == true" @click="generateGraph()">Confirm graph</v-btn>
           <h3 style="color: darkred; margin-left: -250px;" v-if="this.dataPieLoaded == true && this.clickedElementName == ''">Click on the graph to change an element</h3>
-          <v-btn class="primary" style="margin-left: -250px;" v-if="this.dataPieLoaded == true && this.clickedElementName !== ''">Change {{clickedElementName}}</v-btn>
+          <v-btn class="primary" style="margin-left: -250px;" v-if="this.dataPieLoaded == true && this.clickedElementName !== ''" @click="goToQuestionnaire()">Change {{clickedElementName}}</v-btn>
         </v-col>
 
       </v-row>
@@ -77,10 +77,11 @@
   import { TooltipComponent } from 'echarts/components'
   import { LineChart } from 'echarts/charts'
   import { GridComponent } from 'echarts/components'
+  import { ToolboxComponent } from 'echarts/components'
 
   import VChart from 'vue-echarts'
 
-  use([ CanvasRenderer, BarChart, PieChart, LineChart, GridComponent, TooltipComponent ])
+  use([ CanvasRenderer, BarChart, PieChart, LineChart, GridComponent, TooltipComponent, ToolboxComponent ])
 
 export default {
   components: {
@@ -186,6 +187,16 @@ export default {
     onChartClick(params) {
       this.clickedElementName = params.name;
     },
+    goToQuestionnaire() {
+      // Get the current URL
+      const currentUrl = window.location.href;
+      // Find the position of the last '/' in the URL
+      const lastSlashIndex = currentUrl.lastIndexOf('/');
+      // Create the new URL by slicing the current URL up to the last '/' and appending 'Questionnaire'
+      const newUrl = `${currentUrl.slice(0, lastSlashIndex)}/Questionnaire`;
+      // Open the new URL in the current tab
+      window.location.href = newUrl;
+  },
   },
   data() {
     return {
