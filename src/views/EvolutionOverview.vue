@@ -246,19 +246,10 @@ export default {
               height: 1,
               padding: [ 0, 0, 0, 260 ]
             },
-            data: [
-              { value: 40, name: 'rose 1' },
-              { value: 38, name: 'rose 2' },
-              { value: 32, name: 'rose 3' },
-              { value: 30, name: 'rose 4' },
-              { value: 60, name: 'rose 5' },
-              { value: 26, name: 'rose 6' },
-              { value: 22, name: 'rose 7' },
-              { value: 18, name: 'rose 8' }
-            ],
+            data: [],
             startAngle: 90,
             endAngle: 42.6315789474,
-            minAngle: 9.47368421053
+            minAngle: 30
           },
           {
             name: 'Invest',
@@ -286,19 +277,10 @@ export default {
               height: 1,
               padding: [ 0, 0, 0, 260 ]
             },
-            data: [
-              { value: 40, name: 'rose 1' },
-              { value: 38, name: 'rose 2' },
-              { value: 32, name: 'rose 3' },
-              { value: 30, name: 'rose 4' },
-              { value: 60, name: 'rose 5' },
-              { value: 26, name: 'rose 6' },
-              { value: 22, name: 'rose 7' },
-              { value: 18, name: 'rose 8' }
-            ],
+            data: [],
             startAngle: 42.6315789474,
             endAngle: 326.842105263,
-            minAngle: 9.47368421053
+            minAngle: 30
           },
           {
             name: 'Control',
@@ -326,19 +308,10 @@ export default {
               height: 1,
               padding: [ 0, 0, 0, 260 ]
             },
-            data: [
-              { value: 40, name: 'rose 1' },
-              { value: 38, name: 'rose 2' },
-              { value: 32, name: 'rose 3' },
-              { value: 30, name: 'rose 4' },
-              { value: 60, name: 'rose 5' },
-              { value: 26, name: 'rose 6' },
-              { value: 22, name: 'rose 7' },
-              { value: 18, name: 'rose 8' }
-            ],
+            data: [],
             startAngle: 326.842105263,
             endAngle: 270,
-            minAngle: 9.47368421053
+            minAngle: 30
           },
           {
             name: 'Respond',
@@ -366,19 +339,10 @@ export default {
               height: 1,
               padding: [ 0, 260, 0, 0 ]
             },
-            data: [
-              { value: 40, name: 'rose 1' },
-              { value: 38, name: 'rose 2' },
-              { value: 32, name: 'rose 3' },
-              { value: 30, name: 'rose 4' },
-              { value: 60, name: 'rose 5' },
-              { value: 26, name: 'rose 6' },
-              { value: 22, name: 'rose 7' },
-              { value: 18, name: 'rose 8' }
-            ],
+            data: [],
             startAngle: 270,
             endAngle: 203.684210526,
-            minAngle: 9.47368421053
+            minAngle: 30
           },
           {
             name: 'Enable',
@@ -406,23 +370,14 @@ export default {
               height: 1,
               padding: [ 0, 260, 0, 0 ],
             },
-            data: [
-              { value: 40, name: 'rose 1' },
-              { value: 38, name: 'rose 2' },
-              { value: 32, name: 'rose 3' },
-              { value: 30, name: 'rose 4' },
-              { value: 60, name: 'rose 5' },
-              { value: 26, name: 'rose 6' },
-              { value: 22, name: 'rose 7' },
-              { value: 18, name: 'rose 8' }
-            ],
+            data: [],
             startAngle: 203.684210526,
             endAngle: 90,
-            minAngle: 9.47368421053
+            minAngle: 15
           },
           {
             type: 'pie',
-            radius: [99.5, 100],
+            radius: [95, 96],
             avoidLabelOverlap: true,
             padAngle: 8,
             itemStyle: {
@@ -450,7 +405,7 @@ export default {
           },
           {
             type: 'pie',
-            radius: [50, 99],
+            radius: [50, 95],
             avoidLabelOverlap: true,
             padAngle: 8,
             showEmptyCircle: true,
