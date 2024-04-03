@@ -249,7 +249,7 @@ export default {
             data: [],
             startAngle: 90,
             endAngle: 42.6315789474,
-            minAngle: 30
+            minAngle: 100000
           },
           {
             name: 'Invest',
@@ -280,7 +280,7 @@ export default {
             data: [],
             startAngle: 42.6315789474,
             endAngle: 326.842105263,
-            minAngle: 30
+            minAngle: 100000
           },
           {
             name: 'Control',
@@ -311,7 +311,7 @@ export default {
             data: [],
             startAngle: 326.842105263,
             endAngle: 270,
-            minAngle: 30
+            minAngle: 100000
           },
           {
             name: 'Respond',
@@ -342,7 +342,7 @@ export default {
             data: [],
             startAngle: 270,
             endAngle: 203.684210526,
-            minAngle: 30
+            minAngle: 100000
           },
           {
             name: 'Enable',
@@ -373,7 +373,7 @@ export default {
             data: [],
             startAngle: 203.684210526,
             endAngle: 90,
-            minAngle: 15
+            minAngle: 100000
           },
           {
             type: 'pie',
