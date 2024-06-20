@@ -21,6 +21,8 @@ export default new Vuex.Store({
         unCompleteAreas: new Set(),
         unCompleteGroups: new Set(),
         initialized: false,
+        selectedAreaIndex: 0,
+        selectedGroupIndex: 0,
     },
 
     mutations: {
@@ -97,6 +99,12 @@ export default new Vuex.Store({
                 }
             }
             state.programSelection = new Set();
+        },
+        updateSelectedAreaIndex(state, areaIndex) {
+            state.selectedAreaIndex = areaIndex
+        },
+        updateSelectedGroupIndex(state, groupIndex) {
+            state.selectedAreaIndex = groupIndex
         },
     },
     actions: {

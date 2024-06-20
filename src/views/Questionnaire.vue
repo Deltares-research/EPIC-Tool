@@ -108,6 +108,7 @@ import ReferencesNavigation from "@/components/ReferencesNavigation";
 import NationalFrameworks from '../components/NationalFrameworks'
 import Evolution from '../components/Evolution'
 import KeyAgencyActions from "@/components/KeyAgencyActions";
+import { mapState } from 'vuex'
 
 export default {
   name: 'Questionnaire',
@@ -124,6 +125,17 @@ export default {
     Evolution,
     // VProgressCircular
   },
+  computed: {
+    ...mapState(['selectedAreaIndex']),
+    selectedAreaIndex: {
+      get() {
+        return this.$store.state.selectedAreaIndex;
+      },
+      set(value) {
+        this.$store.commit('updateSelectedAreaIndex', value);
+      }
+    },
+  },
   async mounted() {
     await this.updateProgress();
     this.selectedAreaIndex = this.getFirstAreaToDisplay();
@@ -138,7 +150,6 @@ export default {
     return {
       expand: [0],
       e1: 1,
-      selectedAreaIndex: 0,
       selectedGroupIndex: 0,
       selectedProgramIndex: 0,
       visiblePrograms: [],

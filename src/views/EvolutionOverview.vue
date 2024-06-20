@@ -79,6 +79,7 @@
   import { LineChart } from 'echarts/charts'
   import { GridComponent } from 'echarts/components'
   import { ToolboxComponent } from 'echarts/components'
+  import { mapMutations } from 'vuex'
 
   import VChart from 'vue-echarts'
 
@@ -95,6 +96,7 @@ export default {
     this.url = "";
   },
   methods: {
+    ...mapMutations(['updateSelectedAreaIndex', 'updateSelectedGroupIndex']),
     generateGraph: async function () {
       this.loading = true;
       const token = this.$store.state.token;
@@ -187,6 +189,160 @@ export default {
     },
     onChartClick(params) {
       this.clickedElementName = params.name;
+      if(params.name == "National Water Resource Management Sector Framework"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "National Disaster Risk Management Sector Framework"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Overarching National Drought Risk Management Framework"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Overarching Flood Risk Management Framework"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Local Government"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Public Participation & Stakeholder Engagement"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Social Inclusion"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Education & Risk Communication"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Scientific Collaboration"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Open Data"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "National Framework for NMS/NHS Services"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(2)
+      }
+      if(params.name == "Co-Production of Services"){
+        this.updateSelectedAreaIndex(0)
+        this.updateSelectedGroupIndex(2)
+      }
+      if(params.name == "Integrated River Basin Planning"){
+        this.updateSelectedAreaIndex(1)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Coastal Zone Management Planning"){
+        this.updateSelectedAreaIndex(1)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Urban Water Supply Planning"){
+        this.updateSelectedAreaIndex(1)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Irrigation Water Supply Planning"){
+        this.updateSelectedAreaIndex(1)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Local Flood Risk Mitigation Planning"){
+        this.updateSelectedAreaIndex(1)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Agriculture Policies and Climate Smart Agriculture"){
+        this.updateSelectedAreaIndex(2)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Forest Management"){
+        this.updateSelectedAreaIndex(2)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Wetlands Management"){
+        this.updateSelectedAreaIndex(2)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Local Watershed Management Organizations"){
+        this.updateSelectedAreaIndex(2)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Watershed Management"){
+        this.updateSelectedAreaIndex(2)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Water Resources Investment Policy"){
+        this.updateSelectedAreaIndex(2)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Dam Safety"){
+        this.updateSelectedAreaIndex(2)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Flood Infrastructure Safety"){
+        this.updateSelectedAreaIndex(2)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Flexible Water Allocation"){
+        this.updateSelectedAreaIndex(3)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Conjunctive Groundwater Management"){
+        this.updateSelectedAreaIndex(3)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Floodplain Mapping"){
+        this.updateSelectedAreaIndex(3)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Floodplain Regulation"){
+        this.updateSelectedAreaIndex(3)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Local Flood Mitigation Planning"){
+        this.updateSelectedAreaIndex(3)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Drought Monitoring Program"){
+        this.updateSelectedAreaIndex(4)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "WRM Drought Response"){
+        this.updateSelectedAreaIndex(4)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Agriculture Drought Response"){
+        this.updateSelectedAreaIndex(4)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Social Protection Drought Response"){
+        this.updateSelectedAreaIndex(4)
+        this.updateSelectedGroupIndex(0)
+      }
+      if(params.name == "Flood Forecasting and Warning"){
+        this.updateSelectedAreaIndex(4)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Flood Emergency Preparedness, Response, and Relief"){
+        this.updateSelectedAreaIndex(4)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Flood Disaster Recovery"){
+        this.updateSelectedAreaIndex(4)
+        this.updateSelectedGroupIndex(1)
+      }
+      if(params.name == "Disaster Risk Financing National Sector Framework and Instruments"){
+        this.updateSelectedAreaIndex(4);
+        this.updateSelectedGroupIndex(2);
+      }
+      // console.log('params.name', params.name)
+      // console.log('selectedAreaIndex', this.selectedAreaIndex)
     },
     goToQuestionnaire() {
       // Get the current URL
@@ -382,7 +538,7 @@ export default {
             avoidLabelOverlap: true,
             padAngle: 8,
             itemStyle: {
-              borderWidth: 3,
+              borderWidth: 2,
               borderRadius: 5,
               borderColor: '#000',
               borderCap: "square",
