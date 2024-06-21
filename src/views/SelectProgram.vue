@@ -88,6 +88,8 @@
 export default {
   name: 'SelectProgram',
   async mounted() {
+    //TODO: Luis. Check if possible to move the api call to home. 
+    // we need to have the programs populated before we click the select program tab probably.
     const token = this.$store.state.token;
     const options = {
       method: 'GET',

@@ -12,7 +12,7 @@
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <v-progress-linear :value="this.$store.state.progress"></v-progress-linear>
-            <v-tabs v-model="selectedAreaIndex">
+            <v-tabs v-model="selectedAreaIndex"> 
               <v-tab v-for="(area) in this.$store.state.areas" :key="area.id"
                      @change="updateVisibleProgramsAfterAreaChange(area.id)"
                      :disabled="disableArea(area.id)">
@@ -126,7 +126,7 @@ export default {
     // VProgressCircular
   },
   computed: {
-    ...mapState(['selectedAreaIndex']),
+    ...mapState(['selectedAreaIndex', 'currentProgram']),
     selectedAreaIndex: {
       get() {
         return this.$store.state.selectedAreaIndex;
@@ -139,10 +139,22 @@ export default {
   async mounted() {
     await this.updateProgress();
     this.selectedAreaIndex = this.getFirstAreaToDisplay();
+  
+    
     let area = this.$store.state.areas[this.selectedAreaIndex];
+    
     this.visibleGroups = this.getVisibleGroups(area);
-    this.visiblePrograms = this.getVisibleProgramsForAreaAndGroup(area.id, this.visibleGroups[0].id);
-    this.$store.commit("updateCurrentProgram", this.visiblePrograms[0]);
+    
+    if (!this.currentProgram) {
+      this.visiblePrograms = this.getVisibleProgramsForAreaAndGroup(area.id, this.visibleGroups[0].id); // visiblePrograms are set
+      this.$store.commit("updateCurrentProgram", this.visiblePrograms[0]); // updatesCurrentProgram
+    }else {
+      this.visiblePrograms = this.getVisibleProgramsForAreaAndGroup(this.currentProgram.area, this.currentProgram.group);
+      this.selectedGroupIndex = this.visibleGroups.findIndex(group => group.id === this.currentProgram.group);
+      this.selectedProgramIndex = this.visiblePrograms.findIndex(program => program.id === this.currentProgram.id)  
+      
+    }
+    
     this.nextProgram = this.getNextProgram();
     await this.$refs.programDescription.load();
   },
@@ -150,7 +162,7 @@ export default {
     return {
       expand: [0],
       e1: 1,
-      selectedGroupIndex: 0,
+      selectedGroupIndex: 0, // I could 
       selectedProgramIndex: 0,
       visiblePrograms: [],
       visibleGroups: [],
@@ -262,6 +274,7 @@ export default {
           programs.push(program);
         }
       }
+      
       let index = programs.indexOf(this.$store.state.currentProgram);
       if (index === programs.length - 1) {
         return null;
@@ -269,12 +282,16 @@ export default {
       return programs[index + 1];
     },
     getFirstAreaToDisplay: function () {
-      for (let i = 0; i < this.$store.state.areas.length; i++) {
-        let area = this.$store.state.areas[i];
-        let visiblePrograms = this.getVisibleProgramsForArea(area.id);
-        if (visiblePrograms.length > 0) {
-          return i;
-        }
+      if (this.currentProgram) {
+        return this.currentProgram.area -1
+      }else {
+        for (let i = 0; i < this.$store.state.areas.length; i++) {
+            let area = this.$store.state.areas[i];
+            let visiblePrograms = this.getVisibleProgramsForArea(area.id);
+            if (visiblePrograms.length > 0) {
+              return i;
+            }
+          }
       }
       return null;
     },
@@ -366,6 +383,7 @@ export default {
       return programs;
     },
     getVisibleProgramsForAreaAndGroup: function (areaId, groupId) {
+   
       let programs = [];
       for (const area of this.$store.state.areas) {
         if (area.id !== areaId) continue;

@@ -16,7 +16,7 @@ export default new Vuex.Store({
         remainingQuestions: 0,
         remainingTime: 0,
         programSelection: new Set(),
-        currentProgram: {},
+        currentProgram: null,
         completedPrograms: new Set(),
         unCompleteAreas: new Set(),
         unCompleteGroups: new Set(),
