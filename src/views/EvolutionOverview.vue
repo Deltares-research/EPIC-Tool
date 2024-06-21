@@ -42,8 +42,8 @@
         <v-col class="custom-center">
           <h4 style="color: darkred; margin-bottom: 30px; max-width: 600px" v-if="this.dataPieLoaded == true">Please review the figure displaying your assessment results. To make adjustments, click on the relevant section to be directed back to the questionnaire. </h4>
           <h3 style="color: darkred; margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName == ''">Click on the graph to change an element</h3>
-          <h3 style="color: darkred; margin-bottom: 30px;" v-if="this.dataPieLoaded == true && !selectedProgramCheck">TEST TEST TEST</h3>
-          <v-btn class="primary" style="margin-bottom: 30px;" v-if="this.dataPieLoaded == true && selectedProgramCheck" @click="goToQuestionnaire()">Change {{clickedElementName}}</v-btn>
+          <h3 style="color: darkred; margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName && !selectedProgramCheck">{{clickedElementName}} is not part of your selected programs.</h3>
+          <v-btn class="primary" style="margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName !== '' && selectedProgramCheck" @click="goToQuestionnaire()">Change {{clickedElementName}}</v-btn>
           <v-btn class="primary" style="margin-bottom: 30px;" v-if="this.dataPieLoaded == true" @click="generateGraph()">Confirm graph</v-btn>
         </v-col>
 

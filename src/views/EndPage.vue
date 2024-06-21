@@ -4,8 +4,8 @@
     <h3>You have completed {{this.$store.state.progress}}% of the questions.</h3>
     <p></p>
     <div style="text-align: center">
-      <v-btn to="/EvolutionOverview" color="primary" class="mx-2">goto evolution report</v-btn>
-      <v-btn to="/LinkagesOverview" color="primary" class="mx-2">goto linkages report</v-btn></div>
+      <v-btn to="/EvolutionOverview" color="primary" class="mx-2">go to evolution report</v-btn>
+      <v-btn to="/LinkagesOverview" color="primary" class="mx-2">go to linkages report</v-btn></div>
   </div>
 </template>
 <script>
