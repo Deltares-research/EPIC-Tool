@@ -48,6 +48,33 @@
         </v-col>
 
       </v-row>
+      <v-row
+          class="ma-5"
+      >
+        <v-col>
+          <v-chart
+            v-if="this.dataPieLoaded == true"
+            class="chart-area"
+            :option="optionBar"
+            @click="onChartClick"
+          />
+          <div v-if="this.dataImgLoaded">
+            <h3 style="color: darkred">Graph</h3>
+            <v-img
+              class="chart-area"
+              max-height="1000px"
+              max-width="1000px"
+              :src="imageUrl"
+            ></v-img>
+            <a :href="pdfUrl" download target="_blank">Download graph</a>
+          </div>
+
+        </v-col>
+
+        <!-- <v-col class="custom-center">
+        </v-col> -->
+
+      </v-row>
     </div>
     <!-- <h2 style="color: darkred">Evolution report</h2> -->
     <!-- <v-row
@@ -180,7 +207,7 @@ export default {
         });
 
         let groupedAreas = Object.groupBy(combinedData, ({ area }) => area);
-       
+        // console.log('groupedAreas.Enable[0].name', groupedAreas.Enable[0].name)
 
         this.optionPie.series[0].data = groupedAreas.Plan
         this.optionPie.series[1].data = groupedAreas.Invest
@@ -188,6 +215,8 @@ export default {
         this.optionPie.series[3].data = groupedAreas.Respond
         this.optionPie.series[4].data = groupedAreas.Enable
 
+        this.optionBar.series[0].data = groupedAreas.Enable
+        this.optionBar.yAxis.data = groupedAreas.Enable.map(item => item.name)
       
 
         this.imageUrl = res.summary_graph;
@@ -448,6 +477,60 @@ export default {
             silent: 'true'
           }
         ]
+      },
+      optionBar : {
+        tooltip: {
+          trigger: "item"
+        },
+        toolbox: {
+          show: true,
+          feature: {
+            mark: { show: true },
+            dataView: { show: true, readOnly: true },
+            // restore: { show: true },
+            // saveAsImage: { show: true }
+          }
+        },
+        xAxis: {
+        type: 'value',
+        min: 0,
+        max: 4,
+        interval: 1,
+        axisLabel: {
+            formatter: function(value) {
+                var labels = ['N/A', 'Nascent', 'Engaged', 'Capable', 'Effective'];
+                return labels[value] || value;
+            }
+        }
+    },
+        yAxis: {
+          type: 'category',
+          data: [],
+          axisLabel: {
+            width: 135,  // Adjust this width based on your needs
+            overflow: 'break'  // This will wrap the text if it's too long
+          }
+        },
+        series: [
+          {
+            name: 'Enable',
+            id: 'Enable',
+            type: 'bar',
+            avoidLabelOverlap: true,
+            itemStyle: {
+              borderRadius: 5,
+              borderCap: "square",
+              color: "#b3b3b3"
+            },
+            selectedMode: 'single',
+            selectedOffset: '30',
+            showEmptyCircle: true,
+            label: {
+              show: false
+            },
+            data: [],
+          }
+        ]
       }
     }
   }
@@ -461,7 +544,7 @@ export default {
     padding-bottom: 5px;
     position: flex;
     height: 800px;
-    left: 400px;
+    left: 800px;
   }
 .centered-column{
   position: absolute;
