@@ -11,8 +11,12 @@
   },
   "dependencies": {
     "@vue/composition-api": "^1.7.2",
+    "axios": "^1.7.2",
     "core-js": "^3.6.5",
+    "docxtemplater": "^3.47.4",
     "echarts": "^5.5.0",
+    "file-saver": "^2.0.5",
+    "pizzip": "^3.1.7",
     "vue": "^2.6.11",
     "vue-echarts": "^6.6.9",
     "vue-html2pdf": "^1.8.0",
