@@ -16,6 +16,10 @@
           class="ma-5"
       >
         <v-col>
+          <div v-if="loading">
+            <h3>Generating evolution graph..</h3>
+          </div>
+          
           <v-chart
             v-if="this.dataPieLoaded == true"
             class="chart-area"
@@ -23,9 +27,6 @@
             @click="onChartClick"
           />
 
-          <div v-if="loading">
-            <h3>Generating evolution graph..</h3>
-          </div>
           <div v-if="this.dataImgLoaded">
             <h3 style="color: darkred">Graph</h3>
             <v-img
@@ -58,17 +59,6 @@
             :option="optionBar"
             @click="onChartClick"
           />
-          <div v-if="this.dataImgLoaded">
-            <h3 style="color: darkred">Graph</h3>
-            <v-img
-              class="chart-area"
-              max-height="1000px"
-              max-width="1000px"
-              :src="imageUrl"
-            ></v-img>
-            <a :href="pdfUrl" download target="_blank">Download graph</a>
-          </div>
-
         </v-col>
 
         <!-- <v-col class="custom-center">
