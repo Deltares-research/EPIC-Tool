@@ -207,19 +207,28 @@ export default {
           'Open Data'
         ];
 
-        this.optionPie.series[0].data = groupedAreas.Plan
-        this.optionPie.series[1].data = groupedAreas.Invest
-        this.optionPie.series[2].data = groupedAreas.Control
-        this.optionPie.series[3].data = groupedAreas.Respond
-        this.optionPie.series[4].data = groupedAreas.Enable
+        this.optionPie.series[0].data = groupedAreas.Plan;
+        this.optionPie.series[1].data = groupedAreas.Invest;
+        this.optionPie.series[2].data = groupedAreas.Control;
+        this.optionPie.series[3].data = groupedAreas.Respond;
 
+        // Remove wosItems from Enable list
+        const enableDataWithoutWos = groupedAreas.Enable.filter(item => !wosItems.includes(item.name));
+        this.optionPie.series[4].data = enableDataWithoutWos;
+
+        // Calculate mean value for Whole of Society
+        const wosData = groupedAreas.Enable.filter(item => wosItems.includes(item.name));
+        const wosMeanValue = wosData.reduce((sum, item) => sum + item.value, 0) / wosData.length;
+        const wholeOfSocietyItem = { name: 'Whole of Society', value: wosMeanValue };
+
+        // Add Whole of Society item to the Enable list
+        this.optionPie.series[4].data.push(wholeOfSocietyItem);
 
         // Filter the series data and yAxis data
         const filteredData = groupedAreas.Enable.filter(item => wosItems.includes(item.name));
 
         this.optionBar.series[0].data = filteredData;
         this.optionBar.yAxis.data = filteredData.map(item => item.name);
-      
 
         this.imageUrl = res.summary_graph;
         this.pdfUrl = res.summary_pdf.replace(server, "");
