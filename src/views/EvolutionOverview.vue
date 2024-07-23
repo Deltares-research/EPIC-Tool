@@ -2,35 +2,60 @@
   <div>
     <h2 style="color: darkred" class="ma-5">Evolution Report</h2>
     <div style="margin-bottom: 100px;">
-      <v-row>
-        <v-col class="centered-column">
-          <v-btn class="primary" v-if="this.dataPieLoaded == false" @click="fetchPieData()">(Re)Generate interactive graph</v-btn>
-        </v-col>
 
-        <v-col>
-        </v-col>
-
+      <v-row class="custom-center">
+        <v-btn class="primary" v-if="this.dataPieLoaded == false" @click="fetchPieData()">(Re)Generate interactive graph</v-btn>
       </v-row>
 
       <v-row
-          class="ma-5"
+          class="ma-3"
       >
+
         <v-col>
-          <div v-if="loading">
+
+          <div v-if="loading" class="mt-5">
             <h3>Generating evolution graph..</h3>
           </div>
+
+          <v-row class="custom-center">
+            <div v-if="!loading" class="custom-center ma-5">
+              <h4 style="color: darkred; margin-bottom: 30px; max-width: 600px" v-if="this.dataPieLoaded == true">Please review the figure displaying your assessment results. To make adjustments, click on the relevant section to be directed back to the questionnaire. </h4>
+              <h3 style="color: darkred; margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName == ''">Click on the graph to change an element</h3>
+              <h3 style="color: darkred; margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName && !selectedProgramCheck">{{clickedElementName}} is not part of your selected programs.</h3>
+              <v-btn class="primary" style="margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName !== '' && selectedProgramCheck" @click="goToQuestionnaire()">Change {{clickedElementName}}</v-btn>
+              <v-btn class="primary" style="margin-bottom: 30px;" v-if="this.dataPieLoaded == true" @click="generateGraph()">Confirm graph</v-btn>
+            </div>
+          </v-row>
+
+          <v-row>
+            <v-chart
+            v-if="this.dataPieLoaded == true && !loading"
+            class="chart-area-bar"
+            :init-options="initOptions"
+            :option="optionBar"
+            @click="onChartClick"
+          />
+          </v-row>
+
+        </v-col>
+
+        <v-col>
           
           <v-chart
-            v-if="this.dataPieLoaded == true"
-            class="chart-area"
+            v-if="this.dataPieLoaded == true && !loading"
+            class="chart-area-pie"
             :option="optionPie"
             @click="onChartClick"
           />
 
-          <div v-if="this.dataImgLoaded">
+        </v-col>
+
+      </v-row>
+
+      <div v-if="this.dataImgLoaded" class="custom-center">
             <h3 style="color: darkred">Graph</h3>
             <v-img
-              class="chart-area"
+              class="image-pie"
               max-height="1000px"
               max-width="1000px"
               :src="imageUrl"
@@ -38,33 +63,6 @@
             <a :href="pdfUrl" download target="_blank">Download graph</a>
           </div>
 
-        </v-col>
-
-        <v-col class="custom-center">
-          <h4 style="color: darkred; margin-bottom: 30px; max-width: 600px" v-if="this.dataPieLoaded == true">Please review the figure displaying your assessment results. To make adjustments, click on the relevant section to be directed back to the questionnaire. </h4>
-          <h3 style="color: darkred; margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName == ''">Click on the graph to change an element</h3>
-          <h3 style="color: darkred; margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName && !selectedProgramCheck">{{clickedElementName}} is not part of your selected programs.</h3>
-          <v-btn class="primary" style="margin-bottom: 30px;" v-if="this.dataPieLoaded == true && this.clickedElementName !== '' && selectedProgramCheck" @click="goToQuestionnaire()">Change {{clickedElementName}}</v-btn>
-          <v-btn class="primary" style="margin-bottom: 30px;" v-if="this.dataPieLoaded == true" @click="generateGraph()">Confirm graph</v-btn>
-        </v-col>
-
-      </v-row>
-      <v-row
-          class="ma-5"
-      >
-        <v-col>
-          <v-chart
-            v-if="this.dataPieLoaded == true"
-            class="chart-area"
-            :option="optionBar"
-            @click="onChartClick"
-          />
-        </v-col>
-
-        <!-- <v-col class="custom-center">
-        </v-col> -->
-
-      </v-row>
     </div>
     <!-- <h2 style="color: darkred">Evolution report</h2> -->
     <!-- <v-row
@@ -199,14 +197,28 @@ export default {
         let groupedAreas = Object.groupBy(combinedData, ({ area }) => area);
         // console.log('groupedAreas.Enable[0].name', groupedAreas.Enable[0].name)
 
+        // List of Whole of Society item names
+        const wosItems = [
+          'Local Government', 
+          'Public Participation & Stakeholder Engagement', 
+          'Social Inclusion', 
+          'Education & Risk Communication', 
+          'Scientific Collaboration', 
+          'Open Data'
+        ];
+
         this.optionPie.series[0].data = groupedAreas.Plan
         this.optionPie.series[1].data = groupedAreas.Invest
         this.optionPie.series[2].data = groupedAreas.Control
         this.optionPie.series[3].data = groupedAreas.Respond
         this.optionPie.series[4].data = groupedAreas.Enable
 
-        this.optionBar.series[0].data = groupedAreas.Enable
-        this.optionBar.yAxis.data = groupedAreas.Enable.map(item => item.name)
+
+        // Filter the series data and yAxis data
+        const filteredData = groupedAreas.Enable.filter(item => wosItems.includes(item.name));
+
+        this.optionBar.series[0].data = filteredData;
+        this.optionBar.yAxis.data = filteredData.map(item => item.name);
       
 
         this.imageUrl = res.summary_graph;
@@ -240,6 +252,7 @@ export default {
       imageUrl: "",
       pdfUrl: "",
       clickedElementName: '',
+      initOptions: { height: '500px', width:'700px' },
       optionPie : {
         tooltip: {
           trigger: "item"
@@ -487,19 +500,24 @@ export default {
         max: 4,
         interval: 1,
         axisLabel: {
-            formatter: function(value) {
-                var labels = ['N/A', 'Nascent', 'Engaged', 'Capable', 'Effective'];
-                return labels[value] || value;
+          formatter: function(value) {
+            var labels = ['N/A', 'Nascent', 'Engaged', 'Capable', 'Effective'];
+            return labels[value] || value;
             }
-        }
-    },
+          }
+        },
         yAxis: {
           type: 'category',
           data: [],
           axisLabel: {
-            width: 135,  // Adjust this width based on your needs
-            overflow: 'break'  // This will wrap the text if it's too long
+            interval: 0, 
+            show: true,
+            width: 250,
+            overflow: 'break'
           }
+        },
+        grid: {
+          left: 300  // Adjust this value to provide enough space for the labels
         },
         series: [
           {
@@ -529,17 +547,28 @@ export default {
 </script>
 
 <style scoped>
-.chart-area {
-    padding-top: 20px;
-    padding-bottom: 5px;
-    position: flex;
-    height: 800px;
-    left: 800px;
-  }
+.chart-area-bar {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center; /* Center buttons horizontally */
+}
+.chart-area-pie {
+  padding-top: 20px;
+  padding-bottom: 5px;
+  position: flex;
+  height: 800px;
+}
+.image-pie {
+  padding-top: 20px;
+  padding-bottom: 5px;
+  position: flex;
+  height: 800px;
+}
 .centered-column{
   position: absolute;
   left: 500px;
-  }
+}
 .custom-center {
   display: flex;
   justify-content: center;
