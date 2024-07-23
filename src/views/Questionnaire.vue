@@ -55,7 +55,7 @@
         </v-stepper-header>
         <v-stepper-items>
           <v-stepper-content step="1">
-            <program-description-navigation
+            <program-description-navigation v-if="isInitialized"
                 @fromProgramDescriptionToNationalFramework="fromProgramDescriptionToNationalFramework"/>
             <program-description ref="programDescription"></program-description>
           </v-stepper-content>
@@ -72,10 +72,12 @@
 
           </v-stepper-content>
           <v-stepper-content step="4">
-            <evolution-navigation @fromEvolutionToKeyAgency="fromEvolutionToKeyAgency"
+            <evolution-navigation v-if="isInitialized"
+                                  @fromEvolutionToKeyAgency="fromEvolutionToKeyAgency"
                                   @fromEvolutionToReferences="fromEvolutionToReferences"/>
             <evolution ref="evolution" @updateProgress="updateProgress"></evolution>
-            <evolution-navigation @fromEvolutionToKeyAgency="fromEvolutionToKeyAgency"
+            <evolution-navigation v-if="isInitialized"
+                                  @fromEvolutionToKeyAgency="fromEvolutionToKeyAgency"
                                   @fromEvolutionToReferences="fromEvolutionToReferences"/>
           </v-stepper-content>
           <!-- <v-stepper-content step="5">
@@ -86,10 +88,10 @@
                                  @fromLinkagesToReferences="fromLinkagesToReferences"/>
           </v-stepper-content> -->
           <v-stepper-content step="5">
-            <references-navigation @back="e1=4" @forward="gotoNextProgram">
+            <references-navigation v-if="isInitialized" @back="e1=4" @forward="gotoNextProgram">
               {{ nextProgram !== null ? nextProgram.name : "finalize questionnaire" }}
             </references-navigation>
-            <references ref="references"/>
+            <references v-if="isInitialized" ref="references"/>
           </v-stepper-content>
         </v-stepper-items>
       </v-stepper>
@@ -157,6 +159,8 @@ export default {
     
     this.nextProgram = this.getNextProgram();
     await this.$refs.programDescription.load();
+
+    this.isInitialized = true;
   },
   data() {
     return {
@@ -167,7 +171,8 @@ export default {
       visiblePrograms: [],
       visibleGroups: [],
       disableEvents: false,
-      nextProgram: null
+      nextProgram: null,
+      isInitialized: false
     }
   },
   methods: {
