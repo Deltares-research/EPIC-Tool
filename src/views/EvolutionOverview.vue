@@ -1,17 +1,18 @@
 <template>
   <div>
     <h2 style="color: darkred" class="ma-5">Evolution Report</h2>
-    <div style="margin-bottom: 100px;">
+    <div>
 
       <v-row class="custom-center">
         <v-btn class="primary" v-if="this.dataPieLoaded == false" @click="fetchPieData()">(Re)Generate interactive graph</v-btn>
       </v-row>
 
+      <div class="scroll-container">
       <v-row
           class="ma-3"
       >
 
-        <v-col>
+        <v-col cols="12" md="6">
 
           <div v-if="loading" class="mt-5">
             <h3>Generating evolution graph..</h3>
@@ -41,7 +42,7 @@
 
         </v-col>
 
-        <v-col>
+        <v-col cols="12" md="6">
           <div class="chart-container">
             <v-chart
               v-if="this.dataPieLoaded == true && !loading"
@@ -55,6 +56,7 @@
         </v-col>
 
       </v-row>
+    </div>
 
       <div v-if="this.dataImgLoaded" class="custom-center">
             <h3 style="color: darkred">Graph</h3>
@@ -615,6 +617,11 @@ export default {
 </script>
 
 <style scoped>
+
+.scroll-container {
+  overflow-x: auto; /* Enable horizontal scrolling */
+  padding-bottom: 1px; /* Ensure scrollbar is visible */
+}
 .chart-area-bar {
   display: flex;
   justify-content: center;
