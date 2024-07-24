@@ -32,7 +32,7 @@
               <v-chart
               v-if="this.dataPieLoaded == true && !loading"
               class="chart-area-bar"
-              :init-options="initOptions"
+              :init-options="initOptionsBar"
               :option="optionBar"
               @click="onChartClick"
             />
@@ -42,13 +42,15 @@
         </v-col>
 
         <v-col>
-          
-          <v-chart
-            v-if="this.dataPieLoaded == true && !loading"
-            class="chart-area-pie"
-            :option="optionPie"
-            @click="onChartClick"
-          />
+          <div class="chart-container">
+            <v-chart
+              v-if="this.dataPieLoaded == true && !loading"
+              class="chart-area-pie"
+              :init-options="initOptionsPie"
+              :option="optionPie"
+              @click="onChartClick"
+            />
+          </div>
 
         </v-col>
 
@@ -220,7 +222,7 @@ export default {
                   ...item,
                   label: {
                     ...this.optionPie.series[2].label, // Copy other label properties
-                    padding: [0, 260, 0, 0] // Different padding
+                    padding: [0, 210, 0, 0] // Different padding
                   }
                 };
               }
@@ -301,7 +303,8 @@ export default {
       imageUrl: "",
       pdfUrl: "",
       clickedElementName: '',
-      initOptions: { height: '500px', width:'700px' },
+      initOptionsBar: { height: '350px', width:'600px' },
+      initOptionsPie: { height: '900px', width:'900px' },
       optionPie : {
         tooltip: {
           trigger: "item"
@@ -340,7 +343,9 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 0, 0, 260 ]
+              padding: [ 0, 0, 0, 210 ],
+              width: 175,
+              overflow: 'break'
             },
             data: [],
             startAngle: 90,
@@ -371,7 +376,9 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 0, 0, 260 ]
+              padding: [ 0, 0, 0, 210 ],
+              width: 175,
+              overflow: 'break'
             },
             data: [],
             startAngle: 35.4545454545455,
@@ -402,7 +409,9 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [0, 0, 0, 260]
+              padding: [0, 0, 0, 210],
+              width: 175,
+              overflow: 'break'
             },
             data: [],
             startAngle: 308.181818181818,
@@ -433,7 +442,9 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 260, 0, 0 ]
+              padding: [ 0, 210, 0, 0 ],
+              width: 175,
+              overflow: 'break'
             },
             data: [],
             startAngle: 253.636363636364,
@@ -464,7 +475,9 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 260, 0, 0 ],
+              padding: [ 0, 210, 0, 0 ],
+              width: 175,
+              overflow: 'break'
             },
             data: [],
             startAngle: 166.363636363636,
@@ -613,10 +626,10 @@ export default {
   border-radius: 5px;
 }
 .chart-area-pie {
-  padding-top: 20px;
+  padding-top: 0px;
+  margin-top: -60px;
   padding-bottom: 5px;
-  position: flex;
-  height: 800px;
+  position: relative;
 }
 .image-pie {
   padding-top: 20px;
