@@ -27,14 +27,16 @@
             </div>
           </v-row>
 
-          <v-row>
-            <v-chart
-            v-if="this.dataPieLoaded == true && !loading"
-            class="chart-area-bar"
-            :init-options="initOptions"
-            :option="optionBar"
-            @click="onChartClick"
-          />
+          <v-row class="custom-center">
+            <div v-if="this.dataPieLoaded == true && !loading" class="border-wos">
+              <v-chart
+              v-if="this.dataPieLoaded == true && !loading"
+              class="chart-area-bar"
+              :init-options="initOptions"
+              :option="optionBar"
+              @click="onChartClick"
+            />
+            </div>
           </v-row>
 
         </v-col>
@@ -95,11 +97,12 @@
   import { LineChart } from 'echarts/charts'
   import { GridComponent } from 'echarts/components'
   import { ToolboxComponent } from 'echarts/components'
+  import { TitleComponent } from 'echarts/components'
   import { mapState, mapMutations } from 'vuex'
 
   import VChart from 'vue-echarts'
 
-  use([ CanvasRenderer, BarChart, PieChart, LineChart, GridComponent, TooltipComponent, ToolboxComponent ])
+  use([ CanvasRenderer, BarChart, PieChart, LineChart, GridComponent, TooltipComponent, ToolboxComponent, TitleComponent ])
 
 export default {
   components: {
@@ -210,6 +213,24 @@ export default {
         this.optionPie.series[0].data = groupedAreas.Plan;
         this.optionPie.series[1].data = groupedAreas.Invest;
         this.optionPie.series[2].data = groupedAreas.Control;
+          if (groupedAreas && groupedAreas.Control) {
+            const controlData = groupedAreas.Control.map(item => {
+              if (item.name === 'Floodplain Regulation' || item.name === 'Local Flood Mitigation Planning') {
+                return {
+                  ...item,
+                  label: {
+                    ...this.optionPie.series[2].label, // Copy other label properties
+                    padding: [0, 260, 0, 0] // Different padding
+                  }
+                };
+              }
+              return item;
+            });
+
+            // Update the series data
+            this.optionPie.series[2].data = controlData;
+          }
+
         this.optionPie.series[3].data = groupedAreas.Respond;
 
         // Remove wosItems from Enable list
@@ -223,6 +244,25 @@ export default {
 
         // Add Whole of Society item to the Enable list
         this.optionPie.series[4].data.push(wholeOfSocietyItem);
+        if (groupedAreas && groupedAreas.Enable && this.optionPie.series[4].data) {
+            const enableData = this.optionPie.series[4].data.map(item => {
+              if (item.name === 'Whole of Society') {
+                return {
+                  ...item,
+                  itemStyle: {
+                    ...this.optionPie.series[4].itemStyle, // Copy other itemStyle properties
+                      borderColor: '#484848'
+                  }
+                };
+              }
+              return item;
+            });
+
+            // Update the series data
+            this.optionPie.series[4].data = enableData;
+          }
+
+
 
         // Filter the series data and yAxis data
         const filteredData = groupedAreas.Enable.filter(item => wosItems.includes(item.name));
@@ -304,7 +344,7 @@ export default {
             },
             data: [],
             startAngle: 90,
-            endAngle: 42.6315789474,
+            endAngle: 35.4545454545455,
             minAngle: 100000
           },
           {
@@ -334,8 +374,8 @@ export default {
               padding: [ 0, 0, 0, 260 ]
             },
             data: [],
-            startAngle: 42.6315789474,
-            endAngle: 326.842105263,
+            startAngle: 35.4545454545455,
+            endAngle: 308.181818181818,
             minAngle: 100000
           },
           {
@@ -362,11 +402,11 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 0, 0, 260 ]
+              padding: [0, 0, 0, 260]
             },
             data: [],
-            startAngle: 326.842105263,
-            endAngle: 270,
+            startAngle: 308.181818181818,
+            endAngle: 253.636363636364,
             minAngle: 100000
           },
           {
@@ -396,8 +436,8 @@ export default {
               padding: [ 0, 260, 0, 0 ]
             },
             data: [],
-            startAngle: 270,
-            endAngle: 203.684210526,
+            startAngle: 253.636363636364,
+            endAngle: 166.363636363636,
             minAngle: 100000
           },
           {
@@ -427,7 +467,7 @@ export default {
               padding: [ 0, 260, 0, 0 ],
             },
             data: [],
-            startAngle: 203.684210526,
+            startAngle: 166.363636363636,
             endAngle: 90,
             minAngle: 100000
           },
@@ -445,11 +485,11 @@ export default {
             },
             showEmptyCircle: true,
             data: [
-              { value: 13.1578947368333},
-              { value: 21.052631579},
-              { value: 15.7894736841667},
-              { value: 18.4210526316667},
-              { value: 31.5789473683333}
+              { value: 15.1515151515152},
+              { value: 24.2424242424242},
+              { value: 15.1515151515152},
+              { value: 24.2424242424242},
+              { value: 21.2121212121212}
             ],
             emphasis: {
               disabled: true,
@@ -472,11 +512,11 @@ export default {
               padding: [0, 0, 0, 0]
             },
             data: [
-              { value: 13.1578947368333, name: 'P' },
-              { value: 21.052631579, name: 'I' },
-              { value: 15.7894736841667, name: 'C' },
-              { value: 18.4210526316667, name: 'R' },
-              { value: 31.5789473683333, name: 'E' }
+              { value: 15.1515151515152, name: 'P' },
+              { value: 24.2424242424242, name: 'I' },
+              { value: 15.1515151515152, name: 'C' },
+              { value: 24.2424242424242, name: 'R' },
+              { value: 21.2121212121212, name: 'E' }
             ],
             color: '#FFF',
             emphasis: {
@@ -491,6 +531,12 @@ export default {
         ]
       },
       optionBar : {
+        title: {
+          text: "Whole of Society breakdown",
+          left: 'center',
+          top: 10,
+          show: true
+        },
         tooltip: {
           trigger: "item"
         },
@@ -561,6 +607,10 @@ export default {
   justify-content: center;
   flex-direction: column;
   align-items: center; /* Center buttons horizontally */
+}
+.border-wos{
+  border: 3px solid #484848;
+  border-radius: 5px;
 }
 .chart-area-pie {
   padding-top: 20px;
