@@ -29,6 +29,7 @@ export default {
       advisor: false,
       report: undefined,
       questions: undefined,
+      structuredData: [],  // New property to store the organized data
       new_short_answer: null,
       new_lang_answer: null,
     }
@@ -54,7 +55,48 @@ export default {
       res = await fetch(input, options);
       if (res.status !== 200) return;
       this.questions = await res.json();
+
+      this.organizeData();
     },
+
+    organizeData() {
+      this.structuredData = this.report.map(program => {
+        return {
+          programName: program.name,
+          questions: program.questions.map(question => {
+            return {
+              questionTitle: question.title,
+              answers: question.question_answers.answers.map(answer => {
+                return {
+                  selectedChoice: this.getFormattedChoice(answer.selected_choice),
+                  justifyAnswer: answer.justify_answer,
+                };
+              }),
+              summary: question.question_answers.summary
+            };
+          })
+        };
+      });
+      // console.log('this.structuredData', this.structuredData)
+    },
+
+    getFormattedChoice(choice) {
+      switch (choice) {
+        case "STRONGLYDISAGREE":
+          return "Strongly disagree";
+        case "DISAGREE":
+          return "Disagree";
+        case "NEITHERAGREENORDISAGREE":
+          return "Neither agree nor disagree";
+        case "AGREE":
+          return "Agree";
+        case "STRONGLYAGREE":
+          return "Strongly agree";
+        default:
+          return choice;
+      }
+    },
+
     async downloadDocx() {
       try {
         // Load the .docx template from the public directory
@@ -70,8 +112,23 @@ export default {
           linebreaks: true,
         });
 
-        // Get the report content
-        const reportContent = this.$refs.report.$el.innerText;
+        // Prepare the report content with structured data
+        const reportContent = this.structuredData.map(program => {
+          return `
+            Program: ${program.programName}
+            ${program.questions.map(question => `
+              Question: ${question.questionTitle}
+              Answers:
+              ${question.answers.map(answer => `
+                - Selected Choice: ${answer.selectedChoice}
+                  Justification: ${answer.justifyAnswer}
+                  User: ${answer.user}
+              `).join('')}
+              Summary:
+              ${JSON.stringify(question.summary, null, 2)}
+            `).join('')}
+          `;
+        }).join('\n');
 
         // Set the data for the template
         doc.setData({
