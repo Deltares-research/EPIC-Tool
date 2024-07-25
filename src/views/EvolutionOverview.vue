@@ -224,13 +224,12 @@ export default {
                   ...item,
                   label: {
                     ...this.optionPie.series[2].label, // Copy other label properties
-                    padding: [0, 210, 0, 0] // Different padding
-                  }
+                    padding: [0, 0, 0, -210], // Different padding
+                  } // TODO: also make the align property to change to 'right' for these two items
                 };
               }
               return item;
             });
-
             // Update the series data
             this.optionPie.series[2].data = controlData;
           }
@@ -255,7 +254,8 @@ export default {
                   ...item,
                   itemStyle: {
                     ...this.optionPie.series[4].itemStyle, // Copy other itemStyle properties
-                      borderColor: '#484848'
+                      borderColor: '#484848',
+                      color: '#E1BA96'
                   }
                 };
               }
@@ -334,7 +334,7 @@ export default {
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "#66c2a5"
+              color: "#426275"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -345,9 +345,13 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 0, 0, 210 ],
-              width: 175,
-              overflow: 'break'
+              padding: [ 0, 0, 0, 110],
+              width: 135,
+              overflow: 'break',
+              color: '#000000'
+            },
+            labelLayout: {
+              align: 'left'
             },
             data: [],
             startAngle: 90,
@@ -367,7 +371,7 @@ export default {
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "#a89bb0"
+              color: "#91A99B"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -378,9 +382,13 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 0, 0, 210 ],
-              width: 175,
-              overflow: 'break'
+              padding: [ 0, 0, 0, 110],
+              width: 135,
+              overflow: 'break',
+              color: '#000000'
+            },
+            labelLayout: {
+              align: 'left'
             },
             data: [],
             startAngle: 35.4545454545455,
@@ -400,7 +408,7 @@ export default {
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "#c6b18b"
+              color: "#AE1F23"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -411,9 +419,13 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [0, 0, 0, 210],
-              width: 175,
-              overflow: 'break'
+              padding: [0, 0, 0, 110],
+              width: 135,
+              overflow: 'break',
+              color: '#000000'
+            },
+            labelLayout: {
+              align: 'left'
             },
             data: [],
             startAngle: 308.181818181818,
@@ -433,7 +445,7 @@ export default {
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "#f8d348"
+              color: "#225F3A"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -444,9 +456,13 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 210, 0, 0 ],
-              width: 175,
-              overflow: 'break'
+              padding: [ 0, 110, 0, 0],
+              width: 135,
+              overflow: 'break',
+              color: '#000000'
+            },
+            labelLayout: {
+              align: 'right'
             },
             data: [],
             startAngle: 253.636363636364,
@@ -466,7 +482,7 @@ export default {
               borderRadius: 5,
               borderColor: '#FFF',
               borderCap: "square",
-              color: "#b3b3b3"
+              color: "#DC7F29"
             },
             selectedMode: 'single',
             selectedOffset: '30',
@@ -477,9 +493,13 @@ export default {
               rotate: true,
               fontSize: 10,
               height: 1,
-              padding: [ 0, 210, 0, 0 ],
-              width: 175,
-              overflow: 'break'
+              padding: [ 0, 110, 0, 0],
+              width: 135,
+              overflow: 'break',
+              color: '#000000'
+            },
+            labelLayout: {
+              align: 'right'
             },
             data: [],
             startAngle: 166.363636363636,
@@ -598,7 +618,7 @@ export default {
             itemStyle: {
               borderRadius: 5,
               borderCap: "square",
-              color: "#b3b3b3"
+              color: "#E1BA96"
             },
             selectedMode: 'single',
             selectedOffset: '30',
