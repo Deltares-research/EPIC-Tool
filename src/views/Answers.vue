@@ -127,30 +127,44 @@ export default {
           linebreaks: true,
         });
 
-        // Prepare the report content with structured data
-        const reportContent = this.structuredData.map(program => {
-          return `
-            Program: ${program.programName}
-            ${program.questions.map(question => `
-              Question: ${question.questionTitle}
-              Answers:
-              ${question.answers.map(answer => `
-                - Selected Choice: ${answer.selectedChoice}
-                  Justification: ${answer.justifyAnswer}
-              `).join('')}
-              Summary:
-              ${question.summary}
-            `).join('')}
-          `;
-        }).join('\n');
+        // Get current date and time
+        const now = new Date();
+        const dateString = now.toLocaleString();
 
-        // Set the data for the template
-        doc.setData({
-          report: reportContent,
+        // Prepare the data for each program
+        const data = {
+          date: dateString,
+        };
+        //TODO: fix weird indentation of first item in the word
+        this.structuredData.forEach((program, index) => {
+          const programContent = program.questions.map(question => {
+            const answers = question.answers.map(answer => `
+              - Selected Choice: ${answer.selectedChoice}
+                Justification: ${answer.justifyAnswer}
+            `).join('');
+
+            const summary = question.summary.split('\n').map(line => `    ${line}`).join('\n');
+
+            return `
+              
+              Question:
+                ${question.questionTitle}
+              
+              Answers:
+                ${answers}
+              
+              Summary:
+                ${summary}
+            `;
+          }).join('');
+
+          data[`program${index + 1}`] = programContent.trim();
         });
 
+        // Set the data for the template
+        doc.setData(data);
+
         try {
-          // Render the document
           doc.render();
         } catch (error) {
           console.error(error);
