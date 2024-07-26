@@ -60,24 +60,44 @@ export default {
     },
 
     organizeData() {
+      // Create a set of question IDs for quick lookup and filter to include only those in the range 1 to 261
+      const questionIds = new Set(this.questions
+        .filter(q => q.id >= 1 && q.id <= 261)
+        .map(q => q.id)
+      );
+
       this.structuredData = this.report.map(program => {
         return {
           programName: program.name,
-          questions: program.questions.map(question => {
-            return {
-              questionTitle: question.title,
-              answers: question.question_answers.answers.map(answer => {
-                return {
-                  selectedChoice: this.getFormattedChoice(answer.selected_choice),
-                  justifyAnswer: answer.justify_answer,
-                };
-              }),
-              summary: question.question_answers.summary
-            };
-          })
+          questions: program.questions
+            .filter(question => questionIds.has(question.id))  // Filter questions based on the question IDs
+            .map(question => {
+              return {
+                questionTitle: question.title,
+                answers: question.question_answers.answers.map(answer => {
+                  return {
+                    selectedChoice: this.getFormattedChoice(answer.selected_choice),
+                    justifyAnswer: answer.justify_answer,
+                  };
+                }),
+                summary: this.formatSummary(question.question_answers.summary)
+              };
+            })
         };
       });
-      // console.log('this.structuredData', this.structuredData)
+    },
+            // console.log('this.structuredData', this.structuredData)
+    formatSummary(summary) {
+      const formattedSummary = [];
+      const fields = ["Strongly_disagree", "Disagree", "Neither_agree_nor_disagree", "Agree", "Strongly_agree"];
+
+      fields.forEach(field => {
+        if (summary[field] !== undefined) {
+          formattedSummary.push(`${field.replace(/_/g, ' ')}: ${summary[field] || 0}`);
+        }
+      });
+
+      return formattedSummary.join('\n');
     },
 
     getFormattedChoice(choice) {
@@ -99,14 +119,9 @@ export default {
 
     async downloadDocx() {
       try {
-        // Load the .docx template from the public directory
         const response = await axios.get("/template.docx", { responseType: "arraybuffer" });
         const content = response.data;
-
-        // Create a new PizZip instance
         const zip = new PizZip(content);
-
-        // Create a new Docxtemplater instance
         const doc = new Docxtemplater(zip, {
           paragraphLoop: true,
           linebreaks: true,
@@ -122,10 +137,9 @@ export default {
               ${question.answers.map(answer => `
                 - Selected Choice: ${answer.selectedChoice}
                   Justification: ${answer.justifyAnswer}
-                  User: ${answer.user}
               `).join('')}
               Summary:
-              ${JSON.stringify(question.summary, null, 2)}
+              ${question.summary}
             `).join('')}
           `;
         }).join('\n');
