@@ -254,6 +254,8 @@ export default {
                   ...item,
                   itemStyle: {
                     ...this.optionPie.series[4].itemStyle, // Copy other itemStyle properties
+                      borderType: 'dashed',
+                      borderWidth: 1,
                       borderColor: '#484848',
                       color: '#E1BA96'
                   }
@@ -649,7 +651,7 @@ export default {
   align-items: center; /* Center buttons horizontally */
 }
 .border-wos{
-  border: 3px solid #484848;
+  border: 1px dashed #484848;
   border-radius: 5px;
 }
 .chart-area-pie {
