@@ -95,6 +95,7 @@ export default {
       if (res.status !== 200) return;
       let data = await res.json();
       this.$store.state.advisor = data.is_advisor;
+      this.$store.commit('setUsername', data.username);
 
 
       await this.$router.push('/');

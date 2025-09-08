@@ -127,13 +127,19 @@ export default {
           linebreaks: true,
         });
 
-        // Get current date and time
+        // Get current date, time and username
         const now = new Date();
         const dateString = now.toLocaleString();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const dateStringTitle = `${yyyy}-${mm}-${dd}`;
+        const username = this.$store.state.username;
 
         // Prepare the data for each program
         const data = {
           date: dateString,
+          username: username,
         };
         //TODO: fix weird indentation of first item in the word
         this.structuredData.forEach((program, index) => {
@@ -178,7 +184,7 @@ export default {
         });
 
         // Save the file
-        saveAs(out, "report.docx");
+        saveAs(out,  `ERAM_report_${dateStringTitle}.docx`);
       } catch (error) {
         console.error("Error creating the document:", error);
       }

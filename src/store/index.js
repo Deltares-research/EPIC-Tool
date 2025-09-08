@@ -9,6 +9,7 @@ export default new Vuex.Store({
         selectedAgency: {},
         advisor: false,
         token: "",
+        username: "",
         areas: [],
         groups: [],
         programs: [],
@@ -105,6 +106,9 @@ export default new Vuex.Store({
         },
         updateSelectedGroupIndex(state, groupIndex) {
             state.selectedAreaIndex = groupIndex
+        },
+        setUsername(state, username) {
+            state.username = username
         },
     },
     actions: {
