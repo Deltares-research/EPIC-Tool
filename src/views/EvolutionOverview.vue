@@ -63,7 +63,6 @@
             <v-img
               class="image-pie"
               max-height="1000px"
-              max-width="1000px"
               :src="imageUrl"
             ></v-img>
             <a :href="pdfUrl" download target="_blank">Download graph</a>
