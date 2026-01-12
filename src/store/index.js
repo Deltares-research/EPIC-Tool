@@ -105,7 +105,7 @@ export default new Vuex.Store({
             state.selectedAreaIndex = areaIndex
         },
         updateSelectedGroupIndex(state, groupIndex) {
-            state.selectedAreaIndex = groupIndex
+            state.selectedGroupIndex = groupIndex
         },
         setUsername(state, username) {
             state.username = username
@@ -118,13 +118,29 @@ export default new Vuex.Store({
             let unansweredQuestions = 0;
             let uncompleteGroups = new Set();
             let uncompleteAreas = new Set();
+            
+            if (context.state.programSelection.size === 0) {
+                return;
+            }
+            
             for (let programId of context.state.programSelection) {
                 const response = await util.loadProgress(programId, context.state.token);
+                
+                if (!response || Object.keys(response).length === 0) {
+                    continue;
+                }
+                
                 if (response.progress === 1) {
                     completedPrograms.add(programId);
                 } else {
                     const program = context.state.programs.filter(program => program.id === programId);
+                    if (program.length === 0) {
+                        continue;
+                    }
                     const group = context.state.groups.filter(group => group.id === program[0].group);
+                    if (group.length === 0) {
+                        continue;
+                    }
                     uncompleteAreas.add(group[0].area);
                     uncompleteGroups.add(program[0].group);
                 }

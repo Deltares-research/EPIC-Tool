@@ -140,25 +140,41 @@ export default {
   },
   async mounted() {
     await this.updateProgress();
+    
     this.selectedAreaIndex = this.getFirstAreaToDisplay();
-  
+    
+    if (this.selectedAreaIndex === null || this.selectedAreaIndex < 0 || this.selectedAreaIndex >= this.$store.state.areas.length) {
+      return;
+    }
     
     let area = this.$store.state.areas[this.selectedAreaIndex];
+    
+    if (!area) {
+      return;
+    }
     
     this.visibleGroups = this.getVisibleGroups(area);
     
     if (!this.currentProgram) {
-      this.visiblePrograms = this.getVisibleProgramsForAreaAndGroup(area.id, this.visibleGroups[0].id); // visiblePrograms are set
-      this.$store.commit("updateCurrentProgram", this.visiblePrograms[0]); // updatesCurrentProgram
+      if (this.visibleGroups.length === 0) {
+        return;
+      }
+      this.visiblePrograms = this.getVisibleProgramsForAreaAndGroup(area.id, this.visibleGroups[0].id);
+      if (this.visiblePrograms.length === 0) {
+        return;
+      }
+      this.$store.commit("updateCurrentProgram", this.visiblePrograms[0]);
     }else {
       this.visiblePrograms = this.getVisibleProgramsForAreaAndGroup(this.currentProgram.area, this.currentProgram.group);
       this.selectedGroupIndex = this.visibleGroups.findIndex(group => group.id === this.currentProgram.group);
-      this.selectedProgramIndex = this.visiblePrograms.findIndex(program => program.id === this.currentProgram.id)  
-      
+      this.selectedProgramIndex = this.visiblePrograms.findIndex(program => program.id === this.currentProgram.id);
     }
     
     this.nextProgram = this.getNextProgram();
-    await this.$refs.programDescription.load();
+    
+    if (this.$refs.programDescription) {
+      await this.$refs.programDescription.load();
+    }
 
     this.isInitialized = true;
   },
@@ -288,16 +304,23 @@ export default {
     },
     getFirstAreaToDisplay: function () {
       if (this.currentProgram) {
-        return this.currentProgram.area -1
-      }else {
-        for (let i = 0; i < this.$store.state.areas.length; i++) {
-            let area = this.$store.state.areas[i];
-            let visiblePrograms = this.getVisibleProgramsForArea(area.id);
-            if (visiblePrograms.length > 0) {
-              return i;
-            }
-          }
+        // Find the index of the area by matching the ID, not by assuming area ID - 1 = index
+        const areaIndex = this.$store.state.areas.findIndex(area => area.id === this.currentProgram.area);
+        if (areaIndex !== -1) {
+          return areaIndex;
+        }
+        // Fall through to find first area with visible programs
       }
+      
+      // Find first area with visible programs
+      for (let i = 0; i < this.$store.state.areas.length; i++) {
+        let area = this.$store.state.areas[i];
+        let visiblePrograms = this.getVisibleProgramsForArea(area.id);
+        if (visiblePrograms.length > 0) {
+          return i;
+        }
+      }
+      
       return null;
     },
     updateVisibleProgramsAfterGroupChange: async function (groupId) {
@@ -388,7 +411,6 @@ export default {
       return programs;
     },
     getVisibleProgramsForAreaAndGroup: function (areaId, groupId) {
-   
       let programs = [];
       for (const area of this.$store.state.areas) {
         if (area.id !== areaId) continue;
