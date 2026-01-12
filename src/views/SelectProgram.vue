@@ -107,6 +107,9 @@ export default {
 
     if (this.$store.state.initialized) return;
     response = await fetch(server + '/api/area/?format=json', options);
+    if (response.status !== 200) {
+      return;
+    }
     let areas = await response.json();
     this.$store.commit("updateAreas", areas);
     this.$store.commit("init");
