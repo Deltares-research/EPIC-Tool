@@ -60,11 +60,9 @@ export default {
     },
 
     organizeData() {
-      // Create a set of question IDs for quick lookup and filter to include only those in the range 1 to 261
-      const questionIds = new Set(this.questions
-        .filter(q => q.id >= 1 && q.id <= 261)
-        .map(q => q.id)
-      );
+      // Create a set of all question IDs from the questions API for quick lookup
+      // This ensures we only include questions that exist in the questions endpoint
+      const questionIds = new Set(this.questions.map(q => q.id));
 
       this.structuredData = this.report.map(program => {
         return {
